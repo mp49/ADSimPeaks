@@ -11,11 +11,17 @@ cd "${TOP}"
 dbLoadDatabase "dbd/example.dbd"
 example_registerRecordDeviceDriver pdbbase
 
+###############################################
+# Start the ADSimPeaks driver
+
+ADSimPeaksConfig(D2.SIM,1024,10,0,3,0,0,0,0)
+
+###############################################
+
 ## Load record instances
-#dbLoadRecords("db/xxx.db","user=mkp")
+#dbLoadRecords("db/example.db")
 
 cd "${TOP}/iocBoot/${IOC}"
 iocInit
 
-## Start any sequence programs
-#seq sncxxx,"user=mkp"
+
