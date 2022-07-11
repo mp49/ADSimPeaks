@@ -14,12 +14,29 @@ DBD += example.dbd
 
 # example.dbd will be made up from these files:
 example_DBD += base.dbd
+example_DBD += asyn.dbd
+example_DBD += ADSupport.dbd
+example_DBD += NDPluginSupport.dbd
+example_DBD += NDPluginPva.dbd
+example_DBD += ADSimPeaks.dbd
+example_DBD += busySupport.dbd
+example_DBD += asSupport.dbd
+example_DBD += devIocStats.dbd
 
-# Include dbd files from all support applications:
-#example_DBD += xxx.dbd
+example_DBD += PVAServerRegister.dbd
+example_DBD += qsrv.dbd
 
 # Add all the support libraries needed by this IOC
-#example_LIBS += xxx
+example_LIBS += asyn
+example_LIBS += ADBase
+example_LIBS += NDPlugin
+example_LIBS += ADSimPeaks
+example_LIBS += busy
+example_LIBS += autosave
+example_LIBS += devIocStats
+
+example_LIBS += qsrv
+example_LIBS += $(EPICS_BASE_PVA_CORE_LIBS)
 
 # example_registerRecordDeviceDriver.cpp derives from example.dbd
 example_SRCS += example_registerRecordDeviceDriver.cpp
@@ -27,9 +44,6 @@ example_SRCS += example_registerRecordDeviceDriver.cpp
 # Build the main IOC entry point on workstation OSs.
 example_SRCS_DEFAULT += exampleMain.cpp
 example_SRCS_vxWorks += -nil-
-
-# Add support from base/src/vxWorks if needed
-#example_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 # Finally link to the EPICS Base libraries
 example_LIBS += $(EPICS_BASE_IOC_LIBS)
