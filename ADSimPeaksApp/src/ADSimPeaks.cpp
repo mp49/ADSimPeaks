@@ -25,12 +25,11 @@ static void ADSimPeaksTaskC(void *drvPvt);
 //Static Data
 const string ADSimPeaks::s_className = "ADSimPeaks";
 
-ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int maxPeaks,
+ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
 		       NDDataType_t dataType, int maxBuffers, size_t maxMemory,
 		       int priority, int stackSize)
   : ADDriver(portName, 1, 0, maxBuffers, maxMemory, 0, 0, 0, 1, priority, stackSize),
-    m_maxSizeX(maxSizeX),
-    m_maxSizeY(maxSizeY),
+    m_maxSize(maxSize),
     m_maxPeaks(maxPeaks),
     m_initialized(false)
 {
@@ -56,12 +55,15 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
   
   //Initialize non static, non const, data members
   m_acquiring = 0;
+  m_uniqueId = 0;
 
   bool paramStatus = true;
   //Initialise any paramLib parameters that need passing up to device support
   paramStatus = ((setIntegerParam(ADAcquire, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADStatus, ADStatusIdle) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADAcquirePeriod, 1.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADMaxSizeX, m_maxSize) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADSizeX, m_maxSize) == asynSuccess) && paramStatus);
   callParamCallbacks();
   if (!paramStatus) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
@@ -82,8 +84,7 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
     return;
   }
   
-  cout << functionName << " maxSizeX: " << m_maxSizeX << endl;
-  cout << functionName << " maxSizeY: " << m_maxSizeY << endl;
+  cout << functionName << " maxSize: " << m_maxSize << endl;
   cout << functionName << " maxPeaks: " << m_maxPeaks << endl; 
 
   m_initialized = true;
@@ -121,7 +122,15 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
 	setIntegerParam(ADStatus, ADStatusAborted);
       }
     }
+  } else if (function == ADSizeX) {
+    if (value > m_maxSize) {
+      value = m_maxSize;
+    }
+    if (value <= 0) {
+      value = 1;
+    }
   }
+  
 
   if (status != asynSuccess) {
     callParamCallbacks();
@@ -146,12 +155,26 @@ asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 {
   
   asynStatus status = asynSuccess;
-  //int function = pasynUser->reason;
+  int function = pasynUser->reason;
 
   string functionName(s_className + "::" + __func__);
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s entry...\n", functionName.c_str());
 
+  if (status != asynSuccess) {
+    callParamCallbacks();
+    return asynError;
+  }
+
+  status = (asynStatus) setDoubleParam(function, value);
+  if (status != asynSuccess) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
+              "%s error setting parameter. asynUser->reason: %d, value: %f\n", 
+              functionName.c_str(), function, value);
+    return(status);
+  }
+ 
+  callParamCallbacks();
 
   return status;
 
@@ -165,8 +188,7 @@ void ADSimPeaks::report(FILE *fp, int details)
   
   if (details > 0) {
     cout << __func__ << endl;
-    cout << "  m_maxSizeX: " << m_maxSizeX << endl;
-    cout << "  m_maxSizeY: " << m_maxSizeY << endl;
+    cout << "  m_maxSize: " << m_maxSize << endl;
     cout << "  m_maxPeaks: " << m_maxPeaks << endl;
 
     
@@ -189,11 +211,20 @@ bool ADSimPeaks::getInitialized(void)
 void ADSimPeaks::ADSimPeaksTask(void)
 {
   int status = asynSuccess;
+  int size = 0;
+  int ndims=0;
+  size_t dims[1];
+  int dataTypeInt = 0;
+  NDDataType_t dataType;
+  epicsTimeStamp nowTime;
+  int arrayCounter = 0;
+  int arrayCallbacks = 0;
   epicsFloat64 updatePeriod = 0.0;
   epicsEventWaitStatus eventStatus;
 
   string functionName(s_className + "::" + __func__);
 
+  p_NDArray = NULL;
   m_acquiring = false;
   
   this->lock();
@@ -212,18 +243,46 @@ void ADSimPeaks::ADSimPeaksTask(void)
 	setStringParam(ADStatusMessage, "Simulation Running");
 	setIntegerParam(ADNumImagesCounter, 0);
       } else {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-		  "%s eventStatus %d\n", functionName.c_str(), eventStatus);
-      }
-      
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s eventStatus %d\n", functionName.c_str(), eventStatus);
+      }  
     }
     callParamCallbacks();
 
     if (m_acquiring) {
+      getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
+      if (arrayCallbacks) {
+	++arrayCounter;
+	cout << arrayCounter << endl;
+      
+	getIntegerParam(NDDataType, &dataTypeInt);
+	dataType = (NDDataType_t)dataTypeInt;
+	getIntegerParam(ADSizeX, &size);
+	dims[0] = size;
+	
+	//Create the NDArray
+	if ((p_NDArray = this->pNDArrayPool->alloc(ndims, dims, dataType, 0, NULL)) == NULL) {
+	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s failed to alloc NDArray\n", functionName.c_str());
+	} else {
+	  epicsTimeGetCurrent(&nowTime);
+	  p_NDArray->uniqueId = arrayCounter;
+	  p_NDArray->timeStamp = nowTime.secPastEpoch + nowTime.nsec / 1.e9;
+	  p_NDArray->pAttributeList->add("TIMESTAMP", "Host Timestamp", NDAttrFloat64, &(p_NDArray->timeStamp));
+
+	  setIntegerParam(NDArraySizeX, dims[0]);
+	  
+	  doCallbacksGenericPointer(p_NDArray, NDArrayData, 0);
+	  
+	  //Free the NDArray 
+	  p_NDArray->release();
+	  setIntegerParam(NDArrayCounter, arrayCounter);          
+	  callParamCallbacks();
+	}
+	
+	
+      }
+      
       //Get the acquire period, which we use to define the update rate
       getDoubleParam(ADAcquirePeriod, &updatePeriod);
-      
-      //Calculate Data
       
       //Wait for a stop event
       this->unlock();
@@ -258,7 +317,7 @@ static void ADSimPeaksTaskC(void *drvPvt)
 
 extern "C" {
 
-  asynStatus ADSimPeaksConfig(const char *portName, int maxSizeX, int maxSizeY, int maxPeaks,
+  asynStatus ADSimPeaksConfig(const char *portName, int maxSize, int maxPeaks,
 			      int dataType, int maxBuffers, size_t maxMemory,
 			      int priority, int stackSize)
   {
@@ -266,7 +325,7 @@ extern "C" {
     
     // Instantiate class
     try {
-      ADSimPeaks *adsp = new ADSimPeaks(portName, maxSizeX, maxSizeY, maxPeaks,
+      ADSimPeaks *adsp = new ADSimPeaks(portName, maxSize, maxPeaks,
 				       static_cast<NDDataType_t>(dataType), maxBuffers, maxMemory,
 				       priority, stackSize);
       if (adsp->getInitialized()) {
@@ -286,14 +345,13 @@ extern "C" {
   
   // Code for iocsh registration
   static const iocshArg ADSimPeaksConfigArg0 = {"Port Name", iocshArgString};
-  static const iocshArg ADSimPeaksConfigArg1 = {"Max X Size", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg2 = {"Max Y Size", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg3 = {"Max Peaks", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg4 = {"Data Type", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg5 = {"maxBuffers", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg6 = {"maxMemory", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg7 = {"priority", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg8 = {"stackSize", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg1 = {"Max Size", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg2 = {"Max Peaks", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg3 = {"Data Type", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg4 = {"maxBuffers", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg5 = {"maxMemory", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg6 = {"priority", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg7 = {"stackSize", iocshArgInt};
   static const iocshArg * const ADSimPeaksConfigArgs[] =  {&ADSimPeaksConfigArg0,
 							   &ADSimPeaksConfigArg1,
 							   &ADSimPeaksConfigArg2,
@@ -301,13 +359,12 @@ extern "C" {
 							   &ADSimPeaksConfigArg4,
 							   &ADSimPeaksConfigArg5,
 							   &ADSimPeaksConfigArg6,
-							   &ADSimPeaksConfigArg7,
-							   &ADSimPeaksConfigArg8};
-  static const iocshFuncDef configADSimPeaks = {"ADSimPeaksConfig", 9, ADSimPeaksConfigArgs};
+							   &ADSimPeaksConfigArg7};
+  static const iocshFuncDef configADSimPeaks = {"ADSimPeaksConfig", 8, ADSimPeaksConfigArgs};
   static void configADSimPeaksCallFunc(const iocshArgBuf *args)
   {
     ADSimPeaksConfig(args[0].sval, args[1].ival, args[2].ival, args[3].ival,
-		     args[4].ival, args[5].ival, args[6].ival, args[7].ival, args[8].ival);
+		     args[4].ival, args[5].ival, args[6].ival, args[7].ival);
   }
   
   static void ADSimPeaksRegister(void)

@@ -14,7 +14,7 @@ example_registerRecordDeviceDriver pdbbase
 ###############################################
 # Start the ADSimPeaks driver
 
-ADSimPeaksConfig(D1.SIM,1024,0,10,3,0,0,0,0)
+ADSimPeaksConfig(D1.SIM,1024,10,3,0,0,0,0)
 
 ###############################################
 

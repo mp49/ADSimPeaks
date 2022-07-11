@@ -1,5 +1,5 @@
 /*
- * areaDetector driver to simulate 1D and 2D peaks with 
+ * areaDetector driver to simulate 1D peaks with 
  * background profiles and noise. 
  *
  * Matt Pearson 
@@ -24,7 +24,7 @@
 class ADSimPeaks : public ADDriver {
 
  public:
-  ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int maxPeaks, NDDataType_t dataType,
+  ADSimPeaks(const char *portName, int maxSize, int maxPeaks, NDDataType_t dataType,
 	     int maxBuffers, size_t maxMemory, int priority, int stackSize);
 
   virtual ~ADSimPeaks();
@@ -44,17 +44,20 @@ class ADSimPeaks : public ADDriver {
   int ADSPIntegrateParam;
 
   //Internal data
-  epicsUInt32 m_maxSizeX;
-  epicsUInt32 m_maxSizeY;
+  epicsUInt32 m_maxSize;
   epicsUInt32 m_maxPeaks;
 
   bool m_acquiring;
+  epicsUInt32 m_uniqueId;
   
   epicsEventId m_startEvent;
   epicsEventId m_stopEvent;
 
   bool m_initialized;
 
+  NDArray *p_NDArray;
+  
+  
   //Static Data
   static const std::string s_className;
 
