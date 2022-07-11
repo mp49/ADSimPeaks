@@ -10,6 +10,8 @@
 #ifndef ADSIMPEAKS_H
 #define ADSIMPEAKS_H
 
+#include <string>
+
 #include <epicsEvent.h>
 #include "ADDriver.h"
 
@@ -44,6 +46,8 @@ class ADSimPeaks : public ADDriver {
   
   epicsEventId m_startEvent;
   epicsEventId m_stopEvent;
+
+  static const std::string s_className;
 
 };
 

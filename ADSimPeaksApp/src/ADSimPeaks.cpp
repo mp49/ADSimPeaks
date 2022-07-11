@@ -1,7 +1,6 @@
 
 //Standard 
 #include <iostream>
-#include <string>
 #include <stdexcept>
 
 //EPICS
@@ -18,8 +17,12 @@
 
 using std::cout;
 using std::endl;
+using std::string;
 
 static void ADSimPeaksTaskC(void *drvPvt);
+
+//Static Data
+const string ADSimPeaks::s_className = "ADSimPeaks";
 
 ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int maxPeaks,
 		       NDDataType_t dataType, int maxBuffers, size_t maxMemory,
@@ -29,26 +32,43 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
     m_maxSizeY(maxSizeY),
     m_maxPeaks(maxPeaks)
 {
-  std::cout << "Creating ADSimPeaks..." << std::endl;
 
-  std::cout << __func__ << " maxSizeX: " << m_maxSizeX << endl;
-  std::cout << __func__ << " maxSizeY: " << m_maxSizeY << endl;
-  std::cout << __func__ << " maxPeaks: " << m_maxPeaks << endl; 
+  string functionName(s_className + "::" + __func__);
+  
+  cout << functionName << " maxSizeX: " << m_maxSizeX << endl;
+  cout << functionName << " maxSizeY: " << m_maxSizeY << endl;
+  cout << functionName << " maxPeaks: " << m_maxPeaks << endl; 
+
+  cout << "Created " << s_className << " OK." << endl;
 }
 
 
 ADSimPeaks::~ADSimPeaks()
 {
-  std::cout << __func__ << endl;
+  cout << __func__ << endl;
 }
 
 
 asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
   asynStatus status = asynSuccess;
-  //int function = pasynUser->reason;
+  int function = pasynUser->reason;
   
-  const char *functionName = "ADSimPeaks::writeInt32";
+  string functionName(s_className + "::" + __func__);
+  
+  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s entry...\n", functionName.c_str());
+
+  return status;
+
+}
+
+asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
+{
+  
+  asynStatus status = asynSuccess;
+  //int function = pasynUser->reason;
+
+  const char *functionName = "ADSimPeaks::writeFloat64";
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s entry...\n", functionName);
 
@@ -56,6 +76,28 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
   return status;
 
+}
+
+void ADSimPeaks::report(FILE *fp, int details)
+{
+  
+  fprintf(fp, "ADSimPeaks %s\n", this->portName);
+  if (details > 0) {
+    cout << __func__ << endl;
+    cout << "  m_maxSizeX: " << m_maxSizeX << endl;
+    cout << "  m_maxSizeY: " << m_maxSizeY << endl;
+    cout << "  m_maxPeaks: " << m_maxPeaks << endl;
+
+    
+    /*int nx, ny, dataType;
+    getIntegerParam(ADSizeX, &nx);
+    getIntegerParam(ADSizeY, &ny);
+    getIntegerParam(NDDataType, &dataType);
+    fprintf(fp, "  NX, NY:            %d  %d\n", nx, ny);
+    fprintf(fp, "  Data type:         %d\n", dataType);*/
+  }
+  /* Invoke the base class method */
+  ADDriver::report(fp, details);
 }
 
 
