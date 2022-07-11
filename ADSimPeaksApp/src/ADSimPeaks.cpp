@@ -216,8 +216,10 @@ void ADSimPeaks::ADSimPeaksTask(void)
   size_t dims[1];
   int dataTypeInt = 0;
   NDDataType_t dataType;
+  NDArrayInfo_t arrayInfo;
   epicsTimeStamp nowTime;
   int arrayCounter = 0;
+  int imagesCounter = 0;
   int arrayCallbacks = 0;
   epicsFloat64 updatePeriod = 0.0;
   epicsEventWaitStatus eventStatus;
@@ -236,6 +238,7 @@ void ADSimPeaks::ADSimPeaksTask(void)
       this->unlock();
       eventStatus = epicsEventWait(m_startEvent);
       this->lock();
+      imagesCounter = 0;
       if (eventStatus == epicsEventWaitOK) {
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
 		  "%s starting simulation.\n", functionName.c_str());
@@ -250,35 +253,47 @@ void ADSimPeaks::ADSimPeaksTask(void)
 
     if (m_acquiring) {
       getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
-      if (arrayCallbacks) {
-	++arrayCounter;
-	cout << arrayCounter << endl;
       
-	getIntegerParam(NDDataType, &dataTypeInt);
-	dataType = (NDDataType_t)dataTypeInt;
-	getIntegerParam(ADSizeX, &size);
-	dims[0] = size;
-	
-	//Create the NDArray
-	if ((p_NDArray = this->pNDArrayPool->alloc(ndims, dims, dataType, 0, NULL)) == NULL) {
-	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s failed to alloc NDArray\n", functionName.c_str());
-	} else {
-	  epicsTimeGetCurrent(&nowTime);
-	  p_NDArray->uniqueId = arrayCounter;
-	  p_NDArray->timeStamp = nowTime.secPastEpoch + nowTime.nsec / 1.e9;
-	  p_NDArray->pAttributeList->add("TIMESTAMP", "Host Timestamp", NDAttrFloat64, &(p_NDArray->timeStamp));
+      ++arrayCounter;
+      ++imagesCounter;
+      cout << arrayCounter << endl;
+      
+      getIntegerParam(NDDataType, &dataTypeInt);
+      dataType = (NDDataType_t)dataTypeInt;
+      getIntegerParam(ADSizeX, &size);
+      ndims = 1;
+      dims[0] = size;
+      
+      //Create the NDArray
+      if ((p_NDArray = this->pNDArrayPool->alloc(ndims, dims, dataType, 0, NULL)) == NULL) {
+	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s failed to alloc NDArray\n", functionName.c_str());
+      } else {
 
-	  setIntegerParam(NDArraySizeX, dims[0]);
-	  
+	//Generate sim data here
+	p_NDArray->getInfo(&arrayInfo);
+	
+	//for (int i=0; i<arrayInfo.nElements; i++) {
+	//  p_NDArray->pData[i] = i;
+	//}
+	
+	epicsTimeGetCurrent(&nowTime);
+	p_NDArray->uniqueId = arrayCounter;
+	p_NDArray->timeStamp = nowTime.secPastEpoch + nowTime.nsec / 1.e9;
+	updateTimeStamp(&p_NDArray->epicsTS);
+	
+	setIntegerParam(NDArraySizeX, dims[0]);
+	setIntegerParam(NDArrayCounter, arrayCounter);
+	setIntegerParam(ADNumImagesCounter, imagesCounter);
+	
+	this->getAttributes(p_NDArray->pAttributeList);
+	
+	if (arrayCallbacks) {	  
 	  doCallbacksGenericPointer(p_NDArray, NDArrayData, 0);
-	  
-	  //Free the NDArray 
-	  p_NDArray->release();
-	  setIntegerParam(NDArrayCounter, arrayCounter);          
-	  callParamCallbacks();
 	}
+	callParamCallbacks();
 	
-	
+	//Free the NDArray 
+	p_NDArray->release();	
       }
       
       //Get the acquire period, which we use to define the update rate

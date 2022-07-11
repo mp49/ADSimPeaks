@@ -1556,3 +1556,2816 @@ record(bo, "ST99:Det:Det1:Integrate") {
   info(autosaveFields, "VAL")
 }
 
+#=================================================================#
+# Template file: NDCodec.template
+# Database for the NDCodec plugin
+# Bruno Martins
+# June 18, 2018
+
+#=================================================================#
+# Template file: NDPluginBase.template
+# Database for NDPluginBase, i.e. records common to all plugins
+# Mark Rivers
+# April 25, 2008
+
+#=================================================================#
+# Template file: NDArrayBase.template
+# Database for area detector control using asyn driver and standard asyn device support
+# Mark Rivers
+# March 9, 2008
+
+###################################################################
+#  This record contains the version of ADCore                     #
+###################################################################
+
+record(stringin, "ST99:Det:Det1:CO1:ADCoreVersion_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.CO1,0,1)ADCORE_VERSION")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  This record contains the version of the driver or plugin       #
+###################################################################
+
+record(stringin, "ST99:Det:Det1:CO1:DriverVersion_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.CO1,0,1)DRIVER_VERSION")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  This record contains the asyn port name of this detector       #
+###################################################################
+
+record(stringin, "ST99:Det:Det1:CO1:PortName_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.CO1,0,1)PORT_NAME_SELF")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records contain basic information about the detector     # 
+###################################################################
+
+record(stringin, "ST99:Det:Det1:CO1:Manufacturer_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.CO1,0,1)MANUFACTURER")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+record(stringin, "ST99:Det:Det1:CO1:Model_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.CO1,0,1)MODEL")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+record(stringin, "ST99:Det:Det1:CO1:SerialNumber_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.CO1,0,1)SERIAL_NUMBER")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+record(stringin, "ST99:Det:Det1:CO1:SDKVersion_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.CO1,0,1)SDK_VERSION")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+record(stringin, "ST99:Det:Det1:CO1:FirmwareVersion_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.CO1,0,1)FIRMWARE_VERSION")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records control acquisition start and stop               #
+###################################################################
+
+record(bo, "ST99:Det:Det1:CO1:Acquire") {
+   field(DTYP, "asynInt32")
+   field(OUT, "@asyn(D1.CO1,0,1)ACQUIRE")
+   field(ZNAM, "Done")
+   field(ONAM, "Acquire")
+   field(VAL,  "0")
+   field(FLNK, "ST99:Det:Det1:CO1:SetAcquireBusy")
+   info(asyn:READBACK, "1")
+}
+
+record(bi, "ST99:Det:Det1:CO1:Acquire_RBV") {
+   field(DTYP, "asynInt32")
+   field(INP, "@asyn(D1.CO1,0,1)ACQUIRE")
+   field(ZNAM, "Done")
+   field(ZSV,  "NO_ALARM")
+   field(ONAM, "Acquiring")
+   field(OSV,  "MINOR")
+   field(SCAN, "I/O Intr")
+}
+
+record(calcout, "ST99:Det:Det1:CO1:SetAcquireBusy")
+{
+    field(INPA, "ST99:Det:Det1:CO1:Acquire NPP")
+    field(CALC, "A")
+    field(OOPT, "Transition To Non-zero")
+    field(OUT,  "ST99:Det:Det1:CO1:AcquireBusy PP")
+}
+
+record(busy, "ST99:Det:Det1:CO1:AcquireBusy") {
+   field(ZNAM, "Done")
+   field(ZSV,  "NO_ALARM")
+   field(ONAM, "Acquiring")
+   field(OSV,  "MINOR")
+   field(VAL,  "0")
+}
+
+record(bi, "ST99:Det:Det1:CO1:AcquireBusyCB") {
+   field(DTYP, "asynInt32")
+   field(INP, "@asyn(D1.CO1,0,1)ACQUIRE_BUSY")
+   field(ZNAM, "Done")
+   field(ZSV,  "NO_ALARM")
+   field(ONAM, "Acquiring")
+   field(OSV,  "MINOR")
+   field(SCAN, "I/O Intr")
+}
+
+record(calcout, "ST99:Det:Det1:CO1:ClearAcquireBusy") {
+    field(INPA, "ST99:Det:Det1:CO1:AcquireBusyCB CP")
+    field(CALC, "A")
+    field(OOPT, "Transition To Zero")
+    field(OUT,  "ST99:Det:Det1:CO1:AcquireBusy PP")
+}
+
+record(bo, "ST99:Det:Det1:CO1:WaitForPlugins") {
+   field(PINI, "YES")
+   field(DTYP, "asynInt32")
+   field(OUT, "@asyn(D1.CO1,0,1)WAIT_FOR_PLUGINS")
+   field(ZNAM, "No")
+   field(ONAM, "Yes")
+   field(VAL,  "0")
+}
+
+###################################################################
+#  These records are the array size and data type                 #
+###################################################################
+# The number of dimensions
+record(longout, "ST99:Det:Det1:CO1:NDimensions")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)ARRAY_NDIMENSIONS")
+}
+
+record(longin, "ST99:Det:Det1:CO1:NDimensions_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)ARRAY_NDIMENSIONS")
+    field(SCAN, "I/O Intr")
+}
+
+# The array dimensions waveform records
+record(waveform, "ST99:Det:Det1:CO1:Dimensions")
+{
+    field(DTYP, "asynInt32ArrayOut")
+    field(INP,  "@asyn(D1.CO1,0,1)ARRAY_DIMENSIONS")
+    field(FTVL, "LONG")
+    field(NELM, "10")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim0SA")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim0SA")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "0")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize0")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize0")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim0SA")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim1SA")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim1SA")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "1")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize1")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize1")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim1SA")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim2SA")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim2SA")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "2")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize2")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize2")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim2SA")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim3SA")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim3SA")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "3")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize3")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize3")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim3SA")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim4SA")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim4SA")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "4")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize4")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize4")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim4SA")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim5SA")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim5SA")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "5")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize5")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize5")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim5SA")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim6SA")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim6SA")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "6")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize6")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize6")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim6SA")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim7SA")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim7SA")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "7")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize7")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize7")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim7SA")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim8SA")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim8SA")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "8")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize8")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize8")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim8SA")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim9SA")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim9SA")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "9")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize9")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize9")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim9SA")
+}
+
+
+record(waveform, "ST99:Det:Det1:CO1:Dimensions_RBV")
+{
+    field(DTYP, "asynInt32ArrayIn")
+    field(INP,  "@asyn(D1.CO1,0,1)ARRAY_DIMENSIONS")
+    field(FTVL, "LONG")
+    field(NELM, "10")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim0SA_RBV")
+    field(SCAN, "I/O Intr")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim0SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "0")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize0_RBV")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize0_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim0SA_RBV")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim1SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim1SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "1")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize1_RBV")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize1_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim1SA_RBV")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim2SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim2SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "2")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize2_RBV")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize2_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim2SA_RBV")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim3SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim3SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "3")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize3_RBV")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize3_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim3SA_RBV")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim4SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim4SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "4")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize4_RBV")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize4_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim4SA_RBV")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim5SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim5SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "5")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize5_RBV")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize5_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim5SA_RBV")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim6SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim6SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "6")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize6_RBV")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize6_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim6SA_RBV")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim7SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim7SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "7")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize7_RBV")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize7_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim7SA_RBV")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim8SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim8SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "8")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize8_RBV")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize8_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim8SA_RBV")
+    field(FLNK, "ST99:Det:Det1:CO1:Dim9SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:CO1:Dim9SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "9")
+    field(FLNK, "ST99:Det:Det1:CO1:ArraySize9_RBV")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize9_RBV")
+{
+    field(INP,  "ST99:Det:Det1:CO1:Dim9SA_RBV")
+}
+
+
+record(mbbi, "ST99:Det:Det1:CO1:BayerPattern_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.CO1,0,1)BAYER_PATTERN")
+   field(ZRST, "RGGB")
+   field(ZRVL, "0")
+   field(ONST, "GBRG")
+   field(ONVL, "1")
+   field(TWST, "GRBG")
+   field(TWVL, "2")
+   field(THST, "BGGR")
+   field(THVL, "3")
+   field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySizeX_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.CO1,0,1)ARRAY_SIZE_X")
+   field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySizeY_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.CO1,0,1)ARRAY_SIZE_Y")
+   field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySizeZ_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.CO1,0,1)ARRAY_SIZE_Z")
+   field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArraySize_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.CO1,0,1)ARRAY_SIZE")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records have information on the compression              # 
+###################################################################
+record(stringin, "ST99:Det:Det1:CO1:Codec_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.CO1,0,1)CODEC")
+   field(VAL,  "")
+   field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:CO1:CompressedSize_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.CO1,0,1)COMPRESSED_SIZE")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records control the data type                            # 
+###################################################################
+
+record(mbbo, "ST99:Det:Det1:CO1:DataType")
+{
+   field(PINI, "YES")
+   field(DTYP, "asynInt32")
+   field(OUT,  "@asyn(D1.CO1,0,1)DATA_TYPE")
+   field(ZRST, "Int8")
+   field(ZRVL, "0")
+   field(ONST, "UInt8")
+   field(ONVL, "1")
+   field(TWST, "Int16")
+   field(TWVL, "2")
+   field(THST, "UInt16")
+   field(THVL, "3")
+   field(FRST, "Int32")
+   field(FRVL, "4")
+   field(FVST, "UInt32")
+   field(FVVL, "5")
+   field(SXST, "Int64")
+   field(SXVL, "6")
+   field(SVST, "UInt64")
+   field(SVVL, "7")
+   field(EIST, "Float32")
+   field(EIVL, "8")
+   field(NIST, "Float64")
+   field(NIVL, "9")
+   field(VAL,  "0")
+   info(autosaveFields, "VAL")
+}
+
+record(mbbi, "ST99:Det:Det1:CO1:DataType_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.CO1,0,1)DATA_TYPE")
+   field(ZRST, "Int8")
+   field(ZRVL, "0")
+   field(ONST, "UInt8")
+   field(ONVL, "1")
+   field(TWST, "Int16")
+   field(TWVL, "2")
+   field(THST, "UInt16")
+   field(THVL, "3")
+   field(FRST, "Int32")
+   field(FRVL, "4")
+   field(FVST, "UInt32")
+   field(FVVL, "5")
+   field(SXST, "Int64")
+   field(SXVL, "6")
+   field(SVST, "UInt64")
+   field(SVVL, "7")
+   field(EIST, "Float32")
+   field(EIVL, "8")
+   field(NIST, "Float64")
+   field(NIVL, "9")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records control the color mode                           #
+#  These choices must agree with NDColorMode_t in NDArray.h       # 
+###################################################################
+
+record(mbbo, "ST99:Det:Det1:CO1:ColorMode")
+{
+   field(PINI, "YES")
+   field(DTYP, "asynInt32")
+   field(OUT,  "@asyn(D1.CO1,0,1)COLOR_MODE")
+   field(ZRST, "Mono")
+   field(ZRVL, "0")
+   field(ONST, "Bayer")
+   field(ONVL, "1")
+   field(TWST, "RGB1")
+   field(TWVL, "2")
+   field(THST, "RGB2")
+   field(THVL, "3")
+   field(FRST, "RGB3")
+   field(FRVL, "4")
+   field(FVST, "YUV444")
+   field(FVVL, "5")
+   field(SXST, "YUV422")
+   field(SXVL, "6")
+   field(SVST, "YUV421")
+   field(SVVL, "7")
+   info(autosaveFields, "VAL")
+}
+
+record(mbbi, "ST99:Det:Det1:CO1:ColorMode_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.CO1,0,1)COLOR_MODE")
+   field(ZRST, "Mono")
+   field(ZRVL, "0")
+   field(ONST, "Bayer")
+   field(ONVL, "1")
+   field(TWST, "RGB1")
+   field(TWVL, "2")
+   field(THST, "RGB2")
+   field(THVL, "3")
+   field(FRST, "RGB3")
+   field(FRVL, "4")
+   field(FVST, "YUV444")
+   field(FVVL, "5")
+   field(SXST, "YUV422")
+   field(SXVL, "6")
+   field(SVST, "YUV421")
+   field(SVVL, "7")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records are the uniqueId and time stamps of the array     #
+###################################################################
+record(longin, "ST99:Det:Det1:CO1:UniqueId_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)UNIQUE_ID")
+    field(SCAN, "I/O Intr")
+}
+
+record(ai, "ST99:Det:Det1:CO1:TimeStamp_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn(D1.CO1,0,1)TIME_STAMP")
+    field(PREC, "3")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:CO1:EpicsTSSec_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)EPICS_TS_SEC")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:CO1:EpicsTSNsec_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)EPICS_TS_NSEC")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records provide statistics on array callbacks and        #
+#  array callback rates                                           # 
+###################################################################
+record(longout, "ST99:Det:Det1:CO1:ArrayCounter")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)ARRAY_COUNTER")
+}
+
+record(longin, "ST99:Det:Det1:CO1:ArrayCounter_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)ARRAY_COUNTER")
+    field(SCAN, "I/O Intr")
+}
+
+# Updated rate calculation to use a smoothing factor w/ guard against negative values
+record(calc, "ST99:Det:Det1:CO1:ArrayRate_RBV")
+{
+    field(INPA, "ST99:Det:Det1:CO1:ArrayRate_RBV.LB NPP NMS")   # Previous counter value
+    field(INPB, "ST99:Det:Det1:CO1:ArrayCounter_RBV NPP NMS")   # Current counter value
+    field(INPC, "1.0")                                # Delta time in seconds
+    field(INPD, "ST99:Det:Det1:CO1:ArrayRate_RBV.VAL NPP NMS")  # Previous rate
+    field(INPE, "0.0")                 # Smoothing factor
+    field(CALC, "(D*E)/C+MAX(0,B-A)*(1-E)/C")
+    field(PREC, "2" )
+    field(EGU,  "Hz" )
+    field(SCAN, "1 second")
+}
+
+###################################################################
+#  These records control NDArray callacks                         # 
+###################################################################
+record(bo, "ST99:Det:Det1:CO1:ArrayCallbacks")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)ARRAY_CALLBACKS")
+    field(ZNAM, "Disable")
+    field(ZSV,  "NO_ALARM")
+    field(ONAM, "Enable")
+    field(OSV,  "MINOR")
+    field(VAL, "1")
+    info(autosaveFields, "VAL")
+}
+
+record(bi, "ST99:Det:Det1:CO1:ArrayCallbacks_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)ARRAY_CALLBACKS")
+    field(ZNAM, "Disable")
+    field(ZSV,  "NO_ALARM")
+    field(ONAM, "Enable")
+    field(OSV,  "MINOR")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  This record contains macro definitions for the attributes      # 
+###################################################################
+
+record(waveform, "ST99:Det:Det1:CO1:NDAttributesMacros")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn(D1.CO1,0,1)ND_ATTRIBUTES_MACROS")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    info(autosaveFields, "VAL")
+}
+
+###################################################################
+#  This record is the name of a file defining attributes          # 
+###################################################################
+
+record(waveform, "ST99:Det:Det1:CO1:NDAttributesFile")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn(D1.CO1,0,1)ND_ATTRIBUTES_FILE")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    info(autosaveFields, "VAL")
+}
+
+###################################################################
+#  This record defines the status of reading attributes file      # 
+###################################################################
+
+record(mbbi, "ST99:Det:Det1:CO1:NDAttributesStatus")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)ND_ATTRIBUTES_STATUS")
+    field(ZRVL, "0")
+    field(ZRST, "Attributes file OK")
+    field(ZRSV, "NO_ALARM")
+    field(ONVL, "1")
+    field(ONST, "File not found")
+    field(ONSV, "MINOR")
+    field(TWVL, "2")
+    field(TWST, "XML syntax error")
+    field(TWSV, "MAJOR")
+    field(THVL, "3")
+    field(THST, "Macro substitution error")
+    field(THSV, "MAJOR")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  Status of NDArrayPool - number of buffers, memory used etc.    # 
+###################################################################
+
+record(ai, "ST99:Det:Det1:CO1:PoolMaxMem")
+{
+   field(DTYP, "asynFloat64")
+   field(INP,  "@asyn(D1.CO1,0,1)POOL_MAX_MEMORY")
+   field(PREC, "1")
+   field(EGU,  "MB")
+   field(SCAN, "Passive")
+   field(PINI, "YES")
+}
+
+record(ai, "ST99:Det:Det1:CO1:PoolUsedMem")
+{
+   field(DTYP, "asynFloat64")
+   field(INP,  "@asyn(D1.CO1,0,1)POOL_USED_MEMORY")
+   field(PREC, "1")
+   field(EGU,  "MB")
+   field(SCAN, "1 second")
+   field(FLNK, "ST99:Det:Det1:CO1:PoolAllocBuffers")
+   info(autosaveFields, "SCAN")
+}
+
+record(longin, "ST99:Det:Det1:CO1:PoolAllocBuffers")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.CO1,0,1)POOL_ALLOC_BUFFERS")
+   field(FLNK, "ST99:Det:Det1:CO1:PoolFreeBuffers")
+}
+
+record(longin, "ST99:Det:Det1:CO1:PoolFreeBuffers")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.CO1,0,1)POOL_FREE_BUFFERS")
+   field(FLNK, "ST99:Det:Det1:CO1:PoolUsedBuffers")
+}
+
+record(calc, "ST99:Det:Det1:CO1:PoolUsedBuffers")
+{
+    field(INPA, "ST99:Det:Det1:CO1:PoolAllocBuffers NPP MS")
+    field(INPB, "ST99:Det:Det1:CO1:PoolFreeBuffers NPP MS")
+    field(CALC, "A-B")
+}
+
+record(bo, "ST99:Det:Det1:CO1:EmptyFreeList")
+{
+   field(DTYP, "asynInt32")
+   field(OUT,  "@asyn(D1.CO1,0,1)POOL_EMPTY_FREELIST")
+}
+
+record(longin, "ST99:Det:Det1:CO1:NumQueuedArrays")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.CO1,0,1)NUM_QUEUED_ARRAYS")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  This record contains the type of plugin                        #
+###################################################################
+
+record(stringin, "ST99:Det:Det1:CO1:PluginType_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.CO1,0,1)PLUGIN_TYPE")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records control the connection of the server to          #
+#  an NDArray driver port and address                             #
+###################################################################
+# Array port name
+record(stringout, "ST99:Det:Det1:CO1:NDArrayPort")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn(D1.CO1,0,1)NDARRAY_PORT")
+    field(VAL,  "D1.SIM")
+    info(autosaveFields, "VAL")
+}
+
+record(stringin, "ST99:Det:Det1:CO1:NDArrayPort_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn(D1.CO1,0,1)NDARRAY_PORT")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "ST99:Det:Det1:CO1:NDArrayAddress")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)NDARRAY_ADDR")
+    field(VAL,  "0")
+    info(autosaveFields, "VAL")
+}
+
+record(longin, "ST99:Det:Det1:CO1:NDArrayAddress_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)NDARRAY_ADDR")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records control whether callbacks are enabled and        #
+#  minimum time between callbacks                                 #
+###################################################################
+record(bo, "ST99:Det:Det1:CO1:EnableCallbacks")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)ENABLE_CALLBACKS")
+    field(ZNAM, "Disable")
+    field(ONAM, "Enable")
+    field(VAL,  "0")
+    info(autosaveFields, "VAL")
+}
+
+record(bi, "ST99:Det:Det1:CO1:EnableCallbacks_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)ENABLE_CALLBACKS")
+    field(ZNAM, "Disable")
+    field(ONAM, "Enable")
+    field(ZSV,  "NO_ALARM")
+    field(OSV,  "MINOR")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao, "ST99:Det:Det1:CO1:MinCallbackTime")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn(D1.CO1,0,1)MIN_CALLBACK_TIME")
+    field(EGU,  "s")
+    field(PREC, "3")
+    field(VAL,  "0.0")
+    field(DRVL, "0")
+    info(autosaveFields, "VAL")
+}
+
+record(ai, "ST99:Det:Det1:CO1:MinCallbackTime_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn(D1.CO1,0,1)MIN_CALLBACK_TIME")
+    field(EGU,  "s")
+    field(PREC, "3")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao, "ST99:Det:Det1:CO1:MaxArrayRate")
+{
+    field(DTYP, "Soft Channel")
+    field(OUT,  "ST99:Det:Det1:CO1:MaxArrayRate_COUT PP")
+    field(EGU,  "Hz")
+    field(PREC, "3")
+    field(VAL,  "0.0")
+    info(autosaveFields, "VAL")
+}
+
+record(calcout, "ST99:Det:Det1:CO1:MaxArrayRate_COUT")
+{
+    field(INPA, "ST99:Det:Det1:CO1:MaxArrayRate")
+    field(CALC, "A=0?0:1.0/A")
+    field(OUT,  "ST99:Det:Det1:CO1:MinCallbackTime PP")
+}
+
+record(calc, "ST99:Det:Det1:CO1:MaxArrayRate_RBV")
+{
+    field(INPA, "ST99:Det:Det1:CO1:MinCallbackTime_RBV CP")
+    field(CALC, "A=0?0:1.0/A")
+    field(EGU,  "Hz")
+    field(PREC, "3")
+    field(SCAN, "Passive")
+}
+
+record(ao, "ST99:Det:Det1:CO1:MaxByteRate")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn(D1.CO1,0,1)MAX_BYTE_RATE")
+    field(EGU,  "s")
+    field(PREC, "3")
+    field(VAL,  "0.0")
+    field(DRVL, "0")
+    info(autosaveFields, "VAL")
+}
+
+record(ai, "ST99:Det:Det1:CO1:MaxByteRate_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn(D1.CO1,0,1)MAX_BYTE_RATE")
+    field(EGU,  "s")
+    field(PREC, "3")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  This record contains the last execution time of the plugin     #
+###################################################################
+record(ai, "ST99:Det:Det1:CO1:ExecutionTime_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn(D1.CO1,0,1)EXECUTION_TIME")
+    field(EGU,  "ms")
+    field(PREC, "3")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  This record requests that the plugin execute again with the    #
+#  same NDArray                                                   #
+###################################################################
+record(bo, "ST99:Det:Det1:CO1:ProcessPlugin")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)PROCESS_PLUGIN")
+    field(VAL,  "1")
+}
+
+###################################################################
+#  These records control whether callbacks block or not           #
+###################################################################
+record(bo, "ST99:Det:Det1:CO1:BlockingCallbacks")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)BLOCKING_CALLBACKS")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(VAL,  "0")
+    info(autosaveFields, "VAL")
+}
+
+record(bi, "ST99:Det:Det1:CO1:BlockingCallbacks_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)BLOCKING_CALLBACKS")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(SCAN, "I/O Intr")
+}
+
+
+record(longout, "ST99:Det:Det1:CO1:DroppedArrays")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)DROPPED_ARRAYS")
+    field(VAL,  "0")
+}
+
+record(longin, "ST99:Det:Det1:CO1:DroppedArrays_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)DROPPED_ARRAYS")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "ST99:Det:Det1:CO1:QueueSize")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)QUEUE_SIZE")
+    field(PINI, "YES")
+}
+
+record(longin, "ST99:Det:Det1:CO1:QueueSize_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)QUEUE_SIZE")
+    field(FLNK, "ST99:Det:Det1:CO1:QueueFreeLow")
+    field(SCAN, "I/O Intr")
+}
+
+record(calcout, "ST99:Det:Det1:CO1:QueueFreeLow") {
+    field(CALC, "A*0.25")
+    field(INPA, "ST99:Det:Det1:CO1:QueueSize")
+    field(OUT,  "ST99:Det:Det1:CO1:QueueFree.LOW")
+    field(FLNK, "ST99:Det:Det1:CO1:QueueUseHIGH")
+}
+
+# Set a HIGH warning level for the input queue fill level to 75%
+# of the full size of the queue
+record(calcout, "ST99:Det:Det1:CO1:QueueUseHIGH") {
+   field(CALC, "A*0.75")
+   field(INPA, "ST99:Det:Det1:CO1:QueueSize")
+   field(OUT,  "ST99:Det:Det1:CO1:QueueUse.HIGH")
+   field(FLNK, "ST99:Det:Det1:CO1:QueueUseHIHI")
+}
+
+# Set a HIHI level for the input queue fill level to indicate an error
+# (MAJOR alarm)  when it fills up to the full size of the queue (frames start dropping)
+record(calcout, "ST99:Det:Det1:CO1:QueueUseHIHI") {
+   field(CALC, "A*1.0")
+   field(INPA, "ST99:Det:Det1:CO1:QueueSize")
+   field(OUT,  "ST99:Det:Det1:CO1:QueueUse.HIHI")
+}
+
+record(longin, "ST99:Det:Det1:CO1:QueueFree")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)QUEUE_FREE")
+    field(LLSV, "MAJOR")
+    field(LSV,  "MINOR")
+    field(LOLO, "0")
+    field(HYST, "1")
+    field(SCAN, "I/O Intr")
+}
+
+# Display the fill level on the plugins input queue
+record(calc, "ST99:Det:Det1:CO1:QueueUse") {
+    field(CALC, "A-B")
+    field(INPA, "ST99:Det:Det1:CO1:QueueSize")
+    field(INPB, "ST99:Det:Det1:CO1:QueueFree CP")
+    field(SCAN, "Passive")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(HYST, "1")
+}
+
+record(longout, "ST99:Det:Det1:CO1:NumThreads")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)NUM_THREADS")
+    field(VAL,  "1")
+    field(PINI, "YES")
+}
+
+record(longin, "ST99:Det:Det1:CO1:NumThreads_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)NUM_THREADS")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:CO1:MaxThreads_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)MAX_THREADS")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records control output array sorting                     #
+###################################################################
+record(mbbo, "ST99:Det:Det1:CO1:SortMode") {
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)SORT_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "Unsorted")
+    field(ONVL, "1")
+    field(ONST, "Sorted")
+}
+
+record(mbbi, "ST99:Det:Det1:CO1:SortMode_RBV") {
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)SORT_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "Unsorted")
+    field(ONVL, "1")
+    field(ONST, "Sorted")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao, "ST99:Det:Det1:CO1:SortTime") {
+    field(PINI, "YES")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn(D1.CO1,0,1)SORT_TIME")
+    field(PREC, "3")
+    field(VAL, "0.1")
+}
+
+record(ai, "ST99:Det:Det1:CO1:SortTime_RBV") {
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn(D1.CO1,0,1)SORT_TIME")
+    field(PREC, "3")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "ST99:Det:Det1:CO1:SortSize")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)SORT_SIZE")
+    field(VAL,  "20")
+    field(PINI, "YES")
+}
+
+record(longin, "ST99:Det:Det1:CO1:SortSize_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)SORT_SIZE")
+    field(FLNK, "ST99:Det:Det1:CO1:SortFreeLow")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:CO1:SortFree") {
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)SORT_FREE")
+    field(LLSV, "MAJOR")
+    field(LSV,  "MINOR")
+    field(LOLO, "0")
+    field(HYST, "1")
+    field(SCAN, "I/O Intr")
+}
+
+record(calcout, "ST99:Det:Det1:CO1:SortFreeLow") {
+    field(CALC, "A*0.25")
+    field(INPA, "ST99:Det:Det1:CO1:SortSize")
+    field(OUT,  "ST99:Det:Det1:CO1:SortFree.LOW")
+}
+
+record(longout, "ST99:Det:Det1:CO1:DroppedOutputArrays")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)DROPPED_OUTPUT_ARRAYS")
+    field(VAL,  "0")
+}
+
+record(longin, "ST99:Det:Det1:CO1:DroppedOutputArrays_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)DROPPED_OUTPUT_ARRAYS")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "ST99:Det:Det1:CO1:DisorderedArrays")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)DISORDERED_ARRAYS")
+    field(PINI, "YES")
+}
+
+record(longin, "ST99:Det:Det1:CO1:DisorderedArrays_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)DISORDERED_ARRAYS")
+    field(SCAN, "I/O Intr")
+}
+
+
+
+###################################################################
+#  The asynRecord is used for mainly for trace mask               # 
+###################################################################
+ 
+# Set ASYN_TRACEIO_HEX bit by default
+record(asyn,"ST99:Det:Det1:CO1:AsynIO")
+{
+    field(PORT, "D1.CO1")
+    field(TIB2,"1")
+    info("ADType", "ADPlugin")
+}
+
+
+record(mbbo, "ST99:Det:Det1:CO1:Mode")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)MODE")
+    field(ZRST, "Compress")
+    field(ZRVL, "0")
+    field(ONST, "Decompress")
+    field(ONVL, "1")
+    info(autosaveFields, "VAL")
+}
+
+record(mbbi, "ST99:Det:Det1:CO1:Mode_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)MODE")
+    field(ZRST, "Compress")
+    field(ZRVL, "0")
+    field(ONST, "Decompress")
+    field(ONVL, "1")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo, "ST99:Det:Det1:CO1:Compressor")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)COMPRESSOR")
+    field(ZRST, "None")
+    field(ZRVL, "0")
+    field(ONST, "JPEG")
+    field(ONVL, "1")
+    field(TWST, "Blosc")
+    field(TWVL, "2")
+    field(THST, "LZ4")
+    field(THVL, "3")
+    field(FRST, "BSLZ4")
+    field(FRVL, "4")
+    info(autosaveFields, "VAL")
+}
+
+record(mbbi, "ST99:Det:Det1:CO1:Compressor_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)COMPRESSOR")
+    field(ZRST, "None")
+    field(ZRVL, "0")
+    field(ONST, "JPEG")
+    field(ONVL, "1")
+    field(TWST, "Blosc")
+    field(TWVL, "2")
+    field(THST, "LZ4")
+    field(THVL, "3")
+    field(FRST, "BSLZ4")
+    field(FRVL, "4")
+    field(SCAN, "I/O Intr")
+}
+
+record(ai, "ST99:Det:Det1:CO1:CompFactor_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn(D1.CO1,0,1)COMP_FACTOR")
+    field(EGU,  "%")
+    field(PREC, "2")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "ST99:Det:Det1:CO1:JPEGQuality")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)JPEG_QUALITY")
+    field(VAL,  "85")
+    field(DRVH, "100")
+    field(DRVL, "1")
+    info(autosaveFields, "VAL")
+}
+
+record(longin, "ST99:Det:Det1:CO1:JPEGQuality_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)JPEG_QUALITY")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo, "ST99:Det:Det1:CO1:BloscCompressor")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)BLOSC_COMPRESSOR")
+    field(ZRST, "BloscLZ")
+    field(ZRVL, "0")
+    field(ONST, "LZ4")
+    field(ONVL, "1")
+    field(TWST, "LZ4HC")
+    field(TWVL, "2")
+    field(THST, "SNAPPY")
+    field(THVL, "3")
+    field(FRST, "ZLIB")
+    field(FRVL, "4")
+    field(FVST, "ZSTD")
+    field(FVVL, "5")
+    info(autosaveFields, "VAL")
+}
+
+record(mbbi, "ST99:Det:Det1:CO1:BloscCompressor_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)BLOSC_COMPRESSOR")
+    field(ZRST, "BloscLZ")
+    field(ZRVL, "0")
+    field(ONST, "LZ4")
+    field(ONVL, "1")
+    field(TWST, "LZ4HC")
+    field(TWVL, "2")
+    field(THST, "SNAPPY")
+    field(THVL, "3")
+    field(FRST, "ZLIB")
+    field(FRVL, "4")
+    field(FVST, "ZSTD")
+    field(FVVL, "5")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "ST99:Det:Det1:CO1:BloscCLevel")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)BLOSC_CLEVEL")
+    field(VAL,  "3")
+    field(DRVH, "9")
+    field(DRVL, "0")
+    info(autosaveFields, "VAL")
+}
+
+record(longin, "ST99:Det:Det1:CO1:BloscCLevel_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)BLOSC_CLEVEL")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbo, "ST99:Det:Det1:CO1:BloscShuffle")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)BLOSC_SHUFFLE")
+    field(ZRST, "None")
+    field(ZRVL, "0")
+    field(ONST, "Byte")
+    field(ONVL, "1")
+    field(TWST, "Bit")
+    field(TWVL, "2")
+    field(VAL,  "0")
+    info(autosaveFields, "VAL")
+}
+
+record(mbbi, "ST99:Det:Det1:CO1:BloscShuffle_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)BLOSC_SHUFFLE")
+    field(ZRST, "None")
+    field(ZRVL, "0")
+    field(ONST, "Byte")
+    field(ONVL, "1")
+    field(TWST, "Bit")
+    field(TWVL, "2")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "ST99:Det:Det1:CO1:BloscNumThreads")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.CO1,0,1)BLOSC_NUMTHREADS")
+    field(VAL,  "1")
+    field(DRVL, "1")
+    info(autosaveFields, "VAL")
+}
+
+record(longin, "ST99:Det:Det1:CO1:BloscNumThreads_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)BLOSC_NUMTHREADS")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "ST99:Det:Det1:CO1:CodecStatus")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.CO1,0,1)CODEC_STATUS")
+    field(ZRVL, "0")
+    field(ZRST, "Success")
+    field(ZRSV, "NO_ALARM")
+    field(ONVL, "1")
+    field(ONST, "Warning")
+    field(ONSV, "MINOR")
+    field(TWVL, "2")
+    field(TWST, "Error")
+    field(TWSV, "MAJOR")
+    field(SCAN, "I/O Intr")
+}
+
+record(waveform, "ST99:Det:Det1:CO1:CodecError")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn(D1.CO1,0,1)CODEC_ERROR")
+    field(SCAN, "I/O Intr")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+}
+#=================================================================#
+# Template file: NDPva.template
+# Database for the records specific to the pvAccess plugin
+# Bruno Martins
+# May 5, 2015
+
+#=================================================================#
+# Template file: NDPluginBase.template
+# Database for NDPluginBase, i.e. records common to all plugins
+# Mark Rivers
+# April 25, 2008
+
+#=================================================================#
+# Template file: NDArrayBase.template
+# Database for area detector control using asyn driver and standard asyn device support
+# Mark Rivers
+# March 9, 2008
+
+###################################################################
+#  This record contains the version of ADCore                     #
+###################################################################
+
+record(stringin, "ST99:Det:Det1:PV1:ADCoreVersion_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.PV1,0,1)ADCORE_VERSION")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  This record contains the version of the driver or plugin       #
+###################################################################
+
+record(stringin, "ST99:Det:Det1:PV1:DriverVersion_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.PV1,0,1)DRIVER_VERSION")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  This record contains the asyn port name of this detector       #
+###################################################################
+
+record(stringin, "ST99:Det:Det1:PV1:PortName_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.PV1,0,1)PORT_NAME_SELF")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records contain basic information about the detector     # 
+###################################################################
+
+record(stringin, "ST99:Det:Det1:PV1:Manufacturer_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.PV1,0,1)MANUFACTURER")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+record(stringin, "ST99:Det:Det1:PV1:Model_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.PV1,0,1)MODEL")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+record(stringin, "ST99:Det:Det1:PV1:SerialNumber_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.PV1,0,1)SERIAL_NUMBER")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+record(stringin, "ST99:Det:Det1:PV1:SDKVersion_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.PV1,0,1)SDK_VERSION")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+record(stringin, "ST99:Det:Det1:PV1:FirmwareVersion_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.PV1,0,1)FIRMWARE_VERSION")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records control acquisition start and stop               #
+###################################################################
+
+record(bo, "ST99:Det:Det1:PV1:Acquire") {
+   field(DTYP, "asynInt32")
+   field(OUT, "@asyn(D1.PV1,0,1)ACQUIRE")
+   field(ZNAM, "Done")
+   field(ONAM, "Acquire")
+   field(VAL,  "0")
+   field(FLNK, "ST99:Det:Det1:PV1:SetAcquireBusy")
+   info(asyn:READBACK, "1")
+}
+
+record(bi, "ST99:Det:Det1:PV1:Acquire_RBV") {
+   field(DTYP, "asynInt32")
+   field(INP, "@asyn(D1.PV1,0,1)ACQUIRE")
+   field(ZNAM, "Done")
+   field(ZSV,  "NO_ALARM")
+   field(ONAM, "Acquiring")
+   field(OSV,  "MINOR")
+   field(SCAN, "I/O Intr")
+}
+
+record(calcout, "ST99:Det:Det1:PV1:SetAcquireBusy")
+{
+    field(INPA, "ST99:Det:Det1:PV1:Acquire NPP")
+    field(CALC, "A")
+    field(OOPT, "Transition To Non-zero")
+    field(OUT,  "ST99:Det:Det1:PV1:AcquireBusy PP")
+}
+
+record(busy, "ST99:Det:Det1:PV1:AcquireBusy") {
+   field(ZNAM, "Done")
+   field(ZSV,  "NO_ALARM")
+   field(ONAM, "Acquiring")
+   field(OSV,  "MINOR")
+   field(VAL,  "0")
+}
+
+record(bi, "ST99:Det:Det1:PV1:AcquireBusyCB") {
+   field(DTYP, "asynInt32")
+   field(INP, "@asyn(D1.PV1,0,1)ACQUIRE_BUSY")
+   field(ZNAM, "Done")
+   field(ZSV,  "NO_ALARM")
+   field(ONAM, "Acquiring")
+   field(OSV,  "MINOR")
+   field(SCAN, "I/O Intr")
+}
+
+record(calcout, "ST99:Det:Det1:PV1:ClearAcquireBusy") {
+    field(INPA, "ST99:Det:Det1:PV1:AcquireBusyCB CP")
+    field(CALC, "A")
+    field(OOPT, "Transition To Zero")
+    field(OUT,  "ST99:Det:Det1:PV1:AcquireBusy PP")
+}
+
+record(bo, "ST99:Det:Det1:PV1:WaitForPlugins") {
+   field(PINI, "YES")
+   field(DTYP, "asynInt32")
+   field(OUT, "@asyn(D1.PV1,0,1)WAIT_FOR_PLUGINS")
+   field(ZNAM, "No")
+   field(ONAM, "Yes")
+   field(VAL,  "0")
+}
+
+###################################################################
+#  These records are the array size and data type                 #
+###################################################################
+# The number of dimensions
+record(longout, "ST99:Det:Det1:PV1:NDimensions")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)ARRAY_NDIMENSIONS")
+}
+
+record(longin, "ST99:Det:Det1:PV1:NDimensions_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)ARRAY_NDIMENSIONS")
+    field(SCAN, "I/O Intr")
+}
+
+# The array dimensions waveform records
+record(waveform, "ST99:Det:Det1:PV1:Dimensions")
+{
+    field(DTYP, "asynInt32ArrayOut")
+    field(INP,  "@asyn(D1.PV1,0,1)ARRAY_DIMENSIONS")
+    field(FTVL, "LONG")
+    field(NELM, "10")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim0SA")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim0SA")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "0")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize0")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize0")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim0SA")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim1SA")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim1SA")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "1")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize1")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize1")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim1SA")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim2SA")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim2SA")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "2")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize2")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize2")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim2SA")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim3SA")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim3SA")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "3")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize3")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize3")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim3SA")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim4SA")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim4SA")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "4")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize4")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize4")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim4SA")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim5SA")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim5SA")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "5")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize5")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize5")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim5SA")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim6SA")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim6SA")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "6")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize6")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize6")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim6SA")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim7SA")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim7SA")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "7")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize7")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize7")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim7SA")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim8SA")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim8SA")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "8")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize8")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize8")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim8SA")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim9SA")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim9SA")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "9")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize9")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize9")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim9SA")
+}
+
+
+record(waveform, "ST99:Det:Det1:PV1:Dimensions_RBV")
+{
+    field(DTYP, "asynInt32ArrayIn")
+    field(INP,  "@asyn(D1.PV1,0,1)ARRAY_DIMENSIONS")
+    field(FTVL, "LONG")
+    field(NELM, "10")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim0SA_RBV")
+    field(SCAN, "I/O Intr")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim0SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "0")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize0_RBV")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize0_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim0SA_RBV")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim1SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim1SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "1")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize1_RBV")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize1_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim1SA_RBV")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim2SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim2SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "2")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize2_RBV")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize2_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim2SA_RBV")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim3SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim3SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "3")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize3_RBV")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize3_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim3SA_RBV")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim4SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim4SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "4")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize4_RBV")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize4_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim4SA_RBV")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim5SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim5SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "5")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize5_RBV")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize5_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim5SA_RBV")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim6SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim6SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "6")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize6_RBV")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize6_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim6SA_RBV")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim7SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim7SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "7")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize7_RBV")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize7_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim7SA_RBV")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim8SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim8SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "8")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize8_RBV")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize8_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim8SA_RBV")
+    field(FLNK, "ST99:Det:Det1:PV1:Dim9SA_RBV")
+}
+
+record(subArray, "ST99:Det:Det1:PV1:Dim9SA_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dimensions_RBV NPP NMS")
+    field(FTVL, "LONG")
+    field(MALM, "10")
+    field(NELM, "1")
+    field(INDX, "9")
+    field(FLNK, "ST99:Det:Det1:PV1:ArraySize9_RBV")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize9_RBV")
+{
+    field(INP,  "ST99:Det:Det1:PV1:Dim9SA_RBV")
+}
+
+
+record(mbbi, "ST99:Det:Det1:PV1:BayerPattern_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.PV1,0,1)BAYER_PATTERN")
+   field(ZRST, "RGGB")
+   field(ZRVL, "0")
+   field(ONST, "GBRG")
+   field(ONVL, "1")
+   field(TWST, "GRBG")
+   field(TWVL, "2")
+   field(THST, "BGGR")
+   field(THVL, "3")
+   field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySizeX_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.PV1,0,1)ARRAY_SIZE_X")
+   field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySizeY_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.PV1,0,1)ARRAY_SIZE_Y")
+   field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySizeZ_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.PV1,0,1)ARRAY_SIZE_Z")
+   field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArraySize_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.PV1,0,1)ARRAY_SIZE")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records have information on the compression              # 
+###################################################################
+record(stringin, "ST99:Det:Det1:PV1:Codec_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.PV1,0,1)CODEC")
+   field(VAL,  "")
+   field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:PV1:CompressedSize_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.PV1,0,1)COMPRESSED_SIZE")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records control the data type                            # 
+###################################################################
+
+record(mbbo, "ST99:Det:Det1:PV1:DataType")
+{
+   field(PINI, "YES")
+   field(DTYP, "asynInt32")
+   field(OUT,  "@asyn(D1.PV1,0,1)DATA_TYPE")
+   field(ZRST, "Int8")
+   field(ZRVL, "0")
+   field(ONST, "UInt8")
+   field(ONVL, "1")
+   field(TWST, "Int16")
+   field(TWVL, "2")
+   field(THST, "UInt16")
+   field(THVL, "3")
+   field(FRST, "Int32")
+   field(FRVL, "4")
+   field(FVST, "UInt32")
+   field(FVVL, "5")
+   field(SXST, "Int64")
+   field(SXVL, "6")
+   field(SVST, "UInt64")
+   field(SVVL, "7")
+   field(EIST, "Float32")
+   field(EIVL, "8")
+   field(NIST, "Float64")
+   field(NIVL, "9")
+   field(VAL,  "0")
+   info(autosaveFields, "VAL")
+}
+
+record(mbbi, "ST99:Det:Det1:PV1:DataType_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.PV1,0,1)DATA_TYPE")
+   field(ZRST, "Int8")
+   field(ZRVL, "0")
+   field(ONST, "UInt8")
+   field(ONVL, "1")
+   field(TWST, "Int16")
+   field(TWVL, "2")
+   field(THST, "UInt16")
+   field(THVL, "3")
+   field(FRST, "Int32")
+   field(FRVL, "4")
+   field(FVST, "UInt32")
+   field(FVVL, "5")
+   field(SXST, "Int64")
+   field(SXVL, "6")
+   field(SVST, "UInt64")
+   field(SVVL, "7")
+   field(EIST, "Float32")
+   field(EIVL, "8")
+   field(NIST, "Float64")
+   field(NIVL, "9")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records control the color mode                           #
+#  These choices must agree with NDColorMode_t in NDArray.h       # 
+###################################################################
+
+record(mbbo, "ST99:Det:Det1:PV1:ColorMode")
+{
+   field(PINI, "YES")
+   field(DTYP, "asynInt32")
+   field(OUT,  "@asyn(D1.PV1,0,1)COLOR_MODE")
+   field(ZRST, "Mono")
+   field(ZRVL, "0")
+   field(ONST, "Bayer")
+   field(ONVL, "1")
+   field(TWST, "RGB1")
+   field(TWVL, "2")
+   field(THST, "RGB2")
+   field(THVL, "3")
+   field(FRST, "RGB3")
+   field(FRVL, "4")
+   field(FVST, "YUV444")
+   field(FVVL, "5")
+   field(SXST, "YUV422")
+   field(SXVL, "6")
+   field(SVST, "YUV421")
+   field(SVVL, "7")
+   info(autosaveFields, "VAL")
+}
+
+record(mbbi, "ST99:Det:Det1:PV1:ColorMode_RBV")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.PV1,0,1)COLOR_MODE")
+   field(ZRST, "Mono")
+   field(ZRVL, "0")
+   field(ONST, "Bayer")
+   field(ONVL, "1")
+   field(TWST, "RGB1")
+   field(TWVL, "2")
+   field(THST, "RGB2")
+   field(THVL, "3")
+   field(FRST, "RGB3")
+   field(FRVL, "4")
+   field(FVST, "YUV444")
+   field(FVVL, "5")
+   field(SXST, "YUV422")
+   field(SXVL, "6")
+   field(SVST, "YUV421")
+   field(SVVL, "7")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records are the uniqueId and time stamps of the array     #
+###################################################################
+record(longin, "ST99:Det:Det1:PV1:UniqueId_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)UNIQUE_ID")
+    field(SCAN, "I/O Intr")
+}
+
+record(ai, "ST99:Det:Det1:PV1:TimeStamp_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn(D1.PV1,0,1)TIME_STAMP")
+    field(PREC, "3")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:PV1:EpicsTSSec_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)EPICS_TS_SEC")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:PV1:EpicsTSNsec_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)EPICS_TS_NSEC")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records provide statistics on array callbacks and        #
+#  array callback rates                                           # 
+###################################################################
+record(longout, "ST99:Det:Det1:PV1:ArrayCounter")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)ARRAY_COUNTER")
+}
+
+record(longin, "ST99:Det:Det1:PV1:ArrayCounter_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)ARRAY_COUNTER")
+    field(SCAN, "I/O Intr")
+}
+
+# Updated rate calculation to use a smoothing factor w/ guard against negative values
+record(calc, "ST99:Det:Det1:PV1:ArrayRate_RBV")
+{
+    field(INPA, "ST99:Det:Det1:PV1:ArrayRate_RBV.LB NPP NMS")   # Previous counter value
+    field(INPB, "ST99:Det:Det1:PV1:ArrayCounter_RBV NPP NMS")   # Current counter value
+    field(INPC, "1.0")                                # Delta time in seconds
+    field(INPD, "ST99:Det:Det1:PV1:ArrayRate_RBV.VAL NPP NMS")  # Previous rate
+    field(INPE, "0.0")                 # Smoothing factor
+    field(CALC, "(D*E)/C+MAX(0,B-A)*(1-E)/C")
+    field(PREC, "2" )
+    field(EGU,  "Hz" )
+    field(SCAN, "1 second")
+}
+
+###################################################################
+#  These records control NDArray callacks                         # 
+###################################################################
+record(bo, "ST99:Det:Det1:PV1:ArrayCallbacks")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)ARRAY_CALLBACKS")
+    field(ZNAM, "Disable")
+    field(ZSV,  "NO_ALARM")
+    field(ONAM, "Enable")
+    field(OSV,  "MINOR")
+    field(VAL, "1")
+    info(autosaveFields, "VAL")
+}
+
+record(bi, "ST99:Det:Det1:PV1:ArrayCallbacks_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)ARRAY_CALLBACKS")
+    field(ZNAM, "Disable")
+    field(ZSV,  "NO_ALARM")
+    field(ONAM, "Enable")
+    field(OSV,  "MINOR")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  This record contains macro definitions for the attributes      # 
+###################################################################
+
+record(waveform, "ST99:Det:Det1:PV1:NDAttributesMacros")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn(D1.PV1,0,1)ND_ATTRIBUTES_MACROS")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    info(autosaveFields, "VAL")
+}
+
+###################################################################
+#  This record is the name of a file defining attributes          # 
+###################################################################
+
+record(waveform, "ST99:Det:Det1:PV1:NDAttributesFile")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn(D1.PV1,0,1)ND_ATTRIBUTES_FILE")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    info(autosaveFields, "VAL")
+}
+
+###################################################################
+#  This record defines the status of reading attributes file      # 
+###################################################################
+
+record(mbbi, "ST99:Det:Det1:PV1:NDAttributesStatus")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)ND_ATTRIBUTES_STATUS")
+    field(ZRVL, "0")
+    field(ZRST, "Attributes file OK")
+    field(ZRSV, "NO_ALARM")
+    field(ONVL, "1")
+    field(ONST, "File not found")
+    field(ONSV, "MINOR")
+    field(TWVL, "2")
+    field(TWST, "XML syntax error")
+    field(TWSV, "MAJOR")
+    field(THVL, "3")
+    field(THST, "Macro substitution error")
+    field(THSV, "MAJOR")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  Status of NDArrayPool - number of buffers, memory used etc.    # 
+###################################################################
+
+record(ai, "ST99:Det:Det1:PV1:PoolMaxMem")
+{
+   field(DTYP, "asynFloat64")
+   field(INP,  "@asyn(D1.PV1,0,1)POOL_MAX_MEMORY")
+   field(PREC, "1")
+   field(EGU,  "MB")
+   field(SCAN, "Passive")
+   field(PINI, "YES")
+}
+
+record(ai, "ST99:Det:Det1:PV1:PoolUsedMem")
+{
+   field(DTYP, "asynFloat64")
+   field(INP,  "@asyn(D1.PV1,0,1)POOL_USED_MEMORY")
+   field(PREC, "1")
+   field(EGU,  "MB")
+   field(SCAN, "1 second")
+   field(FLNK, "ST99:Det:Det1:PV1:PoolAllocBuffers")
+   info(autosaveFields, "SCAN")
+}
+
+record(longin, "ST99:Det:Det1:PV1:PoolAllocBuffers")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.PV1,0,1)POOL_ALLOC_BUFFERS")
+   field(FLNK, "ST99:Det:Det1:PV1:PoolFreeBuffers")
+}
+
+record(longin, "ST99:Det:Det1:PV1:PoolFreeBuffers")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.PV1,0,1)POOL_FREE_BUFFERS")
+   field(FLNK, "ST99:Det:Det1:PV1:PoolUsedBuffers")
+}
+
+record(calc, "ST99:Det:Det1:PV1:PoolUsedBuffers")
+{
+    field(INPA, "ST99:Det:Det1:PV1:PoolAllocBuffers NPP MS")
+    field(INPB, "ST99:Det:Det1:PV1:PoolFreeBuffers NPP MS")
+    field(CALC, "A-B")
+}
+
+record(bo, "ST99:Det:Det1:PV1:EmptyFreeList")
+{
+   field(DTYP, "asynInt32")
+   field(OUT,  "@asyn(D1.PV1,0,1)POOL_EMPTY_FREELIST")
+}
+
+record(longin, "ST99:Det:Det1:PV1:NumQueuedArrays")
+{
+   field(DTYP, "asynInt32")
+   field(INP,  "@asyn(D1.PV1,0,1)NUM_QUEUED_ARRAYS")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  This record contains the type of plugin                        #
+###################################################################
+
+record(stringin, "ST99:Det:Det1:PV1:PluginType_RBV")
+{
+   field(DTYP, "asynOctetRead")
+   field(INP,  "@asyn(D1.PV1,0,1)PLUGIN_TYPE")
+   field(VAL,  "Unknown")
+   field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records control the connection of the server to          #
+#  an NDArray driver port and address                             #
+###################################################################
+# Array port name
+record(stringout, "ST99:Det:Det1:PV1:NDArrayPort")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn(D1.PV1,0,1)NDARRAY_PORT")
+    field(VAL,  "D1.CO1")
+    info(autosaveFields, "VAL")
+}
+
+record(stringin, "ST99:Det:Det1:PV1:NDArrayPort_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn(D1.PV1,0,1)NDARRAY_PORT")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "ST99:Det:Det1:PV1:NDArrayAddress")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)NDARRAY_ADDR")
+    field(VAL,  "0")
+    info(autosaveFields, "VAL")
+}
+
+record(longin, "ST99:Det:Det1:PV1:NDArrayAddress_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)NDARRAY_ADDR")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records control whether callbacks are enabled and        #
+#  minimum time between callbacks                                 #
+###################################################################
+record(bo, "ST99:Det:Det1:PV1:EnableCallbacks")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)ENABLE_CALLBACKS")
+    field(ZNAM, "Disable")
+    field(ONAM, "Enable")
+    field(VAL,  "0")
+    info(autosaveFields, "VAL")
+}
+
+record(bi, "ST99:Det:Det1:PV1:EnableCallbacks_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)ENABLE_CALLBACKS")
+    field(ZNAM, "Disable")
+    field(ONAM, "Enable")
+    field(ZSV,  "NO_ALARM")
+    field(OSV,  "MINOR")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao, "ST99:Det:Det1:PV1:MinCallbackTime")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn(D1.PV1,0,1)MIN_CALLBACK_TIME")
+    field(EGU,  "s")
+    field(PREC, "3")
+    field(VAL,  "0.0")
+    field(DRVL, "0")
+    info(autosaveFields, "VAL")
+}
+
+record(ai, "ST99:Det:Det1:PV1:MinCallbackTime_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn(D1.PV1,0,1)MIN_CALLBACK_TIME")
+    field(EGU,  "s")
+    field(PREC, "3")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao, "ST99:Det:Det1:PV1:MaxArrayRate")
+{
+    field(DTYP, "Soft Channel")
+    field(OUT,  "ST99:Det:Det1:PV1:MaxArrayRate_COUT PP")
+    field(EGU,  "Hz")
+    field(PREC, "3")
+    field(VAL,  "0.0")
+    info(autosaveFields, "VAL")
+}
+
+record(calcout, "ST99:Det:Det1:PV1:MaxArrayRate_COUT")
+{
+    field(INPA, "ST99:Det:Det1:PV1:MaxArrayRate")
+    field(CALC, "A=0?0:1.0/A")
+    field(OUT,  "ST99:Det:Det1:PV1:MinCallbackTime PP")
+}
+
+record(calc, "ST99:Det:Det1:PV1:MaxArrayRate_RBV")
+{
+    field(INPA, "ST99:Det:Det1:PV1:MinCallbackTime_RBV CP")
+    field(CALC, "A=0?0:1.0/A")
+    field(EGU,  "Hz")
+    field(PREC, "3")
+    field(SCAN, "Passive")
+}
+
+record(ao, "ST99:Det:Det1:PV1:MaxByteRate")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn(D1.PV1,0,1)MAX_BYTE_RATE")
+    field(EGU,  "s")
+    field(PREC, "3")
+    field(VAL,  "0.0")
+    field(DRVL, "0")
+    info(autosaveFields, "VAL")
+}
+
+record(ai, "ST99:Det:Det1:PV1:MaxByteRate_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn(D1.PV1,0,1)MAX_BYTE_RATE")
+    field(EGU,  "s")
+    field(PREC, "3")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  This record contains the last execution time of the plugin     #
+###################################################################
+record(ai, "ST99:Det:Det1:PV1:ExecutionTime_RBV")
+{
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn(D1.PV1,0,1)EXECUTION_TIME")
+    field(EGU,  "ms")
+    field(PREC, "3")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  This record requests that the plugin execute again with the    #
+#  same NDArray                                                   #
+###################################################################
+record(bo, "ST99:Det:Det1:PV1:ProcessPlugin")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)PROCESS_PLUGIN")
+    field(VAL,  "1")
+}
+
+###################################################################
+#  These records control whether callbacks block or not           #
+###################################################################
+record(bo, "ST99:Det:Det1:PV1:BlockingCallbacks")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)BLOCKING_CALLBACKS")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(VAL,  "0")
+    info(autosaveFields, "VAL")
+}
+
+record(bi, "ST99:Det:Det1:PV1:BlockingCallbacks_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)BLOCKING_CALLBACKS")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(SCAN, "I/O Intr")
+}
+
+
+record(longout, "ST99:Det:Det1:PV1:DroppedArrays")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)DROPPED_ARRAYS")
+    field(VAL,  "0")
+}
+
+record(longin, "ST99:Det:Det1:PV1:DroppedArrays_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)DROPPED_ARRAYS")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "ST99:Det:Det1:PV1:QueueSize")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)QUEUE_SIZE")
+    field(PINI, "YES")
+}
+
+record(longin, "ST99:Det:Det1:PV1:QueueSize_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)QUEUE_SIZE")
+    field(FLNK, "ST99:Det:Det1:PV1:QueueFreeLow")
+    field(SCAN, "I/O Intr")
+}
+
+record(calcout, "ST99:Det:Det1:PV1:QueueFreeLow") {
+    field(CALC, "A*0.25")
+    field(INPA, "ST99:Det:Det1:PV1:QueueSize")
+    field(OUT,  "ST99:Det:Det1:PV1:QueueFree.LOW")
+    field(FLNK, "ST99:Det:Det1:PV1:QueueUseHIGH")
+}
+
+# Set a HIGH warning level for the input queue fill level to 75%
+# of the full size of the queue
+record(calcout, "ST99:Det:Det1:PV1:QueueUseHIGH") {
+   field(CALC, "A*0.75")
+   field(INPA, "ST99:Det:Det1:PV1:QueueSize")
+   field(OUT,  "ST99:Det:Det1:PV1:QueueUse.HIGH")
+   field(FLNK, "ST99:Det:Det1:PV1:QueueUseHIHI")
+}
+
+# Set a HIHI level for the input queue fill level to indicate an error
+# (MAJOR alarm)  when it fills up to the full size of the queue (frames start dropping)
+record(calcout, "ST99:Det:Det1:PV1:QueueUseHIHI") {
+   field(CALC, "A*1.0")
+   field(INPA, "ST99:Det:Det1:PV1:QueueSize")
+   field(OUT,  "ST99:Det:Det1:PV1:QueueUse.HIHI")
+}
+
+record(longin, "ST99:Det:Det1:PV1:QueueFree")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)QUEUE_FREE")
+    field(LLSV, "MAJOR")
+    field(LSV,  "MINOR")
+    field(LOLO, "0")
+    field(HYST, "1")
+    field(SCAN, "I/O Intr")
+}
+
+# Display the fill level on the plugins input queue
+record(calc, "ST99:Det:Det1:PV1:QueueUse") {
+    field(CALC, "A-B")
+    field(INPA, "ST99:Det:Det1:PV1:QueueSize")
+    field(INPB, "ST99:Det:Det1:PV1:QueueFree CP")
+    field(SCAN, "Passive")
+    field(HHSV, "MAJOR")
+    field(HSV,  "MINOR")
+    field(HYST, "1")
+}
+
+record(longout, "ST99:Det:Det1:PV1:NumThreads")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)NUM_THREADS")
+    field(VAL,  "1")
+    field(PINI, "YES")
+}
+
+record(longin, "ST99:Det:Det1:PV1:NumThreads_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)NUM_THREADS")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:PV1:MaxThreads_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)MAX_THREADS")
+    field(SCAN, "I/O Intr")
+}
+
+###################################################################
+#  These records control output array sorting                     #
+###################################################################
+record(mbbo, "ST99:Det:Det1:PV1:SortMode") {
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)SORT_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "Unsorted")
+    field(ONVL, "1")
+    field(ONST, "Sorted")
+}
+
+record(mbbi, "ST99:Det:Det1:PV1:SortMode_RBV") {
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)SORT_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "Unsorted")
+    field(ONVL, "1")
+    field(ONST, "Sorted")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao, "ST99:Det:Det1:PV1:SortTime") {
+    field(PINI, "YES")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn(D1.PV1,0,1)SORT_TIME")
+    field(PREC, "3")
+    field(VAL, "0.1")
+}
+
+record(ai, "ST99:Det:Det1:PV1:SortTime_RBV") {
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn(D1.PV1,0,1)SORT_TIME")
+    field(PREC, "3")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "ST99:Det:Det1:PV1:SortSize")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)SORT_SIZE")
+    field(VAL,  "20")
+    field(PINI, "YES")
+}
+
+record(longin, "ST99:Det:Det1:PV1:SortSize_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)SORT_SIZE")
+    field(FLNK, "ST99:Det:Det1:PV1:SortFreeLow")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "ST99:Det:Det1:PV1:SortFree") {
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)SORT_FREE")
+    field(LLSV, "MAJOR")
+    field(LSV,  "MINOR")
+    field(LOLO, "0")
+    field(HYST, "1")
+    field(SCAN, "I/O Intr")
+}
+
+record(calcout, "ST99:Det:Det1:PV1:SortFreeLow") {
+    field(CALC, "A*0.25")
+    field(INPA, "ST99:Det:Det1:PV1:SortSize")
+    field(OUT,  "ST99:Det:Det1:PV1:SortFree.LOW")
+}
+
+record(longout, "ST99:Det:Det1:PV1:DroppedOutputArrays")
+{
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)DROPPED_OUTPUT_ARRAYS")
+    field(VAL,  "0")
+}
+
+record(longin, "ST99:Det:Det1:PV1:DroppedOutputArrays_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)DROPPED_OUTPUT_ARRAYS")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "ST99:Det:Det1:PV1:DisorderedArrays")
+{
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn(D1.PV1,0,1)DISORDERED_ARRAYS")
+    field(PINI, "YES")
+}
+
+record(longin, "ST99:Det:Det1:PV1:DisorderedArrays_RBV")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn(D1.PV1,0,1)DISORDERED_ARRAYS")
+    field(SCAN, "I/O Intr")
+}
+
+
+
+###################################################################
+#  The asynRecord is used for mainly for trace mask               # 
+###################################################################
+ 
+# Set ASYN_TRACEIO_HEX bit by default
+record(asyn,"ST99:Det:Det1:PV1:AsynIO")
+{
+    field(PORT, "D1.PV1")
+    field(TIB2,"1")
+    info("ADType", "ADPlugin")
+}
+
+
+# New records for NDPluginPva
+
+record(waveform, "ST99:Det:Det1:PV1:PvName_RBV")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn(D1.PV1,0,1)PV_NAME")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+    field(SCAN, "I/O Intr")
+}

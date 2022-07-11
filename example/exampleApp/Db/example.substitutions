@@ -5,4 +5,15 @@ pattern {P, R, PORT, ADDR, TIMEOUT}
         {ST99:Det, :Det1:, D1.SIM, 0, 1}
 }
 
+file NDCodec.template
+{
+pattern {P, R, PORT, ADDR, TIMEOUT, NDARRAY_PORT, NDARRAY_ADDR}
+        {ST99:Det, :Det1:CO1:, D1.CO1, 0, 1, D1.SIM, 0}
+}
+
+file NDPva.template
+{
+pattern {P, R, PORT, ADDR, TIMEOUT, NDARRAY_PORT, NDARRAY_ADDR}
+        {ST99:Det, :Det1:PV1:, D1.PV1, 0, 1, D1.CO1, 0}
+}
 
