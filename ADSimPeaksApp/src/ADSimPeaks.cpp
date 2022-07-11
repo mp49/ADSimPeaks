@@ -271,10 +271,10 @@ void ADSimPeaks::ADSimPeaksTask(void)
 
 	//Generate sim data here
 	p_NDArray->getInfo(&arrayInfo);
-	
-	//for (int i=0; i<arrayInfo.nElements; i++) {
-	//  p_NDArray->pData[i] = i;
-	//}
+	epicsUInt8 *pData = static_cast<epicsUInt8*>(p_NDArray->pData);
+	for (int i=0; i<arrayInfo.nElements; i++) {
+	  pData[i] = i;
+	}
 	
 	epicsTimeGetCurrent(&nowTime);
 	p_NDArray->uniqueId = arrayCounter;
