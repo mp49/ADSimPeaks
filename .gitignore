@@ -1,0 +1,23 @@
+/cfg/
+/bin/
+/lib/
+/db/
+/dbd/
+/html/
+/include/
+/templates/
+*~
+O.*/
+*.swp
+*_BAK.adl
+/QtC-*
+cdCommands
+envPaths
+dllPath.bat
+
+# sts-deploy build files
+build_log.txt
+build_stdout.txt
+build_stderr.txt
+
+
