@@ -1,0 +1,15 @@
+
+include "ADBase.template"
+
+# ///
+# /// Control profile integration 
+# ///
+record(bo, "$(P)$(R)Integrate") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_INTEGRATE")
+  field(ZNAM, "Disabled")
+  field(ONAM, "Enabled")
+  info(autosaveFields, "VAL")
+}
+

@@ -1,0 +1,8 @@
+
+file ADSimPeaks.template
+{
+pattern {P, R, PORT, ADDR, TIMEOUT}
+        {ST99:Det, :Det1:, D1.SIM, 0, 1}
+}
+
+

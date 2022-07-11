@@ -18,7 +18,7 @@
 /* These are the drvInfo strings that are used to identify the parameters.
  * They are used by asyn clients, including standard asyn device support */
 
-#define ADSPIntegrate "ADSP_INTEGRATE"
+#define ADSPIntegrateParamString "ADSP_INTEGRATE"
 
 
 class ADSimPeaks : public ADDriver {
@@ -33,20 +33,29 @@ class ADSimPeaks : public ADDriver {
   virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
   virtual void report(FILE *fp, int details);
 
-  void ADSimPeaksTask();
+  void ADSimPeaksTask(void);
 
+
+  bool getInitialized(void);
 
  private:
 
+  //Values used for pasynUser->reason, and indexes into the parameter library.
+  int ADSPIntegrateParam;
+
+  //Internal data
   epicsUInt32 m_maxSizeX;
   epicsUInt32 m_maxSizeY;
   epicsUInt32 m_maxPeaks;
 
-  epicsUInt32 m_acquiring;
+  bool m_acquiring;
   
   epicsEventId m_startEvent;
   epicsEventId m_stopEvent;
 
+  bool m_initialized;
+
+  //Static Data
   static const std::string s_className;
 
 };

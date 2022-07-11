@@ -14,12 +14,12 @@ example_registerRecordDeviceDriver pdbbase
 ###############################################
 # Start the ADSimPeaks driver
 
-ADSimPeaksConfig(D2.SIM,1024,0,10,3,0,0,0,0)
+ADSimPeaksConfig(D1.SIM,1024,0,10,3,0,0,0,0)
 
 ###############################################
 
 ## Load record instances
-#dbLoadRecords("db/example.db")
+dbLoadRecords("db/example.db")
 
 cd "${TOP}/iocBoot/${IOC}"
 iocInit
