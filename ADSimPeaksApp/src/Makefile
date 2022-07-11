@@ -10,13 +10,9 @@ include $(TOP)/configure/CONFIG
 
 LIBRARY_IOC += ADSimPeaks
 
-# xxxRecord.h will be created from xxxRecord.dbd
-#DBDINC += xxxRecord
-# install ADSimPeaks.dbd into <top>/dbd
 DBD += ADSimPeaks.dbd
 
-# specify all source files to be compiled and added to the library
-#ADSimPeaks_SRCS += xxx
+ADSimPeaks_SRCS += ADSimPeaks.cpp
 
 ADSimPeaks_LIBS += $(EPICS_BASE_IOC_LIBS)
 
