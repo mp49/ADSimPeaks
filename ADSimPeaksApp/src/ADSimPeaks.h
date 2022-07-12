@@ -56,11 +56,13 @@ class ADSimPeaks : public ADDriver {
   bool m_initialized;
 
   NDArray *p_NDArray;
-  
+  bool m_needNewArray;
   
   //Static Data
   static const std::string s_className;
 
+  asynStatus computeData(void);
+  
 };
 
 

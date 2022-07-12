@@ -2,6 +2,7 @@
 //Standard 
 #include <iostream>
 #include <stdexcept>
+#include <algorithm>
 
 //EPICS
 #include <epicsTime.h>
@@ -56,6 +57,7 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
   //Initialize non static, non const, data members
   m_acquiring = 0;
   m_uniqueId = 0;
+  m_needNewArray = true;
 
   bool paramStatus = true;
   //Initialise any paramLib parameters that need passing up to device support
@@ -123,11 +125,11 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
       }
     }
   } else if (function == ADSizeX) {
-    if (value > m_maxSize) {
-      value = m_maxSize;
-    }
-    if (value <= 0) {
-      value = 1;
+    value = std::max(1, std::min(static_cast<int32_t>(value), static_cast<int32_t>(m_maxSize)));
+    int currentXSize = 0;
+    getIntegerParam(ADSizeX, &currentXSize);
+    if (value != currentXSize) {
+      m_needNewArray = true;
     }
   }
   
@@ -263,24 +265,39 @@ void ADSimPeaks::ADSimPeaksTask(void)
       getIntegerParam(ADSizeX, &size);
       ndims = 1;
       dims[0] = size;
-      
-      //Create the NDArray
-      if ((p_NDArray = this->pNDArrayPool->alloc(ndims, dims, dataType, 0, NULL)) == NULL) {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s failed to alloc NDArray\n", functionName.c_str());
-      } else {
 
-	//Generate sim data here
-	p_NDArray->getInfo(&arrayInfo);
-	epicsUInt8 *pData = static_cast<epicsUInt8*>(p_NDArray->pData);
-	for (int i=0; i<arrayInfo.nElements; i++) {
-	  pData[i] = i;
+      if (m_needNewArray) {
+	if (p_NDArray != NULL) {
+	  p_NDArray->release();
+	  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s released NDArray\n", functionName.c_str());
+	  //TODO - do I need to empty the free list, otherwise the pool keeps growing each time we change the array size?
 	}
+	if ((p_NDArray = this->pNDArrayPool->alloc(ndims, dims, dataType, 0, NULL)) == NULL) {
+	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s failed to alloc NDArray\n", functionName.c_str());
+	} else {
+	  m_needNewArray = false;
+	  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s allocated new NDArray\n", functionName.c_str());
+	}
+      }
+
+      if (p_NDArray != NULL) {
+	//Generate sim data here
+	if (computeData() != asynSuccess) {
+	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s failed to compute data.\n", functionName.c_str());
+	}
+	
+	//epicsUInt8 *pData = static_cast<epicsUInt8*>(p_NDArray->pData);
+	//for (int i=0; i<arrayInfo.nElements; i++) {
+	//  pData[i] = i;
+	//}
 	
 	epicsTimeGetCurrent(&nowTime);
 	p_NDArray->uniqueId = arrayCounter;
 	p_NDArray->timeStamp = nowTime.secPastEpoch + nowTime.nsec / 1.e9;
 	updateTimeStamp(&p_NDArray->epicsTS);
-	
+
+	p_NDArray->getInfo(&arrayInfo);
+	setIntegerParam(NDArraySize, arrayInfo.totalBytes);
 	setIntegerParam(NDArraySizeX, dims[0]);
 	setIntegerParam(NDArrayCounter, arrayCounter);
 	setIntegerParam(ADNumImagesCounter, imagesCounter);
@@ -291,9 +308,6 @@ void ADSimPeaks::ADSimPeaksTask(void)
 	  doCallbacksGenericPointer(p_NDArray, NDArrayData, 0);
 	}
 	callParamCallbacks();
-	
-	//Free the NDArray 
-	p_NDArray->release();	
       }
       
       //Get the acquire period, which we use to define the update rate
@@ -318,6 +332,19 @@ void ADSimPeaks::ADSimPeaksTask(void)
     
   }
   
+}
+
+
+asynStatus ADSimPeaks::computeData(void)
+{
+  asynStatus status = asynSuccess;
+  NDDataType_t dataType;
+  NDArrayInfo_t arrayInfo;
+
+  string functionName(s_className + "::" + __func__);
+
+
+  return status;
 }
 
 
