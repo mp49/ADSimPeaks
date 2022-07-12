@@ -54,6 +54,7 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
 
   //Add the params to the paramLib 
   createParam(ADSPIntegrateParamString, asynParamInt32, &ADSPIntegrateParam);
+  createParam(ADSPElapsedTimeParamString, asynParamFloat64, &ADSPElapsedTimeParam);
   createParam(ADSPPeakTypeParamString, asynParamInt32, &ADSPPeakTypeParam);
   createParam(ADSPPeakPosParamString, asynParamFloat64, &ADSPPeakPosParam);
   createParam(ADSPPeakFWHMParamString, asynParamFloat64, &ADSPPeakFWHMParam);
@@ -72,6 +73,7 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
   paramStatus = ((setDoubleParam(ADAcquirePeriod, 1.0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADMaxSizeX, m_maxSize) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADSizeX, m_maxSize) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPElapsedTimeParam, 0.0) == asynSuccess) && paramStatus);
   //Peak Params
   paramStatus = ((setIntegerParam(ADSPPeakTypeParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPPeakPosParam, 1.0) == asynSuccess) && paramStatus);
@@ -233,11 +235,13 @@ void ADSimPeaks::ADSimPeaksTask(void)
   int dataTypeInt = 0;
   NDDataType_t dataType;
   NDArrayInfo_t arrayInfo;
+  epicsTimeStamp startTime;
   epicsTimeStamp nowTime;
   int arrayCounter = 0;
   int imagesCounter = 0;
   int arrayCallbacks = 0;
   epicsFloat64 updatePeriod = 0.0;
+  double elapsedTime = 0.0;
   epicsEventWaitStatus eventStatus;
 
   string functionName(s_className + "::" + __func__);
@@ -261,6 +265,7 @@ void ADSimPeaks::ADSimPeaksTask(void)
 	m_acquiring = true;
 	setStringParam(ADStatusMessage, "Simulation Running");
 	setIntegerParam(ADNumImagesCounter, 0);
+	epicsTimeGetCurrent(&startTime);
       } else {
 	asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s eventStatus %d\n", functionName.c_str(), eventStatus);
       }  
@@ -300,10 +305,13 @@ void ADSimPeaks::ADSimPeaksTask(void)
 	}
 	
 	epicsTimeGetCurrent(&nowTime);
-	p_NDArray->uniqueId = arrayCounter;
+	elapsedTime = epicsTimeDiffInSeconds(&nowTime, &startTime);
+        p_NDArray->uniqueId = arrayCounter;
 	p_NDArray->timeStamp = nowTime.secPastEpoch + nowTime.nsec / 1.e9;
 	updateTimeStamp(&p_NDArray->epicsTS);
-
+	setDoubleParam(NDTimeStamp, p_NDArray->timeStamp);
+	setDoubleParam(ADSPElapsedTimeParam, elapsedTime);
+	
 	p_NDArray->getInfo(&arrayInfo);
 	setIntegerParam(NDArraySize, arrayInfo.totalBytes);
 	setIntegerParam(NDArraySizeX, dims[0]);
@@ -416,6 +424,9 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
     if (peak_type == static_cast<epicsUInt32>(e_peak_type::gaussian)) { 
       computeGaussian(peak_pos, peak_fwhm, bin, &result);
       result = result * peak_scale;
+    } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::lorentz)) { 
+      computeLorentz(peak_pos, peak_fwhm, bin, &result);
+      result = result * peak_scale;
     }
     pData[bin] += static_cast<T>(result);
   }
@@ -429,8 +440,23 @@ asynStatus ADSimPeaks::computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epic
   asynStatus status = asynSuccess;
   string functionName(s_className + "::" + __func__);
 
-  epicsFloat64 sigma = fwhm / (2.0 * sqrt(2.0 * log(2.0)));
-  *result = (1.0 / (sigma * sqrt(2.0 * M_PI))) * exp(-(pow(bin - pos,2)) / (2.0 * pow(sigma,2)));
+  //TODO - error check and use exceptions
+  
+  epicsFloat64 sigma = fwhm / (2.0*sqrt(2.0*log(2.0)));
+  *result = (1.0 / (sigma*sqrt(2.0*M_PI))) * exp(-(((bin-pos)*(bin-pos))) / (2.0*(sigma*sigma)));
+
+  return status;
+}
+
+asynStatus ADSimPeaks::computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsUInt32 bin, epicsFloat64 *result)
+{
+  asynStatus status = asynSuccess;
+  string functionName(s_className + "::" + __func__);
+
+  //TODO - error check and use exceptions
+  
+  epicsFloat64 gamma = fwhm / 2.0;
+  *result = (1 / (M_PI*gamma)) * ((gamma*gamma) / (((bin-pos)*(bin-pos)) + (gamma*gamma)));
 
   return status;
 }

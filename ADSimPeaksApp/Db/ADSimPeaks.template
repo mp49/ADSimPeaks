@@ -30,7 +30,7 @@ record(mbbo, "$(P)$(R)PeakType") {
   field(VAL,  "0")
   field(ZRST, "Gaussian")
   field(ZRVL, "0")
-  field(ONST, "None")
+  field(ONST, "Lorentz")
   field(ONVL, "1")
   field(TWST, "None")
   field(TWVL, "2")
@@ -43,7 +43,7 @@ record(mbbi, "$(P)$(R)PeakType_RBV") {
   field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_TYPE")
   field(ZRST, "Gaussian")
   field(ZRVL, "0")
-  field(ONST, "None")
+  field(ONST, "Lorentz")
   field(ONVL, "1")
   field(TWST, "None")
   field(TWVL, "2")
@@ -109,3 +109,15 @@ record(ai, "$(P)$(R)PeakScale_RBV") {
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
+
+# ///
+# /// Elapsed Time
+# ///
+record(ai, "$(P)$(R)ElapsedTime") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_ELAPSEDTIME")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")
+  field(EGU, "s")
+}
+

@@ -1573,7 +1573,7 @@ record(mbbo, "ST99:Det:Det1:PeakType") {
   field(VAL,  "0")
   field(ZRST, "Gaussian")
   field(ZRVL, "0")
-  field(ONST, "None")
+  field(ONST, "Lorentz")
   field(ONVL, "1")
   field(TWST, "None")
   field(TWVL, "2")
@@ -1586,7 +1586,7 @@ record(mbbi, "ST99:Det:Det1:PeakType_RBV") {
   field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_TYPE")
   field(ZRST, "Gaussian")
   field(ZRVL, "0")
-  field(ONST, "None")
+  field(ONST, "Lorentz")
   field(ONVL, "1")
   field(TWST, "None")
   field(TWVL, "2")
@@ -1652,6 +1652,18 @@ record(ai, "ST99:Det:Det1:PeakScale_RBV") {
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
+
+# ///
+# /// Elapsed Time
+# ///
+record(ai, "ST99:Det:Det1:ElapsedTime") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_ELAPSEDTIME")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")
+  field(EGU, "s")
+}
+
 #=================================================================#
 # Template file: NDCodec.template
 # Database for the NDCodec plugin

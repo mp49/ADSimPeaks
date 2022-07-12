@@ -18,7 +18,8 @@
 /* These are the drvInfo strings that are used to identify the parameters.
  * They are used by asyn clients, including standard asyn device support */
 
-#define ADSPIntegrateParamString "ADSP_INTEGRATE"
+#define ADSPIntegrateParamString   "ADSP_INTEGRATE"
+#define ADSPElapsedTimeParamString "ADSP_ELAPSEDTIME"
 // Peak Information Params
 #define ADSPPeakTypeParamString  "ADSP_PEAK_TYPE"
 #define ADSPPeakPosParamString   "ADSP_PEAK_POS"
@@ -46,6 +47,7 @@ class ADSimPeaks : public ADDriver {
 
   //Values used for pasynUser->reason, and indexes into the parameter library.
   int ADSPIntegrateParam;
+  int ADSPElapsedTimeParam;
   int ADSPPeakTypeParam;
   int ADSPPeakPosParam;
   int ADSPPeakFWHMParam;
@@ -69,7 +71,8 @@ class ADSimPeaks : public ADDriver {
 
   //Enum Data
   enum class e_peak_type {
-    gaussian
+    gaussian,
+    lorentz
   };
   
   //Static Data
@@ -79,6 +82,7 @@ class ADSimPeaks : public ADDriver {
   template <typename T> asynStatus computeDataT();
 
   asynStatus computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsUInt32 bin, epicsFloat64 *result);
+  asynStatus computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsUInt32 bin, epicsFloat64 *result);
   
 };
 
