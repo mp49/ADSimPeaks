@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <algorithm>
+#include <cmath>
 
 //EPICS
 #include <epicsTime.h>
@@ -53,11 +54,16 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
 
   //Add the params to the paramLib 
   createParam(ADSPIntegrateParamString, asynParamInt32, &ADSPIntegrateParam);
+  createParam(ADSPPeakTypeParamString, asynParamInt32, &ADSPPeakTypeParam);
+  createParam(ADSPPeakPosParamString, asynParamFloat64, &ADSPPeakPosParam);
+  createParam(ADSPPeakFWHMParamString, asynParamFloat64, &ADSPPeakFWHMParam);
+  createParam(ADSPPeakScaleParamString, asynParamFloat64, &ADSPPeakScaleParam);
   
   //Initialize non static, non const, data members
   m_acquiring = 0;
   m_uniqueId = 0;
   m_needNewArray = true;
+  m_needReset = false;
 
   bool paramStatus = true;
   //Initialise any paramLib parameters that need passing up to device support
@@ -66,6 +72,11 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
   paramStatus = ((setDoubleParam(ADAcquirePeriod, 1.0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADMaxSizeX, m_maxSize) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADSizeX, m_maxSize) == asynSuccess) && paramStatus);
+  //Peak Params
+  paramStatus = ((setIntegerParam(ADSPPeakTypeParam, 0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPPeakPosParam, 1.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPPeakFWHMParam, 1.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPPeakScaleParam, 1.0) == asynSuccess) && paramStatus);
   callParamCallbacks();
   if (!paramStatus) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
@@ -113,6 +124,7 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
   
   if (function == ADAcquire) {
     if ((value == 1) && (!m_acquiring)) {
+      m_needReset = true;
       epicsEventSignal(this->m_startEvent);
       setIntegerParam(ADStatus, ADStatusAcquire);
     }
@@ -131,6 +143,8 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (value != currentXSize) {
       m_needNewArray = true;
     }
+  } else if (function == NDDataType) {
+    m_needNewArray = true;  
   }
   
 
@@ -258,7 +272,6 @@ void ADSimPeaks::ADSimPeaksTask(void)
       
       ++arrayCounter;
       ++imagesCounter;
-      cout << arrayCounter << endl;
       
       getIntegerParam(NDDataType, &dataTypeInt);
       dataType = (NDDataType_t)dataTypeInt;
@@ -282,14 +295,9 @@ void ADSimPeaks::ADSimPeaksTask(void)
 
       if (p_NDArray != NULL) {
 	//Generate sim data here
-	if (computeData() != asynSuccess) {
+	if (computeData(dataType) != asynSuccess) {
 	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s failed to compute data.\n", functionName.c_str());
 	}
-	
-	//epicsUInt8 *pData = static_cast<epicsUInt8*>(p_NDArray->pData);
-	//for (int i=0; i<arrayInfo.nElements; i++) {
-	//  pData[i] = i;
-	//}
 	
 	epicsTimeGetCurrent(&nowTime);
 	p_NDArray->uniqueId = arrayCounter;
@@ -326,8 +334,6 @@ void ADSimPeaks::ADSimPeaksTask(void)
 	setStringParam(ADStatusMessage, "Simulation Idle");
       }
       callParamCallbacks();
-      
-      cout << functionName << endl;
     }
     
   }
@@ -335,14 +341,96 @@ void ADSimPeaks::ADSimPeaksTask(void)
 }
 
 
-asynStatus ADSimPeaks::computeData(void)
+asynStatus ADSimPeaks::computeData(NDDataType_t dataType)
 {
   asynStatus status = asynSuccess;
-  NDDataType_t dataType;
+  //NDDataType_t dataType;
   NDArrayInfo_t arrayInfo;
 
   string functionName(s_className + "::" + __func__);
 
+  if (dataType == NDInt8) {
+    status = computeDataT<epicsInt8>();
+  } else if (dataType == NDUInt8) {
+    status = computeDataT<epicsUInt8>();
+  } else if (dataType == NDInt16) {
+    status = computeDataT<epicsInt16>();
+  } else if (dataType == NDUInt16) {
+    status = computeDataT<epicsUInt16>();
+  } else if (dataType == NDInt32) {
+    status = computeDataT<epicsInt32>();
+  } else if (dataType == NDUInt32) {
+    status = computeDataT<epicsUInt32>();
+  } else if (dataType == NDInt64) {
+    status = computeDataT<epicsInt64>();
+  } else if (dataType == NDUInt64) {
+    status = computeDataT<epicsUInt64>();
+  } else if (dataType == NDFloat32) {
+    status = computeDataT<epicsFloat32>();
+  } else if (dataType == NDFloat64) {
+    status = computeDataT<epicsFloat64>();
+  } else {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+	      "%s invalid dataType %d.\n", functionName.c_str(), dataType);
+  }
+  
+
+  return status;
+}
+
+template <typename T> asynStatus ADSimPeaks::computeDataT()
+{
+  asynStatus status = asynSuccess;
+  //NDDataType_t dataType;
+  NDArrayInfo_t arrayInfo;
+
+  string functionName(s_className + "::" + __func__);
+
+  if (p_NDArray == NULL) {
+    asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
+	      "%s invalid NDArray pointer.\n", functionName.c_str());
+  }
+  
+  p_NDArray->getInfo(&arrayInfo);
+  T *pData = static_cast<T*>(p_NDArray->pData);
+  
+  int integrate = 0;
+  getIntegerParam(ADSPIntegrateParam, &integrate);
+  if ((integrate == 0) || (m_needReset)) {
+    for (int i=0; i<arrayInfo.nElements; i++) {
+      pData[i] = 0;
+    }
+    m_needReset = false;
+  }
+
+  epicsInt32 peak_type = 0;
+  epicsFloat64 peak_pos = 0.0;
+  epicsFloat64 peak_fwhm = 0.0;
+  epicsFloat64 peak_scale = 0.0;
+  epicsFloat64 result = 0.0;
+  getIntegerParam(ADSPPeakTypeParam, &peak_type);
+  getDoubleParam(ADSPPeakPosParam, &peak_pos);
+  getDoubleParam(ADSPPeakFWHMParam, &peak_fwhm);
+  getDoubleParam(ADSPPeakScaleParam, &peak_scale);
+  for (epicsUInt32 bin=0; bin<arrayInfo.nElements; bin++) {
+    if (peak_type == static_cast<epicsUInt32>(e_peak_type::gaussian)) { 
+      computeGaussian(peak_pos, peak_fwhm, bin, &result);
+      result = result * peak_scale;
+    }
+    pData[bin] += static_cast<T>(result);
+  }
+  
+  return status;
+}
+
+
+asynStatus ADSimPeaks::computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsUInt32 bin, epicsFloat64 *result)
+{
+  asynStatus status = asynSuccess;
+  string functionName(s_className + "::" + __func__);
+
+  epicsFloat64 sigma = fwhm / (2.0 * sqrt(2.0 * log(2.0)));
+  *result = (1.0 / (sigma * sqrt(2.0 * M_PI))) * exp(-(pow(bin - pos,2)) / (2.0 * pow(sigma,2)));
 
   return status;
 }

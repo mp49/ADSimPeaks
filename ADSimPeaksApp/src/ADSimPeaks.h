@@ -19,7 +19,11 @@
  * They are used by asyn clients, including standard asyn device support */
 
 #define ADSPIntegrateParamString "ADSP_INTEGRATE"
-
+// Peak Information Params
+#define ADSPPeakTypeParamString  "ADSP_PEAK_TYPE"
+#define ADSPPeakPosParamString   "ADSP_PEAK_POS"
+#define ADSPPeakFWHMParamString  "ADSP_PEAK_FWHM"
+#define ADSPPeakScaleParamString "ADSP_PEAK_SCALE"
 
 class ADSimPeaks : public ADDriver {
 
@@ -42,7 +46,11 @@ class ADSimPeaks : public ADDriver {
 
   //Values used for pasynUser->reason, and indexes into the parameter library.
   int ADSPIntegrateParam;
-
+  int ADSPPeakTypeParam;
+  int ADSPPeakPosParam;
+  int ADSPPeakFWHMParam;
+  int ADSPPeakScaleParam;
+  
   //Internal data
   epicsUInt32 m_maxSize;
   epicsUInt32 m_maxPeaks;
@@ -57,11 +65,20 @@ class ADSimPeaks : public ADDriver {
 
   NDArray *p_NDArray;
   bool m_needNewArray;
+  bool m_needReset;
+
+  //Enum Data
+  enum class e_peak_type {
+    gaussian
+  };
   
   //Static Data
   static const std::string s_className;
 
-  asynStatus computeData(void);
+  asynStatus computeData(NDDataType_t dataType);
+  template <typename T> asynStatus computeDataT();
+
+  asynStatus computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsUInt32 bin, epicsFloat64 *result);
   
 };
 
