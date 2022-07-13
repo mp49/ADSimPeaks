@@ -26,6 +26,7 @@ static void ADSimPeaksTaskC(void *drvPvt);
 
 //Static Data
 const string ADSimPeaks::s_className = "ADSimPeaks";
+const epicsFloat64 ADSimPeaks::s_zeroCheck = 1e-12;
 
 ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
 		       NDDataType_t dataType, int maxBuffers, size_t maxMemory,
@@ -58,7 +59,7 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
   createParam(ADSPPeakTypeParamString, asynParamInt32, &ADSPPeakTypeParam);
   createParam(ADSPPeakPosParamString, asynParamFloat64, &ADSPPeakPosParam);
   createParam(ADSPPeakFWHMParamString, asynParamFloat64, &ADSPPeakFWHMParam);
-  createParam(ADSPPeakScaleParamString, asynParamFloat64, &ADSPPeakScaleParam);
+  createParam(ADSPPeakMaxParamString, asynParamFloat64, &ADSPPeakMaxParam);
   
   //Initialize non static, non const, data members
   m_acquiring = 0;
@@ -78,7 +79,7 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
   paramStatus = ((setIntegerParam(ADSPPeakTypeParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPPeakPosParam, 1.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPPeakFWHMParam, 1.0) == asynSuccess) && paramStatus);
-  paramStatus = ((setDoubleParam(ADSPPeakScaleParam, 1.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPPeakMaxParam, 1.0) == asynSuccess) && paramStatus);
   callParamCallbacks();
   if (!paramStatus) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
@@ -389,11 +390,10 @@ asynStatus ADSimPeaks::computeData(NDDataType_t dataType)
 template <typename T> asynStatus ADSimPeaks::computeDataT()
 {
   asynStatus status = asynSuccess;
-  //NDDataType_t dataType;
   NDArrayInfo_t arrayInfo;
 
   string functionName(s_className + "::" + __func__);
-
+  
   if (p_NDArray == NULL) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
 	      "%s invalid NDArray pointer.\n", functionName.c_str());
@@ -414,20 +414,38 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   epicsInt32 peak_type = 0;
   epicsFloat64 peak_pos = 0.0;
   epicsFloat64 peak_fwhm = 0.0;
-  epicsFloat64 peak_scale = 0.0;
+  epicsFloat64 peak_max = 0.0;
   epicsFloat64 result = 0.0;
+  epicsFloat64 result_max = 0.0;
+  epicsFloat64 scale_factor = 0.0;
+  
   getIntegerParam(ADSPPeakTypeParam, &peak_type);
   getDoubleParam(ADSPPeakPosParam, &peak_pos);
   getDoubleParam(ADSPPeakFWHMParam, &peak_fwhm);
-  getDoubleParam(ADSPPeakScaleParam, &peak_scale);
-  for (epicsUInt32 bin=0; bin<arrayInfo.nElements; bin++) {
+  getDoubleParam(ADSPPeakMaxParam, &peak_max);
+
+  //Calculate profile and store in a cache
+  std::vector<epicsFloat64> cache(arrayInfo.nElements, 0.0);
+  for (epicsUInt32 bin=0; bin<cache.size(); bin++) {
     if (peak_type == static_cast<epicsUInt32>(e_peak_type::gaussian)) { 
       computeGaussian(peak_pos, peak_fwhm, bin, &result);
-      result = result * peak_scale;
+      cache.at(bin) = result;
     } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::lorentz)) { 
       computeLorentz(peak_pos, peak_fwhm, bin, &result);
-      result = result * peak_scale;
+      cache.at(bin) = result;
     }
+    if (result > result_max) {
+      result_max = result;
+    }
+  }
+  //Scale profile to the desired height
+  if ((result_max > -s_zeroCheck) && (result_max < s_zeroCheck)) {
+    scale_factor = 1.0;
+  } else {
+    scale_factor = peak_max / result_max;
+  }
+  for (epicsUInt32 bin=0; bin<cache.size(); bin++) {
+    result = cache.at(bin) * scale_factor;
     pData[bin] += static_cast<T>(result);
   }
   

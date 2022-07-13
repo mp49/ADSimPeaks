@@ -24,7 +24,7 @@
 #define ADSPPeakTypeParamString  "ADSP_PEAK_TYPE"
 #define ADSPPeakPosParamString   "ADSP_PEAK_POS"
 #define ADSPPeakFWHMParamString  "ADSP_PEAK_FWHM"
-#define ADSPPeakScaleParamString "ADSP_PEAK_SCALE"
+#define ADSPPeakMaxParamString "ADSP_PEAK_MAX"
 
 class ADSimPeaks : public ADDriver {
 
@@ -51,7 +51,7 @@ class ADSimPeaks : public ADDriver {
   int ADSPPeakTypeParam;
   int ADSPPeakPosParam;
   int ADSPPeakFWHMParam;
-  int ADSPPeakScaleParam;
+  int ADSPPeakMaxParam;
   
   //Internal data
   epicsUInt32 m_maxSize;
@@ -71,12 +71,14 @@ class ADSimPeaks : public ADDriver {
 
   //Enum Data
   enum class e_peak_type {
+    none,
     gaussian,
     lorentz
   };
   
   //Static Data
   static const std::string s_className;
+  static const epicsFloat64 s_zeroCheck;
 
   asynStatus computeData(NDDataType_t dataType);
   template <typename T> asynStatus computeDataT();

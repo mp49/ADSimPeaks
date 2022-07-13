@@ -28,11 +28,11 @@ record(mbbo, "$(P)$(R)PeakType") {
   field(DTYP, "asynInt32")
   field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_TYPE")
   field(VAL,  "0")
-  field(ZRST, "Gaussian")
+  field(ZRST, "None")
   field(ZRVL, "0")
-  field(ONST, "Lorentz")
+  field(ONST, "Gaussian")
   field(ONVL, "1")
-  field(TWST, "None")
+  field(TWST, "Lorentz")
   field(TWVL, "2")
   field(THST, "None")
   field(THVL, "3")
@@ -41,11 +41,11 @@ record(mbbo, "$(P)$(R)PeakType") {
 record(mbbi, "$(P)$(R)PeakType_RBV") {
   field(DTYP, "asynInt32")
   field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_TYPE")
-  field(ZRST, "Gaussian")
+  field(ZRST, "None")
   field(ZRVL, "0")
-  field(ONST, "Lorentz")
+  field(ONST, "Gaussian")
   field(ONVL, "1")
-  field(TWST, "None")
+  field(TWST, "Lorentz")
   field(TWVL, "2")
   field(THST, "None")
   field(THVL, "3") 
@@ -93,19 +93,19 @@ record(ai, "$(P)$(R)PeakFWHM_RBV") {
 }
 
 # ///
-# /// Peak scale
+# /// Peak max
 # ///
-record(ao, "$(P)$(R)PeakScale") {
-  field(DESC, "Peak Scale")
+record(ao, "$(P)$(R)PeakMax") {
+  field(DESC, "Peak Max")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_SCALE")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_MAX")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
-record(ai, "$(P)$(R)PeakScale_RBV") {
+record(ai, "$(P)$(R)PeakMax_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_SCALE")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_MAX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }

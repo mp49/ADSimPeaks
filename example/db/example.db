@@ -1571,11 +1571,11 @@ record(mbbo, "ST99:Det:Det1:PeakType") {
   field(DTYP, "asynInt32")
   field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_TYPE")
   field(VAL,  "0")
-  field(ZRST, "Gaussian")
+  field(ZRST, "None")
   field(ZRVL, "0")
-  field(ONST, "Lorentz")
+  field(ONST, "Gaussian")
   field(ONVL, "1")
-  field(TWST, "None")
+  field(TWST, "Lorentz")
   field(TWVL, "2")
   field(THST, "None")
   field(THVL, "3")
@@ -1584,11 +1584,11 @@ record(mbbo, "ST99:Det:Det1:PeakType") {
 record(mbbi, "ST99:Det:Det1:PeakType_RBV") {
   field(DTYP, "asynInt32")
   field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_TYPE")
-  field(ZRST, "Gaussian")
+  field(ZRST, "None")
   field(ZRVL, "0")
-  field(ONST, "Lorentz")
+  field(ONST, "Gaussian")
   field(ONVL, "1")
-  field(TWST, "None")
+  field(TWST, "Lorentz")
   field(TWVL, "2")
   field(THST, "None")
   field(THVL, "3") 
@@ -1636,19 +1636,19 @@ record(ai, "ST99:Det:Det1:PeakFWHM_RBV") {
 }
 
 # ///
-# /// Peak scale
+# /// Peak max
 # ///
-record(ao, "ST99:Det:Det1:PeakScale") {
-  field(DESC, "Peak Scale")
+record(ao, "ST99:Det:Det1:PeakMax") {
+  field(DESC, "Peak Max")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_SCALE")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_MAX")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:PeakScale_RBV") {
+record(ai, "ST99:Det:Det1:PeakMax_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_SCALE")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_MAX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
