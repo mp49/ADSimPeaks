@@ -424,28 +424,27 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   getDoubleParam(ADSPPeakFWHMParam, &peak_fwhm);
   getDoubleParam(ADSPPeakMaxParam, &peak_max);
 
-  //Calculate profile and store in a cache
-  std::vector<epicsFloat64> cache(arrayInfo.nElements, 0.0);
-  for (epicsUInt32 bin=0; bin<cache.size(); bin++) {
-    if (peak_type == static_cast<epicsUInt32>(e_peak_type::gaussian)) { 
-      computeGaussian(peak_pos, peak_fwhm, bin, &result);
-      cache.at(bin) = result;
-    } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::lorentz)) { 
-      computeLorentz(peak_pos, peak_fwhm, bin, &result);
-      cache.at(bin) = result;
-    }
-    if (result > result_max) {
-      result_max = result;
-    }
+  //Calculate the profile height (which occurs at peak_pos)
+  if (peak_type == static_cast<epicsUInt32>(e_peak_type::gaussian)) {  
+    computeGaussian(peak_pos, peak_fwhm, peak_pos, &result_max);
+  } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::lorentz)) {
+    computeLorentz(peak_pos, peak_fwhm, peak_pos, &result_max);
   }
-  //Scale profile to the desired height
+  //Calculate the scale factor based on the desired height
   if ((result_max > -s_zeroCheck) && (result_max < s_zeroCheck)) {
     scale_factor = 1.0;
   } else {
     scale_factor = peak_max / result_max;
   }
-  for (epicsUInt32 bin=0; bin<cache.size(); bin++) {
-    result = cache.at(bin) * scale_factor;
+  
+  //Calculate full profile
+  for (epicsUInt32 bin=0; bin<arrayInfo.nElements; bin++) {
+    if (peak_type == static_cast<epicsUInt32>(e_peak_type::gaussian)) {
+      computeGaussian(peak_pos, peak_fwhm, bin, &result);
+    } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::lorentz)) { 
+      computeLorentz(peak_pos, peak_fwhm, bin, &result);
+    }
+    result = result * scale_factor;
     pData[bin] += static_cast<T>(result);
   }
   
