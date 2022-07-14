@@ -180,6 +180,13 @@ asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s entry...\n", functionName.c_str());
 
+  if (function == ADSPPeakFWHMParam) {
+    if (value < 1.0) {
+      value = 1.0;
+      setDoubleParam(ADSPPeakFWHMParam, value);
+    }
+  }
+  
   if (status != asynSuccess) {
     callParamCallbacks();
     return asynError;
@@ -423,12 +430,14 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   getDoubleParam(ADSPPeakPosParam, &peak_pos);
   getDoubleParam(ADSPPeakFWHMParam, &peak_fwhm);
   getDoubleParam(ADSPPeakMaxParam, &peak_max);
-
+  
   //Calculate the profile height (which occurs at peak_pos)
   if (peak_type == static_cast<epicsUInt32>(e_peak_type::gaussian)) {  
     computeGaussian(peak_pos, peak_fwhm, peak_pos, &result_max);
   } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::lorentz)) {
     computeLorentz(peak_pos, peak_fwhm, peak_pos, &result_max);
+  } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::pseudovoigt)) {
+    computePseudoVoigt(peak_pos, peak_fwhm, peak_pos, &result_max);
   }
   //Calculate the scale factor based on the desired height
   if ((result_max > -s_zeroCheck) && (result_max < s_zeroCheck)) {
@@ -438,11 +447,13 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   }
   
   //Calculate full profile
-  for (epicsUInt32 bin=0; bin<arrayInfo.nElements; bin++) {
+  for (epicsInt32 bin=0; bin<arrayInfo.nElements; bin++) {
     if (peak_type == static_cast<epicsUInt32>(e_peak_type::gaussian)) {
       computeGaussian(peak_pos, peak_fwhm, bin, &result);
     } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::lorentz)) { 
       computeLorentz(peak_pos, peak_fwhm, bin, &result);
+    } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::pseudovoigt)) {
+    computePseudoVoigt(peak_pos, peak_fwhm, bin, &result);
     }
     result = result * scale_factor;
     pData[bin] += static_cast<T>(result);
@@ -452,12 +463,16 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 }
 
 
-asynStatus ADSimPeaks::computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsUInt32 bin, epicsFloat64 *result)
+asynStatus ADSimPeaks::computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
 {
   asynStatus status = asynSuccess;
   string functionName(s_className + "::" + __func__);
 
   //TODO - error check and use exceptions
+
+  if (fwhm < 1.0) {
+    fwhm = 1.0;
+  }
   
   epicsFloat64 sigma = fwhm / (2.0*sqrt(2.0*log(2.0)));
   *result = (1.0 / (sigma*sqrt(2.0*M_PI))) * exp(-(((bin-pos)*(bin-pos))) / (2.0*(sigma*sigma)));
@@ -465,15 +480,50 @@ asynStatus ADSimPeaks::computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epic
   return status;
 }
 
-asynStatus ADSimPeaks::computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsUInt32 bin, epicsFloat64 *result)
+asynStatus ADSimPeaks::computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
 {
   asynStatus status = asynSuccess;
   string functionName(s_className + "::" + __func__);
 
   //TODO - error check and use exceptions
+
+  
+  if (fwhm < 1.0) {
+    fwhm = 1.0;
+  }
   
   epicsFloat64 gamma = fwhm / 2.0;
   *result = (1 / (M_PI*gamma)) * ((gamma*gamma) / (((bin-pos)*(bin-pos)) + (gamma*gamma)));
+
+  return status;
+}
+
+asynStatus ADSimPeaks::computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
+{
+  asynStatus status = asynSuccess;
+  string functionName(s_className + "::" + __func__);
+
+  epicsFloat64 fwhm_pv = 0.0;
+  epicsFloat64 fwhm_p5 = 0.0;
+  epicsFloat64 eta = 0.0;
+  epicsFloat64 gaussian = 0.0;
+  epicsFloat64 lorentz = 0.0;
+
+  //TODO - error check and use exceptions
+
+  if (fwhm < 1.0) {
+    fwhm = 1.0;
+  }
+  
+  //This implementation assumes the FWHM of the Gaussian and Lorentz is the same.
+  fwhm_p5 = pow(fwhm,5);
+  fwhm_pv = pow(11.6711699999*fwhm_p5,0.2);
+  eta = ((1.36603*(fwhm/fwhm_pv)) - (0.47719*pow((fwhm/fwhm_pv),2)) + (0.11116*pow((fwhm/fwhm_pv),3)));
+  
+  computeGaussian(pos, fwhm, bin, &gaussian);
+  computeLorentz(pos, fwhm, bin, &lorentz);
+
+  *result = ((1.0 - eta)*gaussian) + (eta*lorentz);
 
   return status;
 }

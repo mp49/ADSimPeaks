@@ -34,7 +34,7 @@ record(mbbo, "$(P)$(R)PeakType") {
   field(ONVL, "1")
   field(TWST, "Lorentz")
   field(TWVL, "2")
-  field(THST, "None")
+  field(THST, "Pseudo-Voigt")
   field(THVL, "3")
   info(autosaveFields, "VAL")
 }
@@ -47,7 +47,7 @@ record(mbbi, "$(P)$(R)PeakType_RBV") {
   field(ONVL, "1")
   field(TWST, "Lorentz")
   field(TWVL, "2")
-  field(THST, "None")
+  field(THST, "Pseudo-Voigt")
   field(THVL, "3") 
   field(SCAN, "I/O Intr")
 }
@@ -62,7 +62,6 @@ record(ao, "$(P)$(R)PeakPos") {
   field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_POS")
   field(VAL, "1")
   field(PREC, "3")
-  field(DRVL, "0.0")
   info(autosaveFields, "VAL")
 }
 record(ai, "$(P)$(R)PeakPos_RBV") {
@@ -82,7 +81,6 @@ record(ao, "$(P)$(R)PeakFWHM") {
   field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_FWHM")
   field(VAL, "1")
   field(PREC, "3")
-  field(DRVL, "0.0")
   info(autosaveFields, "VAL")
 }
 record(ai, "$(P)$(R)PeakFWHM_RBV") {

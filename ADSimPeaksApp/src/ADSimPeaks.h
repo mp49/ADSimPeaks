@@ -73,7 +73,8 @@ class ADSimPeaks : public ADDriver {
   enum class e_peak_type {
     none,
     gaussian,
-    lorentz
+    lorentz,
+    pseudovoigt  
   };
   
   //Static Data
@@ -83,8 +84,9 @@ class ADSimPeaks : public ADDriver {
   asynStatus computeData(NDDataType_t dataType);
   template <typename T> asynStatus computeDataT();
 
-  asynStatus computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsUInt32 bin, epicsFloat64 *result);
-  asynStatus computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsUInt32 bin, epicsFloat64 *result);
+  asynStatus computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
+  asynStatus computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
+  asynStatus computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
   
 };
 

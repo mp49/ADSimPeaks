@@ -1577,7 +1577,7 @@ record(mbbo, "ST99:Det:Det1:PeakType") {
   field(ONVL, "1")
   field(TWST, "Lorentz")
   field(TWVL, "2")
-  field(THST, "None")
+  field(THST, "Pseudo-Voigt")
   field(THVL, "3")
   info(autosaveFields, "VAL")
 }
@@ -1590,7 +1590,7 @@ record(mbbi, "ST99:Det:Det1:PeakType_RBV") {
   field(ONVL, "1")
   field(TWST, "Lorentz")
   field(TWVL, "2")
-  field(THST, "None")
+  field(THST, "Pseudo-Voigt")
   field(THVL, "3") 
   field(SCAN, "I/O Intr")
 }
@@ -1605,7 +1605,6 @@ record(ao, "ST99:Det:Det1:PeakPos") {
   field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POS")
   field(VAL, "1")
   field(PREC, "3")
-  field(DRVL, "0.0")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:PeakPos_RBV") {
@@ -1625,7 +1624,7 @@ record(ao, "ST99:Det:Det1:PeakFWHM") {
   field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHM")
   field(VAL, "1")
   field(PREC, "3")
-  field(DRVL, "0.0")
+  field(DRVL, "1.0")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:PeakFWHM_RBV") {
