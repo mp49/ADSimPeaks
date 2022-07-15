@@ -119,3 +119,96 @@ record(ai, "$(P)$(R)ElapsedTime") {
   field(EGU, "s")
 }
 
+############################################################
+# Background Polynomial Coefficients (Cubic Polynomial)
+
+# ///
+# /// Background Polynomial Constant Term
+# ///
+record(ao, "$(P)$(R)BGC0") {
+  field(DESC, "Background Coef 0")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C0")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)BGC0_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C0")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// Background Polynomial Slope
+# ///
+record(ao, "$(P)$(R)BGC1") {
+  field(DESC, "Background Coef 1")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C1")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)BGC1_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C1")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// Background Polynomial 2nd Order Coefficients
+# ///
+record(ao, "$(P)$(R)BGC2") {
+  field(DESC, "Background Coef 2")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C2")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)BGC2_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C2")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// Background Polynomial 3rd Order Coefficients
+# ///
+record(ao, "$(P)$(R)BGC3") {
+  field(DESC, "Background Coef 3")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C3")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)BGC3_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C3")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// Background Polynomial Horizontal Shift 
+# ///
+record(ao, "$(P)$(R)BGSH") {
+  field(DESC, "Background Shift")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_SH")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)BGSH_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_SH")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+

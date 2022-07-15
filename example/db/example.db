@@ -1624,7 +1624,6 @@ record(ao, "ST99:Det:Det1:PeakFWHM") {
   field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHM")
   field(VAL, "1")
   field(PREC, "3")
-  field(DRVL, "1.0")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:PeakFWHM_RBV") {
@@ -1661,6 +1660,99 @@ record(ai, "ST99:Det:Det1:ElapsedTime") {
   field(SCAN, "I/O Intr")
   field(PREC, "3")
   field(EGU, "s")
+}
+
+############################################################
+# Background Polynomial Coefficients (Cubic Polynomial)
+
+# ///
+# /// Background Polynomial Constant Term
+# ///
+record(ao, "ST99:Det:Det1:BGC0") {
+  field(DESC, "Background Coef 0")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C0")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:BGC0_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C0")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// Background Polynomial Slope
+# ///
+record(ao, "ST99:Det:Det1:BGC1") {
+  field(DESC, "Background Coef 1")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C1")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:BGC1_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C1")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// Background Polynomial 2nd Order Coefficients
+# ///
+record(ao, "ST99:Det:Det1:BGC2") {
+  field(DESC, "Background Coef 2")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C2")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:BGC2_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C2")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// Background Polynomial 3rd Order Coefficients
+# ///
+record(ao, "ST99:Det:Det1:BGC3") {
+  field(DESC, "Background Coef 3")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C3")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:BGC3_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C3")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// Background Polynomial Horizontal Shift 
+# ///
+record(ao, "ST99:Det:Det1:BGSH") {
+  field(DESC, "Background Shift")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_SH")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:BGSH_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_SH")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
 }
 
 #=================================================================#

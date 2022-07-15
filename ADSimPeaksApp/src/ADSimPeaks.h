@@ -25,6 +25,12 @@
 #define ADSPPeakPosParamString   "ADSP_PEAK_POS"
 #define ADSPPeakFWHMParamString  "ADSP_PEAK_FWHM"
 #define ADSPPeakMaxParamString "ADSP_PEAK_MAX"
+// Background Polynomial Coefficients
+#define ADSPBGC0ParamString  "ADSP_BG_C0"
+#define ADSPBGC1ParamString  "ADSP_BG_C1"
+#define ADSPBGC2ParamString  "ADSP_BG_C2"
+#define ADSPBGC3ParamString  "ADSP_BG_C3"
+#define ADSPBGSHParamString  "ADSP_BG_SH"
 
 class ADSimPeaks : public ADDriver {
 
@@ -52,6 +58,11 @@ class ADSimPeaks : public ADDriver {
   int ADSPPeakPosParam;
   int ADSPPeakFWHMParam;
   int ADSPPeakMaxParam;
+  int ADSPBGC0Param;
+  int ADSPBGC1Param;
+  int ADSPBGC2Param;
+  int ADSPBGC3Param;
+  int ADSPBGSHParam;
   
   //Internal data
   epicsUInt32 m_maxSize;
