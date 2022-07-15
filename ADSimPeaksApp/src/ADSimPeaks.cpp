@@ -501,13 +501,16 @@ asynStatus ADSimPeaks::computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epics
 asynStatus ADSimPeaks::computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
 {
   asynStatus status = asynSuccess;
-  string functionName(s_className + "::" + __func__);
 
-  epicsFloat64 fwhm_pv = 0.0;
-  epicsFloat64 fwhm_p5 = 0.0;
+  epicsFloat64 fwhm_g = 0.0;
+  epicsFloat64 fwhm_l = 0.0;
+  epicsFloat64 fwhm_sum = 0.0;
+  epicsFloat64 fwhm_tot = 0.0;
   epicsFloat64 eta = 0.0;
   epicsFloat64 gaussian = 0.0;
   epicsFloat64 lorentz = 0.0;
+  
+  string functionName(s_className + "::" + __func__);
 
   //TODO - error check and use exceptions
 
@@ -515,10 +518,27 @@ asynStatus ADSimPeaks::computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, e
     fwhm = 1.0;
   }
   
-  //This implementation assumes the FWHM of the Gaussian and Lorentz is the same.
-  fwhm_p5 = pow(fwhm,5);
-  fwhm_pv = pow(11.6711699999*fwhm_p5,0.2);
-  eta = ((1.36603*(fwhm/fwhm_pv)) - (0.47719*pow((fwhm/fwhm_pv),2)) + (0.11116*pow((fwhm/fwhm_pv),3)));
+  //This implementation assumes the FWHM of the Gaussian and Lorentz is the same. However, we
+  //still use the full approximation for the Pseudo-Voigt total FWHM (fwhm_tot) and use two FWHM parameters
+  //(fwhm_g and fwhm_l), so that this function can easily be modified to use a different Gaussian
+  //and Lorentzian FWHM.
+
+  epicsFloat64 p1 = 2.69269;
+  epicsFloat64 p2 = 2.42843;
+  epicsFloat64 p3 = 4.47163;
+  epicsFloat64 p4 = 0.07842;
+
+  epicsFloat64 e1 = 1.36603;
+  epicsFloat64 e2 = 0.47719;
+  epicsFloat64 e3 = 0.11116;
+  
+  fwhm_g = fwhm;
+  fwhm_l = fwhm;
+  fwhm_sum = pow(fwhm_g,5) + (p1*pow(fwhm_g,4)*fwhm_l) + (p2*pow(fwhm_g,3)*pow(fwhm_l,2)) +
+            (p3*pow(fwhm_g,2)*pow(fwhm_l,3)) + (p4*fwhm_g*pow(fwhm_l,4)) + pow(fwhm_l,5);
+  fwhm_tot = pow(fwhm_sum,0.2);
+  
+  eta = ((e1*(fwhm_l/fwhm_tot)) - (e2*pow((fwhm_l/fwhm_tot),2)) + (e3*pow((fwhm_l/fwhm_tot),3)));
   
   computeGaussian(pos, fwhm, bin, &gaussian);
   computeLorentz(pos, fwhm, bin, &lorentz);
