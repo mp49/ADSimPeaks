@@ -497,11 +497,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
     computePseudoVoigt(peak_pos, peak_fwhm, bin, &result);
     }
     result = (result*scale_factor);
-    if (bg.at(bin) >= result) {
-      pData[bin] += static_cast<T>(bg.at(bin));
-    } else {
-      pData[bin] += static_cast<T>(result);
-    }
+    pData[bin] += static_cast<T>(bg.at(bin) + result);
   }
 
   //Noise
