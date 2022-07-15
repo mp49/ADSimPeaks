@@ -19,6 +19,8 @@
  * They are used by asyn clients, including standard asyn device support */
 
 #define ADSPIntegrateParamString   "ADSP_INTEGRATE"
+#define ADSPNoiseTypeParamString   "ADSP_NOISE_TYPE"
+#define ADSPNoiseLevelParamString   "ADSP_NOISE_LEVEL"
 #define ADSPElapsedTimeParamString "ADSP_ELAPSEDTIME"
 // Peak Information Params
 #define ADSPPeakTypeParamString  "ADSP_PEAK_TYPE"
@@ -53,6 +55,8 @@ class ADSimPeaks : public ADDriver {
 
   //Values used for pasynUser->reason, and indexes into the parameter library.
   int ADSPIntegrateParam;
+  int ADSPNoiseTypeParam;
+  int ADSPNoiseLevelParam;
   int ADSPElapsedTimeParam;
   int ADSPPeakTypeParam;
   int ADSPPeakPosParam;
@@ -86,6 +90,11 @@ class ADSimPeaks : public ADDriver {
     gaussian,
     lorentz,
     pseudovoigt  
+  };
+  enum class e_noise_type {
+    none,
+    uniform,
+    gaussian  
   };
   
   //Static Data

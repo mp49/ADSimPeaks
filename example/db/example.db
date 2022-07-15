@@ -1564,6 +1564,50 @@ record(bi, "ST99:Det:Det1:Integrate_RBV") {
 }
 
 # ///
+# /// Control noise
+# ///
+record(mbbo, "ST99:Det:Det1:NoiseType") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_NOISE_TYPE")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Uniform")
+  field(ONVL, "1")
+  field(TWST, "Gaussian")
+  field(TWVL, "2")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "ST99:Det:Det1:NoiseType_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_NOISE_TYPE")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Uniform")
+  field(ONVL, "1")
+  field(TWST, "Gaussian")
+  field(TWVL, "2")
+  field(SCAN, "I/O Intr")
+}
+record(ao, "ST99:Det:Det1:NoiseLevel") {
+  field(DESC, "Noise Level")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_NOISE_LEVEL")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:NoiseLevel_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_NOISE_LEVEL")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+
+# ///
 # /// Peak Type
 # ///
 record(mbbo, "ST99:Det:Det1:PeakType") {

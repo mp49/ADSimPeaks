@@ -55,6 +55,8 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
 
   //Add the params to the paramLib 
   createParam(ADSPIntegrateParamString, asynParamInt32, &ADSPIntegrateParam);
+  createParam(ADSPNoiseTypeParamString, asynParamInt32, &ADSPNoiseTypeParam);
+  createParam(ADSPNoiseLevelParamString, asynParamFloat64, &ADSPNoiseLevelParam);
   createParam(ADSPElapsedTimeParamString, asynParamFloat64, &ADSPElapsedTimeParam);
   createParam(ADSPPeakTypeParamString, asynParamInt32, &ADSPPeakTypeParam);
   createParam(ADSPPeakPosParamString, asynParamFloat64, &ADSPPeakPosParam);
@@ -79,6 +81,9 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
   paramStatus = ((setDoubleParam(ADAcquirePeriod, 1.0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADMaxSizeX, m_maxSize) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADSizeX, m_maxSize) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADSPIntegrateParam, 0) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADSPNoiseTypeParam, 0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPNoiseLevelParam, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPElapsedTimeParam, 0.0) == asynSuccess) && paramStatus);
   //Peak Params
   paramStatus = ((setIntegerParam(ADSPPeakTypeParam, 0) == asynSuccess) && paramStatus);
@@ -409,6 +414,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 {
   asynStatus status = asynSuccess;
   NDArrayInfo_t arrayInfo;
+  epicsUInt32 size = 0;
 
   string functionName(s_className + "::" + __func__);
   
@@ -419,7 +425,8 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   
   p_NDArray->getInfo(&arrayInfo);
   T *pData = static_cast<T*>(p_NDArray->pData);
-  
+  size = arrayInfo.nElements;
+
   int integrate = 0;
   getIntegerParam(ADSPIntegrateParam, &integrate);
   if ((integrate == 0) || (m_needReset)) {
@@ -441,6 +448,12 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   epicsFloat64 bg_c2 = 0.0;
   epicsFloat64 bg_c3 = 0.0;
   epicsFloat64 bg_sh = 0.0;
+  epicsInt32 noise_type = 0;
+  epicsFloat64 noise_level = 0.0;
+  epicsFloat64 noise = 0.0;
+
+  std::vector<epicsFloat64> bg(size, 0);
+  std::vector<epicsFloat64> sig(size, 0);
   
   getIntegerParam(ADSPPeakTypeParam, &peak_type);
   getDoubleParam(ADSPPeakPosParam, &peak_pos);
@@ -451,10 +464,11 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   getDoubleParam(ADSPBGC2Param, &bg_c2);
   getDoubleParam(ADSPBGC3Param, &bg_c3);
   getDoubleParam(ADSPBGSHParam, &bg_sh);
+  getIntegerParam(ADSPNoiseTypeParam, &noise_type);
+  getDoubleParam(ADSPNoiseLevelParam, &noise_level);
 
   //Calculate the background profile
-  std::vector<epicsFloat64> bg(arrayInfo.nElements, 0);
-  for (epicsInt32 bin=0; bin<bg.size(); bin++) {
+  for (epicsInt32 bin=0; bin<size; bin++) {
     bg.at(bin) = bg_c0 + (bin-bg_sh)*bg_c1 + pow((bin-bg_sh),2)*bg_c2 + pow((bin-bg_sh),3)*bg_c3;
   }
   
@@ -474,7 +488,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   }
   
   //Calculate full profile and add the background
-  for (epicsInt32 bin=0; bin<arrayInfo.nElements; bin++) {
+  for (epicsInt32 bin=0; bin<size; bin++) {
     if (peak_type == static_cast<epicsUInt32>(e_peak_type::gaussian)) {
       computeGaussian(peak_pos, peak_fwhm, bin, &result);
     } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::lorentz)) { 
@@ -489,7 +503,28 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
       pData[bin] += static_cast<T>(result);
     }
   }
+
+  //Noise
+  epicsFloat64 temp = 0.0;
+  epicsUInt32 g_count = 12;
   
+  for (epicsInt32 bin=0; bin<size; bin++) {
+    if (noise_type == static_cast<epicsUInt32>(e_noise_type::uniform)) {
+      noise = 1.0 - (2.0*(rand() / static_cast<epicsFloat64>(RAND_MAX)));
+      noise = noise_level * noise;
+    } else if (noise_type == static_cast<epicsUInt32>(e_noise_type::gaussian)) {
+      temp = 0.0;
+      for (epicsUInt32 i=0; i<g_count; i++) {
+      	noise = (1.0-(2.0*(rand() / static_cast<epicsFloat64>(RAND_MAX))));
+      	temp += noise;
+      }
+      noise = temp / static_cast<epicsFloat64>(g_count);
+      noise = noise_level * noise;
+    }
+    pData[bin] += static_cast<T>(noise);
+  }
+  
+
   return status;
 }
 
