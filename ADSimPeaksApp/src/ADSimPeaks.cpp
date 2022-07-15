@@ -74,6 +74,11 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
   m_needNewArray = true;
   m_needReset = false;
 
+  //Seed the random number generator
+  epicsTimeStamp nowTime;
+  epicsTimeGetCurrent(&nowTime);
+  m_rand_gen.seed(nowTime.secPastEpoch);
+
   bool paramStatus = true;
   //Initialise any paramLib parameters that need passing up to device support
   paramStatus = ((setIntegerParam(ADAcquire, 0) == asynSuccess) && paramStatus);
@@ -500,27 +505,23 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
     pData[bin] += static_cast<T>(bg.at(bin) + result);
   }
 
-  //Noise
-  epicsFloat64 temp = 0.0;
-  epicsUInt32 g_count = 12;
-  
-  for (epicsInt32 bin=0; bin<size; bin++) {
-    if (noise_type == static_cast<epicsUInt32>(e_noise_type::uniform)) {
-      noise = 1.0 - (2.0*(rand() / static_cast<epicsFloat64>(RAND_MAX)));
+  //Generate noise
+  if (noise_type == static_cast<epicsUInt32>(e_noise_type::uniform)) {
+    std::uniform_real_distribution<double> dist(-1.0,1.0);
+    for (epicsInt32 bin=0; bin<size; bin++) {
+      noise = dist(m_rand_gen);
       noise = noise_level * noise;
-    } else if (noise_type == static_cast<epicsUInt32>(e_noise_type::gaussian)) {
-      temp = 0.0;
-      for (epicsUInt32 i=0; i<g_count; i++) {
-      	noise = (1.0-(2.0*(rand() / static_cast<epicsFloat64>(RAND_MAX))));
-      	temp += noise;
-      }
-      noise = temp / static_cast<epicsFloat64>(g_count);
-      noise = noise_level * noise;
+      pData[bin] += static_cast<T>(noise);
     }
-    pData[bin] += static_cast<T>(noise);
+  } else if (noise_type == static_cast<epicsUInt32>(e_noise_type::gaussian)) {
+    std::normal_distribution<double> dist(0.0,1.0);
+    for (epicsInt32 bin=0; bin<size; bin++) {
+      noise = dist(m_rand_gen);
+      noise = noise_level * noise;
+      pData[bin] += static_cast<T>(noise);
+    }
   }
   
-
   return status;
 }
 

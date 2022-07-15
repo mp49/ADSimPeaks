@@ -11,6 +11,7 @@
 #define ADSIMPEAKS_H
 
 #include <string>
+#include <random>
 
 #include <epicsEvent.h>
 #include "ADDriver.h"
@@ -83,6 +84,8 @@ class ADSimPeaks : public ADDriver {
   NDArray *p_NDArray;
   bool m_needNewArray;
   bool m_needReset;
+
+  std::default_random_engine m_rand_gen;
 
   //Enum Data
   enum class e_peak_type {
