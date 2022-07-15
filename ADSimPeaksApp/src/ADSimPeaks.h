@@ -110,6 +110,7 @@ class ADSimPeaks : public ADDriver {
   asynStatus computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
   asynStatus computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
   asynStatus computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
+  epicsFloat64 zeroCheck(epicsFloat64 value);
   
 };
 
