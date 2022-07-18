@@ -1,0 +1,95 @@
+#################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// Peak Type
+# ///
+record(mbbo, "$(P)$(R)P$(PEAK)Type") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_TYPE")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_TYPE")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3") 
+  field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// Peak position
+# ///
+record(ao, "$(P)$(R)P$(PEAK)Pos") {
+  field(DESC, "Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_POS")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)P$(PEAK)Pos_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_POS")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak full width half max (FWHM)
+# ///
+record(ao, "$(P)$(R)P$(PEAK)FWHM") {
+  field(DESC, "Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_FWHM")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)P$(PEAK)FWHM_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_FWHM")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak max
+# ///
+record(ao, "$(P)$(R)P$(PEAK)Max") {
+  field(DESC, "Peak Max")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_MAX")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)P$(PEAK)Max_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_MAX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+

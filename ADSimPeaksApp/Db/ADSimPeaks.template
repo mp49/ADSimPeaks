@@ -21,138 +21,6 @@ record(bi, "$(P)$(R)Integrate_RBV") {
 }
 
 # ///
-# /// Control noise
-# ///
-record(mbbo, "$(P)$(R)NoiseType") {
-  field(PINI, "YES")
-  field(DTYP, "asynInt32")
-  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_TYPE")
-  field(VAL,  "0")
-  field(ZRST, "None")
-  field(ZRVL, "0")
-  field(ONST, "Uniform")
-  field(ONVL, "1")
-  field(TWST, "Gaussian")
-  field(TWVL, "2")
-  info(autosaveFields, "VAL")
-}
-record(mbbi, "$(P)$(R)NoiseType_RBV") {
-  field(DTYP, "asynInt32")
-  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_TYPE")
-  field(ZRST, "None")
-  field(ZRVL, "0")
-  field(ONST, "Uniform")
-  field(ONVL, "1")
-  field(TWST, "Gaussian")
-  field(TWVL, "2")
-  field(SCAN, "I/O Intr")
-}
-record(ao, "$(P)$(R)NoiseLevel") {
-  field(DESC, "Noise Level")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_LEVEL")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "$(P)$(R)NoiseLevel_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_LEVEL")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-
-# ///
-# /// Peak Type
-# ///
-record(mbbo, "$(P)$(R)PeakType") {
-  field(PINI, "YES")
-  field(DTYP, "asynInt32")
-  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_TYPE")
-  field(VAL,  "0")
-  field(ZRST, "None")
-  field(ZRVL, "0")
-  field(ONST, "Gaussian")
-  field(ONVL, "1")
-  field(TWST, "Lorentz")
-  field(TWVL, "2")
-  field(THST, "Pseudo-Voigt")
-  field(THVL, "3")
-  info(autosaveFields, "VAL")
-}
-record(mbbi, "$(P)$(R)PeakType_RBV") {
-  field(DTYP, "asynInt32")
-  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_TYPE")
-  field(ZRST, "None")
-  field(ZRVL, "0")
-  field(ONST, "Gaussian")
-  field(ONVL, "1")
-  field(TWST, "Lorentz")
-  field(TWVL, "2")
-  field(THST, "Pseudo-Voigt")
-  field(THVL, "3") 
-  field(SCAN, "I/O Intr")
-}
-
-# ///
-# /// Peak position
-# ///
-record(ao, "$(P)$(R)PeakPos") {
-  field(DESC, "Peak Position")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_POS")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "$(P)$(R)PeakPos_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_POS")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak full width half max (FWHM)
-# ///
-record(ao, "$(P)$(R)PeakFWHM") {
-  field(DESC, "Peak FWHM")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_FWHM")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "$(P)$(R)PeakFWHM_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_FWHM")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak max
-# ///
-record(ao, "$(P)$(R)PeakMax") {
-  field(DESC, "Peak Max")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_MAX")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "$(P)$(R)PeakMax_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_PEAK_MAX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
 # /// Elapsed Time
 # ///
 record(ai, "$(P)$(R)ElapsedTime") {
@@ -254,5 +122,51 @@ record(ai, "$(P)$(R)BGSH_RBV") {
   field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_SH")
   field(SCAN, "I/O Intr")
   field(PREC, "6")	
+}
+
+############################################################
+# Noise Control
+
+# ///
+# /// Control noise
+# ///
+record(mbbo, "$(P)$(R)NoiseType") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_TYPE")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Uniform")
+  field(ONVL, "1")
+  field(TWST, "Gaussian")
+  field(TWVL, "2")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "$(P)$(R)NoiseType_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_TYPE")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Uniform")
+  field(ONVL, "1")
+  field(TWST, "Gaussian")
+  field(TWVL, "2")
+  field(SCAN, "I/O Intr")
+}
+record(ao, "$(P)$(R)NoiseLevel") {
+  field(DESC, "Noise Level")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_LEVEL")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)NoiseLevel_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_LEVEL")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
 }
 

@@ -1564,138 +1564,6 @@ record(bi, "ST99:Det:Det1:Integrate_RBV") {
 }
 
 # ///
-# /// Control noise
-# ///
-record(mbbo, "ST99:Det:Det1:NoiseType") {
-  field(PINI, "YES")
-  field(DTYP, "asynInt32")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_NOISE_TYPE")
-  field(VAL,  "0")
-  field(ZRST, "None")
-  field(ZRVL, "0")
-  field(ONST, "Uniform")
-  field(ONVL, "1")
-  field(TWST, "Gaussian")
-  field(TWVL, "2")
-  info(autosaveFields, "VAL")
-}
-record(mbbi, "ST99:Det:Det1:NoiseType_RBV") {
-  field(DTYP, "asynInt32")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_NOISE_TYPE")
-  field(ZRST, "None")
-  field(ZRVL, "0")
-  field(ONST, "Uniform")
-  field(ONVL, "1")
-  field(TWST, "Gaussian")
-  field(TWVL, "2")
-  field(SCAN, "I/O Intr")
-}
-record(ao, "ST99:Det:Det1:NoiseLevel") {
-  field(DESC, "Noise Level")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_NOISE_LEVEL")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:NoiseLevel_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_NOISE_LEVEL")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-
-# ///
-# /// Peak Type
-# ///
-record(mbbo, "ST99:Det:Det1:PeakType") {
-  field(PINI, "YES")
-  field(DTYP, "asynInt32")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_TYPE")
-  field(VAL,  "0")
-  field(ZRST, "None")
-  field(ZRVL, "0")
-  field(ONST, "Gaussian")
-  field(ONVL, "1")
-  field(TWST, "Lorentz")
-  field(TWVL, "2")
-  field(THST, "Pseudo-Voigt")
-  field(THVL, "3")
-  info(autosaveFields, "VAL")
-}
-record(mbbi, "ST99:Det:Det1:PeakType_RBV") {
-  field(DTYP, "asynInt32")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_TYPE")
-  field(ZRST, "None")
-  field(ZRVL, "0")
-  field(ONST, "Gaussian")
-  field(ONVL, "1")
-  field(TWST, "Lorentz")
-  field(TWVL, "2")
-  field(THST, "Pseudo-Voigt")
-  field(THVL, "3") 
-  field(SCAN, "I/O Intr")
-}
-
-# ///
-# /// Peak position
-# ///
-record(ao, "ST99:Det:Det1:PeakPos") {
-  field(DESC, "Peak Position")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POS")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:PeakPos_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POS")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak full width half max (FWHM)
-# ///
-record(ao, "ST99:Det:Det1:PeakFWHM") {
-  field(DESC, "Peak FWHM")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHM")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:PeakFWHM_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHM")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak max
-# ///
-record(ao, "ST99:Det:Det1:PeakMax") {
-  field(DESC, "Peak Max")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_MAX")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:PeakMax_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_MAX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
 # /// Elapsed Time
 # ///
 record(ai, "ST99:Det:Det1:ElapsedTime") {
@@ -1797,6 +1665,812 @@ record(ai, "ST99:Det:Det1:BGSH_RBV") {
   field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_SH")
   field(SCAN, "I/O Intr")
   field(PREC, "6")	
+}
+
+############################################################
+# Noise Control
+
+# ///
+# /// Control noise
+# ///
+record(mbbo, "ST99:Det:Det1:NoiseType") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_NOISE_TYPE")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Uniform")
+  field(ONVL, "1")
+  field(TWST, "Gaussian")
+  field(TWVL, "2")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "ST99:Det:Det1:NoiseType_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_NOISE_TYPE")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Uniform")
+  field(ONVL, "1")
+  field(TWST, "Gaussian")
+  field(TWVL, "2")
+  field(SCAN, "I/O Intr")
+}
+record(ao, "ST99:Det:Det1:NoiseLevel") {
+  field(DESC, "Noise Level")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_NOISE_LEVEL")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:NoiseLevel_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_NOISE_LEVEL")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+#################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// Peak Type
+# ///
+record(mbbo, "ST99:Det:Det1:P0Type") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_TYPE")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "ST99:Det:Det1:P0Type_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_TYPE")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3") 
+  field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// Peak position
+# ///
+record(ao, "ST99:Det:Det1:P0Pos") {
+  field(DESC, "Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POS")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P0Pos_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POS")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P0FWHM") {
+  field(DESC, "Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHM")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P0FWHM_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHM")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak max
+# ///
+record(ao, "ST99:Det:Det1:P0Max") {
+  field(DESC, "Peak Max")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_MAX")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P0Max_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_MAX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+#################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// Peak Type
+# ///
+record(mbbo, "ST99:Det:Det1:P1Type") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_TYPE")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "ST99:Det:Det1:P1Type_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_TYPE")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3") 
+  field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// Peak position
+# ///
+record(ao, "ST99:Det:Det1:P1Pos") {
+  field(DESC, "Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_POS")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P1Pos_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_POS")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P1FWHM") {
+  field(DESC, "Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_FWHM")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P1FWHM_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_FWHM")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak max
+# ///
+record(ao, "ST99:Det:Det1:P1Max") {
+  field(DESC, "Peak Max")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_MAX")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P1Max_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_MAX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+#################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// Peak Type
+# ///
+record(mbbo, "ST99:Det:Det1:P2Type") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_TYPE")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "ST99:Det:Det1:P2Type_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_TYPE")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3") 
+  field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// Peak position
+# ///
+record(ao, "ST99:Det:Det1:P2Pos") {
+  field(DESC, "Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_POS")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P2Pos_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_POS")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P2FWHM") {
+  field(DESC, "Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_FWHM")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P2FWHM_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_FWHM")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak max
+# ///
+record(ao, "ST99:Det:Det1:P2Max") {
+  field(DESC, "Peak Max")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_MAX")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P2Max_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_MAX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+#################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// Peak Type
+# ///
+record(mbbo, "ST99:Det:Det1:P3Type") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_TYPE")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "ST99:Det:Det1:P3Type_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_TYPE")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3") 
+  field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// Peak position
+# ///
+record(ao, "ST99:Det:Det1:P3Pos") {
+  field(DESC, "Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_POS")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P3Pos_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_POS")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P3FWHM") {
+  field(DESC, "Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_FWHM")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P3FWHM_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_FWHM")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak max
+# ///
+record(ao, "ST99:Det:Det1:P3Max") {
+  field(DESC, "Peak Max")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_MAX")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P3Max_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_MAX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+#################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// Peak Type
+# ///
+record(mbbo, "ST99:Det:Det1:P4Type") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_TYPE")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "ST99:Det:Det1:P4Type_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_TYPE")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3") 
+  field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// Peak position
+# ///
+record(ao, "ST99:Det:Det1:P4Pos") {
+  field(DESC, "Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_POS")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P4Pos_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_POS")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P4FWHM") {
+  field(DESC, "Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_FWHM")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P4FWHM_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_FWHM")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak max
+# ///
+record(ao, "ST99:Det:Det1:P4Max") {
+  field(DESC, "Peak Max")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_MAX")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P4Max_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_MAX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+#################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// Peak Type
+# ///
+record(mbbo, "ST99:Det:Det1:P5Type") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_TYPE")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "ST99:Det:Det1:P5Type_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_TYPE")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3") 
+  field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// Peak position
+# ///
+record(ao, "ST99:Det:Det1:P5Pos") {
+  field(DESC, "Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_POS")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P5Pos_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_POS")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P5FWHM") {
+  field(DESC, "Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_FWHM")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P5FWHM_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_FWHM")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak max
+# ///
+record(ao, "ST99:Det:Det1:P5Max") {
+  field(DESC, "Peak Max")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_MAX")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P5Max_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_MAX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+#################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// Peak Type
+# ///
+record(mbbo, "ST99:Det:Det1:P6Type") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_TYPE")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "ST99:Det:Det1:P6Type_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_TYPE")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3") 
+  field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// Peak position
+# ///
+record(ao, "ST99:Det:Det1:P6Pos") {
+  field(DESC, "Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_POS")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P6Pos_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_POS")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P6FWHM") {
+  field(DESC, "Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_FWHM")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P6FWHM_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_FWHM")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak max
+# ///
+record(ao, "ST99:Det:Det1:P6Max") {
+  field(DESC, "Peak Max")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_MAX")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P6Max_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_MAX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+#################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// Peak Type
+# ///
+record(mbbo, "ST99:Det:Det1:P7Type") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_TYPE")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "ST99:Det:Det1:P7Type_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_TYPE")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3") 
+  field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// Peak position
+# ///
+record(ao, "ST99:Det:Det1:P7Pos") {
+  field(DESC, "Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_POS")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P7Pos_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_POS")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P7FWHM") {
+  field(DESC, "Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_FWHM")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P7FWHM_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_FWHM")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak max
+# ///
+record(ao, "ST99:Det:Det1:P7Max") {
+  field(DESC, "Peak Max")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_MAX")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P7Max_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_MAX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
 }
 
 #=================================================================#

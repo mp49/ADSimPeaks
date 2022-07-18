@@ -5,6 +5,19 @@ pattern {P, R, PORT, ADDR, TIMEOUT}
         {ST99:Det, :Det1:, D1.SIM, 0, 1}
 }
 
+file ADSimPeaksPeak.template
+{
+pattern {P, R, PORT, ADDR, TIMEOUT, PEAK}
+        {ST99:Det, :Det1:, D1.SIM, 0, 1, 0}
+	{ST99:Det, :Det1:, D1.SIM, 0, 1, 1}
+	{ST99:Det, :Det1:, D1.SIM, 0, 1, 2}
+	{ST99:Det, :Det1:, D1.SIM, 0, 1, 3}
+	{ST99:Det, :Det1:, D1.SIM, 0, 1, 4}
+	{ST99:Det, :Det1:, D1.SIM, 0, 1, 5}
+	{ST99:Det, :Det1:, D1.SIM, 0, 1, 6}
+	{ST99:Det, :Det1:, D1.SIM, 0, 1, 7}
+}
+
 file NDCodec.template
 {
 pattern {P, R, PORT, ADDR, TIMEOUT, NDARRAY_PORT, NDARRAY_ADDR}
