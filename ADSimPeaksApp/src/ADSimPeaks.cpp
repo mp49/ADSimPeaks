@@ -31,7 +31,7 @@ const epicsFloat64 ADSimPeaks::s_zeroCheck = 1e-12;
 ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
 		       NDDataType_t dataType, int maxBuffers, size_t maxMemory,
 		       int priority, int stackSize)
-  : ADDriver(portName, 1, 0, maxBuffers, maxMemory, 0, 0, 0, 1, priority, stackSize),
+  : ADDriver(portName, maxPeaks, 0, maxBuffers, maxMemory, 0, 0, 0, 1, priority, stackSize),
     m_maxSize(maxSize),
     m_maxPeaks(maxPeaks),
     m_initialized(false)
@@ -91,10 +91,13 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
   paramStatus = ((setDoubleParam(ADSPNoiseLevelParam, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPElapsedTimeParam, 0.0) == asynSuccess) && paramStatus);
   //Peak Params
-  paramStatus = ((setIntegerParam(ADSPPeakTypeParam, 0) == asynSuccess) && paramStatus);
-  paramStatus = ((setDoubleParam(ADSPPeakPosParam, 1.0) == asynSuccess) && paramStatus);
-  paramStatus = ((setDoubleParam(ADSPPeakFWHMParam, 1.0) == asynSuccess) && paramStatus);
-  paramStatus = ((setDoubleParam(ADSPPeakMaxParam, 1.0) == asynSuccess) && paramStatus);
+  for (epicsUInt32 peak=0; peak<m_maxPeaks; peak++) {
+    paramStatus = ((setIntegerParam(ADSPPeakTypeParam, 0) == asynSuccess) && paramStatus);
+    paramStatus = ((setDoubleParam(ADSPPeakPosParam, 1.0) == asynSuccess) && paramStatus);
+    paramStatus = ((setDoubleParam(ADSPPeakFWHMParam, 1.0) == asynSuccess) && paramStatus);
+    paramStatus = ((setDoubleParam(ADSPPeakMaxParam, 1.0) == asynSuccess) && paramStatus);
+    callParamCallbacks(peak);
+  }
   //Background Params
   paramStatus = ((setDoubleParam(ADSPBGC0Param, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPBGC1Param, 0.0) == asynSuccess) && paramStatus);
@@ -257,7 +260,6 @@ bool ADSimPeaks::getInitialized(void)
 
 void ADSimPeaks::ADSimPeaksTask(void)
 {
-  int status = asynSuccess;
   int size = 0;
   int ndims=0;
   size_t dims[1];
@@ -381,8 +383,6 @@ void ADSimPeaks::ADSimPeaksTask(void)
 asynStatus ADSimPeaks::computeData(NDDataType_t dataType)
 {
   asynStatus status = asynSuccess;
-  //NDDataType_t dataType;
-  NDArrayInfo_t arrayInfo;
 
   string functionName(s_className + "::" + __func__);
 
@@ -441,17 +441,18 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   if (p_NDArray == NULL) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
 	      "%s invalid NDArray pointer.\n", functionName.c_str());
+    return asynError;
   }
   
   p_NDArray->getInfo(&arrayInfo);
   T *pData = static_cast<T*>(p_NDArray->pData);
   size = arrayInfo.nElements;
-
+  
   //Reset the array data if we need to
   int integrate = 0;
   getIntegerParam(ADSPIntegrateParam, &integrate);
   if ((integrate == 0) || (m_needReset)) {
-    for (int i=0; i<arrayInfo.nElements; i++) {
+    for (epicsUInt32 i=0; i<arrayInfo.nElements; i++) {
       pData[i] = 0;
     }
     m_needReset = false;
@@ -463,39 +464,40 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   getDoubleParam(ADSPBGC2Param, &bg_c2);
   getDoubleParam(ADSPBGC3Param, &bg_c3);
   getDoubleParam(ADSPBGSHParam, &bg_sh);
-  std::vector<epicsFloat64> bg(size, 0);
-  for (epicsInt32 bin=0; bin<size; bin++) {
-    bg.at(bin) = bg_c0 + (bin-bg_sh)*bg_c1 + pow((bin-bg_sh),2)*bg_c2 + pow((bin-bg_sh),3)*bg_c3;
+  for (epicsInt32 bin=0; bin<static_cast<epicsInt32>(size); bin++) {
+    pData[bin] += bg_c0 + (bin-bg_sh)*bg_c1 + pow((bin-bg_sh),2)*bg_c2 + pow((bin-bg_sh),3)*bg_c3;
   }
   
-  //Calculate the data profile and scale it to the desired height
-  getIntegerParam(ADSPPeakTypeParam, &peak_type);
-  getDoubleParam(ADSPPeakPosParam, &peak_pos);
-  getDoubleParam(ADSPPeakFWHMParam, &peak_fwhm);
-  getDoubleParam(ADSPPeakMaxParam, &peak_max);
-  if (peak_type == static_cast<epicsUInt32>(e_peak_type::gaussian)) {
-    computeGaussian(peak_pos, peak_fwhm, peak_pos, &result_max);
-    scale_factor = peak_max / zeroCheck(result_max);
-    for (epicsInt32 bin=0; bin<size; bin++) {
-      computeGaussian(peak_pos, peak_fwhm, bin, &result);
-      result = (result*scale_factor);
-      pData[bin] += static_cast<T>(bg.at(bin) + result);
-    }
-  } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::lorentz)) {
-    computeLorentz(peak_pos, peak_fwhm, peak_pos, &result_max);
-    scale_factor = peak_max / zeroCheck(result_max);
-    for (epicsInt32 bin=0; bin<size; bin++) {
-      computeLorentz(peak_pos, peak_fwhm, bin, &result);
-      result = (result*scale_factor);
-      pData[bin] += static_cast<T>(bg.at(bin) + result);
-    }
-  } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::pseudovoigt)) {
-    computePseudoVoigt(peak_pos, peak_fwhm, peak_pos, &result_max);
-    scale_factor = peak_max / zeroCheck(result_max);
-    for (epicsInt32 bin=0; bin<size; bin++) {
-      computePseudoVoigt(peak_pos, peak_fwhm, bin, &result);
-      result = (result*scale_factor);
-      pData[bin] += static_cast<T>(bg.at(bin) + result);
+  //Calculate the peak profile and scale it to the desired height
+  for (epicsUInt32 peak=0; peak<m_maxPeaks; peak++) {
+    getIntegerParam(peak, ADSPPeakTypeParam, &peak_type);
+    getDoubleParam(peak, ADSPPeakPosParam, &peak_pos);
+    getDoubleParam(peak, ADSPPeakFWHMParam, &peak_fwhm);
+    getDoubleParam(peak, ADSPPeakMaxParam, &peak_max);
+    if (peak_type == static_cast<epicsUInt32>(e_peak_type::gaussian)) {
+      computeGaussian(peak_pos, peak_fwhm, peak_pos, &result_max);
+      scale_factor = peak_max / zeroCheck(result_max);
+      for (epicsUInt32 bin=0; bin<size; bin++) {
+	computeGaussian(peak_pos, peak_fwhm, bin, &result);
+	result = (result*scale_factor);
+	pData[bin] += static_cast<T>(result);
+      }
+    } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::lorentz)) {
+      computeLorentz(peak_pos, peak_fwhm, peak_pos, &result_max);
+      scale_factor = peak_max / zeroCheck(result_max);
+      for (epicsUInt32 bin=0; bin<size; bin++) {
+	computeLorentz(peak_pos, peak_fwhm, bin, &result);
+	result = (result*scale_factor);
+	pData[bin] += static_cast<T>(result);
+      }
+    } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::pseudovoigt)) {
+      computePseudoVoigt(peak_pos, peak_fwhm, peak_pos, &result_max);
+      scale_factor = peak_max / zeroCheck(result_max);
+      for (epicsUInt32 bin=0; bin<size; bin++) {
+	computePseudoVoigt(peak_pos, peak_fwhm, bin, &result);
+	result = (result*scale_factor);
+	pData[bin] += static_cast<T>(result);
+      }
     }
   }
 
@@ -504,14 +506,14 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   getDoubleParam(ADSPNoiseLevelParam, &noise_level);
   if (noise_type == static_cast<epicsUInt32>(e_noise_type::uniform)) {
     std::uniform_real_distribution<double> dist(-1.0,1.0);
-    for (epicsInt32 bin=0; bin<size; bin++) {
+    for (epicsUInt32 bin=0; bin<size; bin++) {
       noise = dist(m_rand_gen);
       noise = noise_level * noise;
       pData[bin] += static_cast<T>(noise);
     }
   } else if (noise_type == static_cast<epicsUInt32>(e_noise_type::gaussian)) {
     std::normal_distribution<double> dist(0.0,1.0);
-    for (epicsInt32 bin=0; bin<size; bin++) {
+    for (epicsUInt32 bin=0; bin<size; bin++) {
       noise = dist(m_rand_gen);
       noise = noise_level * noise;
       pData[bin] += static_cast<T>(noise);
