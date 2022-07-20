@@ -141,12 +141,19 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
   asynStatus status = asynSuccess;
   int imageMode = 0;
+  int addr = 0;
   int function = pasynUser->reason;
   
   string functionName(s_className + "::" + __func__);
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s entry...\n", functionName.c_str());
 
+  //Read address (ie. peak number).
+  status = getAddress(pasynUser, &addr); 
+  if (status != asynSuccess) {
+    return(status);
+  }
+  
   getIntegerParam(ADImageMode, &imageMode);
   
   if (function == ADAcquire) {
@@ -180,7 +187,7 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return asynError;
   }
 
-  status = (asynStatus) setIntegerParam(function, value);
+  status = (asynStatus) setIntegerParam(addr, function, value);
   if (status != asynSuccess) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
               "%s error setting parameter. asynUser->reason: %d, value: %d\n", 
@@ -196,18 +203,23 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 {
-  
   asynStatus status = asynSuccess;
+  int addr = 0;
   int function = pasynUser->reason;
 
   string functionName(s_className + "::" + __func__);
   
   asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW, "%s entry...\n", functionName.c_str());
 
+  //Read address (ie. peak number).
+  status = getAddress(pasynUser, &addr); 
+  if (status != asynSuccess) {
+    return(status);
+  }
+
   if (function == ADSPPeakFWHMParam) {
     if (value < 1.0) {
       value = 1.0;
-      setDoubleParam(ADSPPeakFWHMParam, value);
     }
   }
   
@@ -216,7 +228,7 @@ asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     return asynError;
   }
 
-  status = (asynStatus) setDoubleParam(function, value);
+  status = (asynStatus) setDoubleParam(addr, function, value);
   if (status != asynSuccess) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, 
               "%s error setting parameter. asynUser->reason: %d, value: %f\n", 
