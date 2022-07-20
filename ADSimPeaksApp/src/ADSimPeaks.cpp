@@ -390,7 +390,6 @@ void ADSimPeaks::ADSimPeaksTask(void)
       } else {
 	//Wait for a stop event
 	this->unlock();
-	//epicsThreadSleep(updatePeriod);
 	eventStatus = epicsEventWaitWithTimeout(m_stopEvent, updatePeriod);
 	this->lock();
 	if (eventStatus == epicsEventWaitOK) {
