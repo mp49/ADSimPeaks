@@ -134,7 +134,8 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
 
 ADSimPeaks::~ADSimPeaks()
 {
-  cout << __func__ << endl;
+  string functionName(s_className + "::" + __func__);
+  cout << functionName << " exiting. " << endl;
 }
 
 asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -217,7 +218,11 @@ asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     return(status);
   }
 
-  if (function == ADSPPeakFWHMParam) {
+  if (function == ADAcquirePeriod) {
+     if (value < s_zeroCheck) {
+       value = 0.0;
+     }
+  } else if (function == ADSPPeakFWHMParam) {
     if (value < 1.0) {
       value = 1.0;
     }
@@ -283,6 +288,8 @@ void ADSimPeaks::ADSimPeaksTask(void)
   int arrayCounter = 0;
   int imagesCounter = 0;
   int arrayCallbacks = 0;
+  int imageMode = 0;
+  int numImages = 0;
   epicsFloat64 updatePeriod = 0.0;
   double elapsedTime = 0.0;
   epicsEventWaitStatus eventStatus;
@@ -317,6 +324,9 @@ void ADSimPeaks::ADSimPeaksTask(void)
 
     if (m_acquiring) {
       getIntegerParam(NDArrayCallbacks, &arrayCallbacks);
+
+      getIntegerParam(ADImageMode, &imageMode);
+      getIntegerParam(ADNumImages, &numImages);
       
       ++arrayCounter;
       ++imagesCounter;
@@ -371,18 +381,24 @@ void ADSimPeaks::ADSimPeaksTask(void)
       
       //Get the acquire period, which we use to define the update rate
       getDoubleParam(ADAcquirePeriod, &updatePeriod);
-      
-      //Wait for a stop event
-      this->unlock();
-      //epicsThreadSleep(updatePeriod);
-      eventStatus = epicsEventWaitWithTimeout(m_stopEvent, updatePeriod);
-      this->lock();
-      if (eventStatus == epicsEventWaitOK) {
-	asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-		  "%s stopping simulation.\n", functionName.c_str());
+
+      //Figure out if we are finished
+      if ((imageMode == ADImageSingle) || ((imageMode == ADImageMultiple) && (imagesCounter >= numImages))) {
 	m_acquiring = false;
 	setIntegerParam(ADStatus, ADStatusIdle);
 	setStringParam(ADStatusMessage, "Simulation Idle");
+      } else {
+	//Wait for a stop event
+	this->unlock();
+	//epicsThreadSleep(updatePeriod);
+	eventStatus = epicsEventWaitWithTimeout(m_stopEvent, updatePeriod);
+	this->lock();
+	if (eventStatus == epicsEventWaitOK) {
+	  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+		    "%s stopping simulation.\n", functionName.c_str());
+	  m_acquiring = false;
+	  setStringParam(ADStatusMessage, "Simulation Idle");
+	}
       }
       callParamCallbacks();
     }
