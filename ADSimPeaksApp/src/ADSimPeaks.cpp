@@ -172,7 +172,7 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
       }
     }
   } else if (function == ADSizeX) {
-    value = std::max(1, std::min(static_cast<int32_t>(value), static_cast<int32_t>(m_maxSize)));
+    value = std::max(1, std::min(value, static_cast<int32_t>(m_maxSize)));
     int currentXSize = 0;
     getIntegerParam(ADSizeX, &currentXSize);
     if (value != currentXSize) {
@@ -180,6 +180,8 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
     }
   } else if (function == NDDataType) {
     m_needNewArray = true;  
+  } else if (function == ADNumImages) {
+    value = std::max(1, value);
   }
   
 
@@ -196,7 +198,7 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return(status);
   }
  
-  callParamCallbacks();
+  callParamCallbacks(addr);
 
   return status;
 
@@ -219,13 +221,9 @@ asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   }
 
   if (function == ADAcquirePeriod) {
-     if (value < s_zeroCheck) {
-       value = 0.0;
-     }
+     value = std::max(0.0, value);
   } else if (function == ADSPPeakFWHMParam) {
-    if (value < 1.0) {
-      value = 1.0;
-    }
+     value = std::max(1.0, value);
   }
   
   if (status != asynSuccess) {
@@ -241,7 +239,7 @@ asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     return(status);
   }
  
-  callParamCallbacks();
+  callParamCallbacks(addr);
 
   return status;
 
