@@ -1,9 +1,11 @@
-/*
- * areaDetector driver to simulate 1D peaks with 
- * background profiles and noise. 
+/**
+ * \brief areaDetector driver to simulate 1D peaks with background 
+ *        profiles and noise. 
  *
- * Matt Pearson 
- * July 11th, 2022 
+ * More detailed documentation can be found in the source file.
+ *
+ * \author Matt Pearson 
+ * \date July 11th, 2022 
  *
  */
 
@@ -49,7 +51,6 @@ class ADSimPeaks : public ADDriver {
 
   void ADSimPeaksTask(void);
 
-
   bool getInitialized(void);
 
  private:
@@ -87,13 +88,21 @@ class ADSimPeaks : public ADDriver {
 
   std::default_random_engine m_rand_gen;
 
-  //Enum Data
+  /**
+   * The enum for the type of peak function. This needs to match
+   * the list order presented to the user. 
+   */
   enum class e_peak_type {
     none,
     gaussian,
     lorentz,
     pseudovoigt  
   };
+
+  /**
+   * The enum for the type of noise. This needs to match
+   * the list order presented to the user. 
+   */
   enum class e_noise_type {
     none,
     uniform,

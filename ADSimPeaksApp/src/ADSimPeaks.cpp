@@ -1,3 +1,29 @@
+/**
+ * \brief areaDetector driver to simulate 1D peaks with background 
+ *        profiles and noise. 
+ *
+ * This areaDetector driver can be used to simulate semi-realistic looking
+ * data in 1D. It can produce a 1D NDArray object of variable size and 
+ * of different data types. The data can contain a background and any number 
+ * of peaks of a few different shapes, with the option to add noise to the 
+ * signal.
+ *
+ * Currently the supported peak shapes are:
+ * 1) Gaussian
+ * 2) Lorentzian (also known as Cauchy)
+ * 3) Voigt (implemented as a psudo-Voigt, which is an approximation)
+ *
+ * The background is defined as a 3rd order polynomial so that the shape
+ * can be a flat offset, a slope or a curve.
+ *
+ * The noise type can be either uniformly distributed or distributed
+ * according to a Gaussian profile. 
+ *
+ * \author Matt Pearson 
+ * \date July 11th, 2022
+ *
+ */
+
 
 //Standard 
 #include <iostream>
@@ -28,6 +54,20 @@ static void ADSimPeaksTaskC(void *drvPvt);
 const string ADSimPeaks::s_className = "ADSimPeaks";
 const epicsFloat64 ADSimPeaks::s_zeroCheck = 1e-12;
 
+/**
+ * Constructor. This creates the driver object and the thread used for
+ * generating the data profile.
+ *
+ * \arg \c portName The Asyn port name
+ * \arg \c maxSize The maximum number of bins in the NDArray object 
+ * \arg \c maxPeaks The maximum number of peaks (i.e. the Asyn addresses)
+ * \arg \c dataType The data type (Uint8, UInt16, etc) to initially use
+ * \arg \c maxBuffers The asynPortDriver max buffers (0=unlimited)
+ * \arg \c maxMemory The asynPortDriver max memory (0=unlimited)
+ * \arg \c priority The asynPortDriver priority (0=default)
+ * \arg \c stackSize The asynPortDriver stackSize (0=default)
+ *
+ */
 ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
 		       NDDataType_t dataType, int maxBuffers, size_t maxMemory,
 		       int priority, int stackSize)
@@ -38,7 +78,7 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
 {
 
   string functionName(s_className + "::" + __func__);
-
+  
   m_startEvent = epicsEventMustCreate(epicsEventEmpty);
   if (!m_startEvent) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
@@ -131,13 +171,25 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
   
 }
 
-
+/**
+ * Destructor. 
+ * We should never get here (unless we have an exit handler calling this)
+ */
 ADSimPeaks::~ADSimPeaks()
 {
   string functionName(s_className + "::" + __func__);
   cout << functionName << " exiting. " << endl;
 }
 
+/**
+ * Implementation of writeInt32. This is called when writing 
+ * integer values.
+ *
+ * /arg /c pasynUser Pointer to the asynUser.
+ * /arg /c value The value to write to the parameter library.
+ *
+ * /return /c asynStatus
+ */
 asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
   asynStatus status = asynSuccess;
@@ -204,6 +256,15 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 }
 
+/**
+ * Implementation of writeFloat64. This is called when writing 
+ * double values.
+ *
+ * /arg /c pasynUser Pointer to the asynUser.
+ * /arg /c value The value to write to the parameter library.
+ *
+ * /return /c asynStatus
+ */
 asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 {
   asynStatus status = asynSuccess;
@@ -245,29 +306,88 @@ asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 
 }
 
+/**
+ * Implementation of the standard report function.
+ * This prints the driver configuration.
+ */
 void ADSimPeaks::report(FILE *fp, int details)
 {
-
+  epicsInt32 intParam = 0;
+  epicsFloat64 floatParam = 0.0;
+  
   string functionName(s_className + "::" + __func__);
-  cout << functionName << " portName:" << this->portName << endl;
+  fprintf(fp, "%s. portName: %s\n", functionName.c_str(), this->portName);
   
   if (details > 0) {
-    cout << __func__ << endl;
-    cout << "  m_maxSize: " << m_maxSize << endl;
-    cout << "  m_maxPeaks: " << m_maxPeaks << endl;
+    fprintf(fp, " Internal Data:\n");
+    fprintf(fp, "  m_acquiring: %d\n", m_acquiring);
+    fprintf(fp, "  m_maxSize: %d\n", m_maxSize);
+    fprintf(fp, "  m_maxPeaks: %d\n", m_maxPeaks);
+    fprintf(fp, "  m_uniqueId: %d\n", m_uniqueId);
+    fprintf(fp, "  m_needNewArray: %d\n", m_needNewArray);
+    fprintf(fp, "  m_needReset: %d\n", m_needReset);
 
-    
-    /*int nx, ny, dataType;
-    getIntegerParam(ADSizeX, &nx);
-    getIntegerParam(ADSizeY, &ny);
-    getIntegerParam(NDDataType, &dataType);
-    fprintf(fp, "  NX, NY:            %d  %d\n", nx, ny);
-    fprintf(fp, "  Data type:         %d\n", dataType);*/
+    fprintf(fp, " Simulation State:\n");
+    getIntegerParam(ADAcquire, &intParam);
+    fprintf(fp, "  acquire: %d\n", intParam);
+    getIntegerParam(ADSizeX, &intParam);
+    fprintf(fp, "  NDArray size: %d\n", intParam);
+    getIntegerParam(NDDataType, &intParam);
+    fprintf(fp, "  NDArray data type: %d\n", intParam);
+    getIntegerParam(ADImageMode, &intParam);
+    fprintf(fp, "  image mode: %d\n", intParam);
+    getIntegerParam(ADNumImages, &intParam);
+    fprintf(fp, "  num images: %d\n", intParam);
+
+    getIntegerParam(ADSPIntegrateParam, &intParam);
+    fprintf(fp, "  integrate: %d\n", intParam);
+    getDoubleParam(ADSPElapsedTimeParam, &floatParam);
+    fprintf(fp, "  elapsed time: %f\n", floatParam);
+
+    getIntegerParam(ADSPNoiseTypeParam, &intParam);
+    fprintf(fp, "  noise type: %d\n", intParam);
+    getDoubleParam(ADSPNoiseLevelParam, &floatParam);
+    fprintf(fp, "  noise level: %f\n", floatParam);
+
+    getDoubleParam(ADSPBGC0Param, &floatParam);
+    fprintf(fp, "  background coefficient 0: %f\n", floatParam);
+    getDoubleParam(ADSPBGC1Param, &floatParam);
+    fprintf(fp, "  background coefficient 1: %f\n", floatParam);
+    getDoubleParam(ADSPBGC2Param, &floatParam);
+    fprintf(fp, "  background coefficient 2: %f\n", floatParam);
+    getDoubleParam(ADSPBGC3Param, &floatParam);
+    fprintf(fp, "  background coefficient 3: %f\n", floatParam);
+    getDoubleParam(ADSPBGSHParam, &floatParam);
+    fprintf(fp, "  background shift: %f\n", floatParam);
+
+    fprintf(fp, " Peak Information:\n");
+    for (epicsUInt32 i=0; i<m_maxPeaks; i++) {
+      fprintf(fp, "  peak: %d\n", i);
+      getIntegerParam(i, ADSPPeakTypeParam, &intParam);
+      if (intParam == static_cast<epicsUInt32>(e_peak_type::none)) {
+	fprintf(fp, "   none (disabled)\n");
+      } else {
+	fprintf(fp, "   type: %d\n", intParam);
+	getDoubleParam(i, ADSPPeakPosParam, &floatParam);
+	fprintf(fp, "   position: %f\n", floatParam);
+	getDoubleParam(i, ADSPPeakFWHMParam, &floatParam);
+	fprintf(fp, "   fwhm: %f\n", floatParam);
+	getDoubleParam(i, ADSPPeakMaxParam, &floatParam);
+	fprintf(fp, "   max: %f\n", floatParam);
+      }
+    }
   }
-  /* Invoke the base class method */
+  // Invoke the base class method.
+  // This will by default print the addr=0 parameters.
   ADDriver::report(fp, details);
 }
 
+/**
+ * Return the state of the driver initialization 
+ * (i.e., did the constructor complete normally)
+ *
+ * /return /c boolean (true means initialized OK)
+ */
 bool ADSimPeaks::getInitialized(void)
 {
   return m_initialized;
