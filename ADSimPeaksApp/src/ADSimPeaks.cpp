@@ -393,6 +393,9 @@ bool ADSimPeaks::getInitialized(void)
   return m_initialized;
 }
 
+/**
+ * The data simulation thread which runs forever.
+ */
 void ADSimPeaks::ADSimPeaksTask(void)
 {
   int size = 0;
@@ -524,7 +527,13 @@ void ADSimPeaks::ADSimPeaksTask(void)
   
 }
 
-
+/**
+ * Generate a simulation array using the input data type
+ *
+ * /arg /c dataType The NDDataType to use (eg. NDInt32, NDFloat64, etc.)
+ *
+ * /return /c asynStatus 
+ */
 asynStatus ADSimPeaks::computeData(NDDataType_t dataType)
 {
   asynStatus status = asynSuccess;
@@ -560,6 +569,14 @@ asynStatus ADSimPeaks::computeData(NDDataType_t dataType)
   return status;
 }
 
+/**
+ * Templated version of ADSimPeaks::computeData. This does the actual work and 
+ * populates the NDArray object. The background profile is first calculated, 
+ * then we add in the desired peaks, then we modify the resulting profile 
+ * with optional noise.
+ *
+ * /return /c asynStatus 
+ */
 template <typename T> asynStatus ADSimPeaks::computeDataT()
 {
   asynStatus status = asynSuccess;
@@ -668,6 +685,13 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   return status;
 }
 
+/**
+ * Utility function to check if a floating point number is close to zero.
+ *
+ * /arg /c value The value to check 
+ *
+ * /return The original input value or 1.0 (if it was too close to zero)
+ */
 epicsFloat64 ADSimPeaks::zeroCheck(epicsFloat64 value)
 {
   if ((value > -s_zeroCheck) && (value < s_zeroCheck)) {
@@ -678,13 +702,23 @@ epicsFloat64 ADSimPeaks::zeroCheck(epicsFloat64 value)
 }
  
 
-
+/**
+ * Implementation of a Gaussian function which has center 'pos' and full width half max 'fwhm'.
+ * 
+ * For more information on this see:
+ * https://en.wikipedia.org/wiki/Normal_distribution
+ *
+ * /arg /c pos The center of the distribution
+ * /arg /c fwhm The FWHM of the distribution
+ * /arg /c bin The position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
 asynStatus ADSimPeaks::computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
 {
   asynStatus status = asynSuccess;
   string functionName(s_className + "::" + __func__);
-
-  //TODO - error check and use exceptions
 
   if (fwhm < 1.0) {
     fwhm = 1.0;
@@ -696,6 +730,19 @@ asynStatus ADSimPeaks::computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epic
   return status;
 }
 
+/**
+ * Implementation of a Cauchy-Lorentz function which has center 'pos' and full width half max 'fwhm'.
+ * 
+ * For more information on this see:
+ * https://en.wikipedia.org/wiki/Cauchy_distribution
+ *
+ * /arg /c pos The center of the distribution
+ * /arg /c fwhm The FWHM of the distribution
+ * /arg /c bin The position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
 asynStatus ADSimPeaks::computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
 {
   asynStatus status = asynSuccess;
@@ -714,6 +761,20 @@ asynStatus ADSimPeaks::computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epics
   return status;
 }
 
+/**
+ * Implementation of the approximation of the Voigt function (known as the Psudo-Voigt) 
+ * which has center 'pos' and full width half max 'fwhm'.
+ * 
+ * For more information on this see:
+ * https://en.wikipedia.org/wiki/Voigt_profile
+ *
+ * /arg /c pos The center of the distribution
+ * /arg /c fwhm The FWHM of the distribution
+ * /arg /c bin The position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
 asynStatus ADSimPeaks::computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
 {
   asynStatus status = asynSuccess;
@@ -764,8 +825,9 @@ asynStatus ADSimPeaks::computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, e
   return status;
 }
 
-
-
+/**
+ * C function to tie into EPICS
+ */
 static void ADSimPeaksTaskC(void *drvPvt)
 {
     ADSimPeaks *pPvt = (ADSimPeaks *)drvPvt;
@@ -773,7 +835,9 @@ static void ADSimPeaksTaskC(void *drvPvt)
     pPvt->ADSimPeaksTask();
 }
 
-
+/**
+ * C linkage functions to define the shell commands
+ */
 extern "C" {
 
   asynStatus ADSimPeaksConfig(const char *portName, int maxSize, int maxPeaks,
