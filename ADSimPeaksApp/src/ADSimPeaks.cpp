@@ -707,6 +707,7 @@ epicsFloat64 ADSimPeaks::zeroCheck(epicsFloat64 value)
  * 
  * For more information on this see:
  * https://en.wikipedia.org/wiki/Normal_distribution
+ * https://en.wikipedia.org/wiki/Gaussian_function
  *
  * /arg /c pos The center of the distribution
  * /arg /c fwhm The FWHM of the distribution
@@ -824,6 +825,88 @@ asynStatus ADSimPeaks::computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, e
 
   return status;
 }
+
+/**
+ * Implementation of a bivariate Gaussian function which has center (x,y) and full width half max 
+ * 'x_fwhm' and 'y_fwhm', with X and Y correlation rho (where -1<=rho<=1).
+ * 
+ * For more information on this see:
+ * https://en.wikipedia.org/wiki/Normal_distribution
+ * https://en.wikipedia.org/wiki/Gaussian_function
+ *
+ * /arg /c x_pos The X coordinate of the distribution
+ * /arg /c y_pos The Y coordinate of the distribution
+ * /arg /c x_fwhm The X dimension FWHM of the distribution
+ * /arg /c y_fwhm The Y dimension FWHM of the distribution
+ * /arg /c x_bin The X position to use for the function
+ * /arg /c y_bin The Y position to use for the function
+ * /arg /c rho The X/Y correlation
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
+asynStatus ADSimPeaks::computeGaussian2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
+					 epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
+					 epicsInt32 x_bin, epicsInt32 y_bin,
+					 epicsFloat64 rho, epicsFloat64 *result)
+{
+  asynStatus status = asynSuccess;
+  string functionName(s_className + "::" + __func__);
+
+  x_fwhm = std::max(1.0, x_fwhm);
+  y_fwhm = std::max(1.0, y_fwhm);
+  rho = std::min(1.0, std::max(-1.0, rho));
+  
+  epicsFloat64 x_sig = x_fwhm / (2.0*sqrt(2.0*log(2.0)));
+  epicsFloat64 y_sig = y_fwhm / (2.0*sqrt(2.0*log(2.0)));
+
+  epicsFloat64 xy_amp = 1.0 / (2.0 * M_PI * x_sig * y_sig * sqrt(1-(rho*rho)));
+  epicsFloat64 xy_factor = -1 / (2*(1-(rho*rho)));
+  epicsFloat64 xy_calc1 = (x_bin-x_pos)/x_sig;
+  epicsFloat64 xy_calc2 = (y_bin-y_pos)/y_sig;
+    
+  *result = xy_amp * exp(xy_factor*(xy_calc1*xy_calc1 - 2*rho*xy_calc1*xy_calc2 + xy_calc2*xy_calc2));
+
+  return status;
+}
+
+/**
+ * Implementation of a bivariate Cauchy-Lorentz function which has center (x,y) and 
+ * full width half max 'fwhm'.
+ * 
+ * For more information on this see:
+ * https://en.wikipedia.org/wiki/Cauchy_distribution
+ *
+ * I can only find bivariate Cauchy functions that are symmetric in X and Y so we just use
+ * a single FWHM argument and there is no covariance factor.
+ * 
+ * /arg /c x_pos The X coordinate of the distribution
+ * /arg /c y_pos The Y coordinate of the distribution
+ * /arg /c fwhm The FWHM of the distribution
+ * /arg /c x_bin The X position to use for the function
+ * /arg /c y_bin The Y position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
+asynStatus ADSimPeaks::computeLorentz2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
+					epicsFloat64 fwhm, epicsInt32 x_bin,
+					epicsInt32 y_bin, epicsFloat64 *result)
+{
+  asynStatus status = asynSuccess;
+  string functionName(s_className + "::" + __func__);
+  
+  fwhm = std::max(1.0, fwhm);
+  
+  epicsFloat64 gamma = fwhm / 2.0;
+  epicsFloat64 xy_calc1 = x_bin-x_pos;
+  epicsFloat64 xy_calc2 = y_bin-y_pos;
+  
+  *result = (1 / (2*M_PI)) * (gamma / pow(((xy_calc1*xy_calc1) + (xy_calc2*xy_calc2) + gamma*gamma),1.5));
+
+  return status;
+}
+
 
 /**
  * C function to tie into EPICS
