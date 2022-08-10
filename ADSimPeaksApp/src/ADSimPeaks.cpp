@@ -721,9 +721,7 @@ asynStatus ADSimPeaks::computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epic
   asynStatus status = asynSuccess;
   string functionName(s_className + "::" + __func__);
 
-  if (fwhm < 1.0) {
-    fwhm = 1.0;
-  }
+  fwhm = std::max(1.0, fwhm);
   
   epicsFloat64 sigma = fwhm / (2.0*sqrt(2.0*log(2.0)));
   *result = (1.0 / (sigma*sqrt(2.0*M_PI))) * exp(-(((bin-pos)*(bin-pos))) / (2.0*(sigma*sigma)));
@@ -749,12 +747,7 @@ asynStatus ADSimPeaks::computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epics
   asynStatus status = asynSuccess;
   string functionName(s_className + "::" + __func__);
 
-  //TODO - error check and use exceptions
-
-  
-  if (fwhm < 1.0) {
-    fwhm = 1.0;
-  }
+  fwhm = std::max(1.0, fwhm);
   
   epicsFloat64 gamma = fwhm / 2.0;
   *result = (1 / (M_PI*gamma)) * ((gamma*gamma) / (((bin-pos)*(bin-pos)) + (gamma*gamma)));
@@ -790,11 +783,7 @@ asynStatus ADSimPeaks::computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, e
   
   string functionName(s_className + "::" + __func__);
 
-  //TODO - error check and use exceptions
-
-  if (fwhm < 1.0) {
-    fwhm = 1.0;
-  }
+  fwhm = std::max(1.0, fwhm);
   
   //This implementation assumes the FWHM of the Gaussian and Lorentz is the same. However, we
   //still use the full approximation for the Pseudo-Voigt total FWHM (fwhm_tot) and use two FWHM parameters
