@@ -124,6 +124,10 @@ class ADSimPeaks : public ADDriver {
   asynStatus computeLorentz2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
 			      epicsFloat64 fwhm, epicsInt32 x_bin,
 			      epicsInt32 y_bin, epicsFloat64 *result);
+  asynStatus computePseudoVoigt2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
+				  epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
+				  epicsInt32 x_bin, epicsInt32 y_bin,
+				  epicsFloat64 *result);
   epicsFloat64 zeroCheck(epicsFloat64 value);
   
 };

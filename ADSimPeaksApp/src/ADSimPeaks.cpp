@@ -896,6 +896,75 @@ asynStatus ADSimPeaks::computeLorentz2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
   return status;
 }
 
+/**
+ * Implementation of the approximation of the bivariate Voigt function 
+ * (known as the Psudo-Voigt) which has center (x,y) and 
+ * full width half max 'fwhm'. The Guassian part of the function 
+ * can be defined with different FWHM parameters in X and Y, and with
+ * a skewed shape, but for the purposes of this approximation we
+ * assume it has zero skew and an average is taken 
+ * as the Lorenztian FWHM component.
+ * 
+ * For more information on this see:
+ * https://en.wikipedia.org/wiki/Voigt_profile
+ *
+ * /arg /c x_pos The X coordinate of the distribution
+ * /arg /c y_pos The Y coordinate of the distribution
+ * /arg /c x_fwhm The X dimension FWHM of the distribution
+ * /arg /c y_fwhm The Y dimension FWHM of the distribution
+ * /arg /c x_bin The X position to use for the function
+ * /arg /c y_bin The Y position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
+asynStatus ADSimPeaks::computePseudoVoigt2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
+					    epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
+					    epicsInt32 x_bin, epicsInt32 y_bin,
+					    epicsFloat64 *result)
+{
+  asynStatus status = asynSuccess;
+
+  epicsFloat64 fwhm_av = 0.0;
+  epicsFloat64 fwhm_g = 0.0;
+  epicsFloat64 fwhm_l = 0.0;
+  epicsFloat64 fwhm_sum = 0.0;
+  epicsFloat64 fwhm_tot = 0.0;
+  epicsFloat64 eta = 0.0;
+  epicsFloat64 gaussian = 0.0;
+  epicsFloat64 lorentz = 0.0;
+  
+  string functionName(s_className + "::" + __func__);
+
+  x_fwhm = std::max(1.0, x_fwhm);
+  y_fwhm = std::max(1.0, y_fwhm);
+  
+  epicsFloat64 p1 = 2.69269;
+  epicsFloat64 p2 = 2.42843;
+  epicsFloat64 p3 = 4.47163;
+  epicsFloat64 p4 = 0.07842;
+
+  epicsFloat64 e1 = 1.36603;
+  epicsFloat64 e2 = 0.47719;
+  epicsFloat64 e3 = 0.11116;
+
+  fwhm_av = (x_fwhm+y_fwhm)/2.0;
+  fwhm_g = fwhm_av;
+  fwhm_l = fwhm_av;
+  fwhm_sum = pow(fwhm_g,5) + (p1*pow(fwhm_g,4)*fwhm_l) + (p2*pow(fwhm_g,3)*pow(fwhm_l,2)) +
+            (p3*pow(fwhm_g,2)*pow(fwhm_l,3)) + (p4*fwhm_g*pow(fwhm_l,4)) + pow(fwhm_l,5);
+  fwhm_tot = pow(fwhm_sum,0.2);
+  
+  eta = ((e1*(fwhm_l/fwhm_tot)) - (e2*pow((fwhm_l/fwhm_tot),2)) + (e3*pow((fwhm_l/fwhm_tot),3)));
+  
+  computeGaussian2D(x_pos, y_pos, x_fwhm, y_fwhm, x_bin, y_bin, 0.0, &gaussian);
+  computeLorentz2D(x_pos, y_pos, fwhm_av, x_bin, y_bin, &lorentz);
+
+  *result = ((1.0 - eta)*gaussian) + (eta*lorentz);
+
+  return status;
+}
+
 
 /**
  * C function to tie into EPICS
