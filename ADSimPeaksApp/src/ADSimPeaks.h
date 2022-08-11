@@ -1,5 +1,5 @@
 /**
- * \brief areaDetector driver to simulate 1D peaks with background 
+ * \brief areaDetector driver to simulate 1D or 2D peaks with background 
  *        profiles and noise. 
  *
  * More detailed documentation can be found in the source file.
@@ -23,16 +23,17 @@
 
 #define ADSPIntegrateParamString   "ADSP_INTEGRATE"
 #define ADSPNoiseTypeParamString   "ADSP_NOISE_TYPE"
-#define ADSPNoiseLevelParamString   "ADSP_NOISE_LEVEL"
+#define ADSPNoiseLevelParamString  "ADSP_NOISE_LEVEL"
 #define ADSPElapsedTimeParamString "ADSP_ELAPSEDTIME"
 // Peak Information Params
 #define ADSPPeakType1DParamString  "ADSP_PEAK_TYPE1D"
 #define ADSPPeakType2DParamString  "ADSP_PEAK_TYPE2D"
-#define ADSPPeakPosXParamString   "ADSP_PEAK_POSX"
-#define ADSPPeakPosYParamString   "ADSP_PEAK_POSY"
-#define ADSPPeakFWHMXParamString  "ADSP_PEAK_FWHMX"
-#define ADSPPeakFWHMYParamString  "ADSP_PEAK_FWHMY"
-#define ADSPPeakMaxParamString "ADSP_PEAK_MAX"
+#define ADSPPeakPosXParamString    "ADSP_PEAK_POSX"
+#define ADSPPeakPosYParamString    "ADSP_PEAK_POSY"
+#define ADSPPeakFWHMXParamString   "ADSP_PEAK_FWHMX"
+#define ADSPPeakFWHMYParamString   "ADSP_PEAK_FWHMY"
+#define ADSPPeakCorrParamString    "ADSP_PEAK_CORR"
+#define ADSPPeakMaxParamString     "ADSP_PEAK_MAX"
 // Background Polynomial Coefficients
 // X
 #define ADSPBGC0XParamString  "ADSP_BG_C0X"
@@ -76,6 +77,7 @@ class ADSimPeaks : public ADDriver {
   int ADSPPeakPosYParam;
   int ADSPPeakFWHMXParam;
   int ADSPPeakFWHMYParam;
+  int ADSPPeakCorrParam;
   int ADSPPeakMaxParam;
   int ADSPBGC0XParam;
   int ADSPBGC1XParam;
@@ -139,16 +141,19 @@ class ADSimPeaks : public ADDriver {
     gaussian  
   };
   
-  //Static Data
+  // Static Data
   static const std::string s_className;
   static const epicsFloat64 s_zeroCheck;
 
   asynStatus computeData(NDDataType_t dataType);
   template <typename T> asynStatus computeDataT();
 
+  // 1D Profiles
   asynStatus computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
   asynStatus computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
   asynStatus computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
+
+  // 2D Profiles
   asynStatus computeGaussian2D(epicsFloat64 x_pos, epicsFloat64 y_pos, epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
 			       epicsInt32 x_bin, epicsInt32 y_bin, epicsFloat64 rho, epicsFloat64 *result);
   asynStatus computeLorentz2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
@@ -158,6 +163,8 @@ class ADSimPeaks : public ADDriver {
 				  epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
 				  epicsInt32 x_bin, epicsInt32 y_bin,
 				  epicsFloat64 *result);
+
+  //Utilty Functions
   epicsFloat64 zeroCheck(epicsFloat64 value);
   
 };

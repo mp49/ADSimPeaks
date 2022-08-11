@@ -105,6 +105,7 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
   createParam(ADSPPeakPosYParamString, asynParamFloat64, &ADSPPeakPosYParam);
   createParam(ADSPPeakFWHMXParamString, asynParamFloat64, &ADSPPeakFWHMXParam);
   createParam(ADSPPeakFWHMYParamString, asynParamFloat64, &ADSPPeakFWHMYParam);
+  createParam(ADSPPeakCorrParamString, asynParamFloat64, &ADSPPeakCorrParam);
   createParam(ADSPPeakMaxParamString, asynParamFloat64, &ADSPPeakMaxParam);
   createParam(ADSPBGC0XParamString, asynParamFloat64, &ADSPBGC0XParam);
   createParam(ADSPBGC1XParamString, asynParamFloat64, &ADSPBGC1XParam);
@@ -153,6 +154,7 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
     paramStatus = ((setDoubleParam(ADSPPeakPosYParam, 1.0) == asynSuccess) && paramStatus);
     paramStatus = ((setDoubleParam(ADSPPeakFWHMXParam, 1.0) == asynSuccess) && paramStatus);
     paramStatus = ((setDoubleParam(ADSPPeakFWHMYParam, 1.0) == asynSuccess) && paramStatus);
+    paramStatus = ((setDoubleParam(ADSPPeakCorrParam, 0.0) == asynSuccess) && paramStatus);
     paramStatus = ((setDoubleParam(ADSPPeakMaxParam, 1.0) == asynSuccess) && paramStatus);
     callParamCallbacks(peak);
   }
@@ -324,6 +326,8 @@ asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
      value = std::max(1.0, value);
   } else if (function == ADSPPeakFWHMYParam) {
      value = std::max(1.0, value);
+  } else if (function == ADSPPeakCorrParam) {
+    value = std::min(1.0, std::max(-1.0, value));
   }
   
   if (status != asynSuccess) {
@@ -432,6 +436,8 @@ void ADSimPeaks::report(FILE *fp, int details)
 	  fprintf(fp, "   fwhm X: %f\n", floatParam);
 	  getDoubleParam(i, ADSPPeakFWHMYParam, &floatParam);
 	  fprintf(fp, "   fwhm Y: %f\n", floatParam);
+	  getDoubleParam(i, ADSPPeakCorrParam, &floatParam);
+	  fprintf(fp, "   correlation: %f\n", floatParam);
 	  getDoubleParam(i, ADSPPeakMaxParam, &floatParam);
 	  fprintf(fp, "   max: %f\n", floatParam);
 	}
@@ -673,6 +679,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   epicsFloat64 peak_fwhm_x = 0.0;
   epicsFloat64 peak_pos_y = 0.0;
   epicsFloat64 peak_fwhm_y = 0.0;
+  epicsFloat64 peak_corr = 0.0;
   epicsFloat64 peak_max = 0.0;
   epicsFloat64 result = 0.0;
   epicsFloat64 result_max = 0.0;
@@ -755,16 +762,17 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
     }
     getDoubleParam(peak, ADSPPeakPosXParam, &peak_pos_x);
     getDoubleParam(peak, ADSPPeakFWHMXParam, &peak_fwhm_x);
+    getDoubleParam(peak, ADSPPeakCorrParam, &peak_corr);
     getDoubleParam(peak, ADSPPeakMaxParam, &peak_max);
 
     if (m_2d) {
       if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::gaussian)) {
-	computeGaussian2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, 0.0, &result_max);
+	computeGaussian2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, peak_corr, &result_max);
 	scale_factor = peak_max / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
-	  computeGaussian2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, 0.0, &result);
+	  computeGaussian2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, peak_corr, &result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}

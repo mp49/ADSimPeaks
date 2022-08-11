@@ -40,6 +40,24 @@ record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
 }
 
 # ///
+# /// X and Y Correlation
+# ///
+record(ao, "$(P)$(R)P$(PEAK)Corr") {
+  field(DESC, "Peak X/Y Corrleation")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_CORR")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)P$(PEAK)Corr_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_CORR")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
 # /// Peak max
 # ///
 record(ao, "$(P)$(R)P$(PEAK)Max") {
