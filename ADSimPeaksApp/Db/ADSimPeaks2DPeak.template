@@ -58,8 +58,10 @@ record(ai, "$(P)$(R)P$(PEAK)Max_RBV") {
 }
 
 substitute "XY=X"
-include "ADSimPeaksNPeak.template
+include "ADSimPeaksNPeak.template"
 
 substitute "XY=Y"
-include "ADSimPeaksNPeak.template
+include "ADSimPeaksNPeak.template"
+
+
 
