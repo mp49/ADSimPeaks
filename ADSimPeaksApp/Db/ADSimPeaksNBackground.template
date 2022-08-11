@@ -1,0 +1,102 @@
+############################################################
+# Background Polynomial Coefficients (Cubic Polynomial)
+#
+# This is template meant to be instantiated by either
+# the 1D or 2D case by setting the additional macro XY
+#
+# Macros:
+# XY - 'X' or 'Y'
+#
+############################################################
+
+# ///
+# /// $(XY) Background Polynomial Constant Term
+# ///
+record(ao, "$(P)$(R)BGC0$(XY)") {
+  field(DESC, "$(XY) Background Coef 0")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C0$(XY)")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)BGC0$(XY)_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C0$(XY)")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// $(XY) Background Polynomial Slope
+# ///
+record(ao, "$(P)$(R)BGC1$(XY)") {
+  field(DESC, "$(XY) Background Coef 1")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C1$(XY)")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)BGC1$(XY)_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C1$(XY)")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// $(XY) Background Polynomial 2nd Order Coefficients
+# ///
+record(ao, "$(P)$(R)BGC2$(XY)") {
+  field(DESC, "$(XY) Background Coef 2")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C2$(XY)")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)BGC2$(XY)_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C2$(XY)")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// $(XY) Background Polynomial 3rd Order Coefficients
+# ///
+record(ao, "$(P)$(R)BGC3$(XY)") {
+  field(DESC, "$(XY) Background Coef 3")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C3$(XY)")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)BGC3$(XY)_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_C3$(XY)")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// $(XY) Background Polynomial Shift 
+# ///
+record(ao, "$(P)$(R)BGSH$(XY)") {
+  field(DESC, "$(XY) Background Shift")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_SH$(XY)")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)BGSH$(XY)_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_SH$(XY)")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+
