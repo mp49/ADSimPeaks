@@ -23,4 +23,8 @@ build_stderr.txt
 # example IOC
 example/bin
 example/dbd
+example/db
+example2d/bin
+example2d/dbd
+example2d/db
 
