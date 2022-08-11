@@ -1,0 +1,63 @@
+#################################################################
+#
+# Instantiate this template for 1D peak applications.
+#
+# Macros: (in addition to ADSimPeaks.template)
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// Peak Type
+# ///
+record(mbbo, "$(P)$(R)P$(PEAK)Type") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_TYPE1D")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_TYPE1D")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Gaussian")
+  field(ONVL, "1")
+  field(TWST, "Lorentz")
+  field(TWVL, "2")
+  field(THST, "Pseudo-Voigt")
+  field(THVL, "3") 
+  field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// Peak max
+# ///
+record(ao, "$(P)$(R)P$(PEAK)Max") {
+  field(DESC, "Peak Max")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_MAX")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)P$(PEAK)Max_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_MAX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+substitute "XY=X"
+include "ADSimPeaksNPeak.template
+
+

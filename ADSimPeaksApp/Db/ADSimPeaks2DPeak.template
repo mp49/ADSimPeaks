@@ -1,5 +1,7 @@
 #################################################################
 #
+# Instantiate this template for 2D peak applications.
+#
 # Macros: (in addition to ADSimPeaks.template)
 # PEAK - The peak index (0 based)
 #
@@ -11,7 +13,7 @@
 record(mbbo, "$(P)$(R)P$(PEAK)Type") {
   field(PINI, "YES")
   field(DTYP, "asynInt32")
-  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_TYPE1D")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_TYPE2D")
   field(VAL,  "0")
   field(ZRST, "None")
   field(ZRVL, "0")
@@ -25,7 +27,7 @@ record(mbbo, "$(P)$(R)P$(PEAK)Type") {
 }
 record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
   field(DTYP, "asynInt32")
-  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_TYPE1D")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_TYPE2D")
   field(ZRST, "None")
   field(ZRVL, "0")
   field(ONST, "Gaussian")
@@ -35,44 +37,6 @@ record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
   field(THST, "Pseudo-Voigt")
   field(THVL, "3") 
   field(SCAN, "I/O Intr")
-}
-
-# ///
-# /// Peak position
-# ///
-record(ao, "$(P)$(R)P$(PEAK)Pos") {
-  field(DESC, "Peak Position")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_POSX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "$(P)$(R)P$(PEAK)Pos_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_POSX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak full width half max (FWHM)
-# ///
-record(ao, "$(P)$(R)P$(PEAK)FWHM") {
-  field(DESC, "Peak FWHM")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_FWHMX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "$(P)$(R)P$(PEAK)FWHM_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_FWHMX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
 }
 
 # ///
@@ -92,4 +56,10 @@ record(ai, "$(P)$(R)P$(PEAK)Max_RBV") {
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
+
+substitute "XY=X"
+include "ADSimPeaksNPeak.template
+
+substitute "XY=Y"
+include "ADSimPeaksNPeak.template
 

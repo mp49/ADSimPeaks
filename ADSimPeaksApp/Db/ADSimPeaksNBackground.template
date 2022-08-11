@@ -4,7 +4,7 @@
 # This is template meant to be instantiated by either
 # the 1D or 2D case by setting the additional macro XY
 #
-# Macros:
+# Macros (in addition to ADSimPeaks.template)
 # XY - 'X' or 'Y'
 #
 ############################################################

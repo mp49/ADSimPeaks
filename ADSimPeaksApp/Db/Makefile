@@ -7,8 +7,12 @@ include $(TOP)/configure/CONFIG
 # Create and install (or just install) into <top>/db
 # databases, templates, substitutions like this
 DB += ADSimPeaks.template
-DB += ADSimPeaksBackground.template
-DB += ADSimPeaksPeak.template
+DB += ADSimPeaksNBackground.template
+DB += ADSimPeaks1DBackground.template
+DB += ADSimPeaks2DBackground.template
+DB += ADSimPeaksNPeak.template
+DB += ADSimPeaks1DPeak.template
+DB += ADSimPeaks2DPeak.template
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add

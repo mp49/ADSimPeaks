@@ -1,0 +1,47 @@
+#################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# XY - 'X' or 'Y'
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// $(XY) Peak position
+# ///
+record(ao, "$(P)$(R)P$(PEAK)Pos$(XY)") {
+  field(DESC, "$(XY) Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_POS$(XY)")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)P$(PEAK)Pos$(XY)_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_POS$(XY)")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// $(XY) Peak full width half max (FWHM)
+# ///
+record(ao, "$(P)$(R)P$(PEAK)FWHM$(XY)") {
+  field(DESC, "$(XY) Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_FWHM$(XY)")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)P$(PEAK)FWHM$(XY)_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_FWHM$(XY)")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+
