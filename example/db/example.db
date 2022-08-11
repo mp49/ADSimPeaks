@@ -1575,99 +1575,6 @@ record(ai, "ST99:Det:Det1:ElapsedTime") {
 }
 
 ############################################################
-# Background Polynomial Coefficients (Cubic Polynomial)
-
-# ///
-# /// Background Polynomial Constant Term
-# ///
-record(ao, "ST99:Det:Det1:BGC0") {
-  field(DESC, "Background Coef 0")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C0")
-  field(PREC, "6")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:BGC0_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C0")
-  field(SCAN, "I/O Intr")
-  field(PREC, "6")	
-}
-
-# ///
-# /// Background Polynomial Slope
-# ///
-record(ao, "ST99:Det:Det1:BGC1") {
-  field(DESC, "Background Coef 1")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C1")
-  field(PREC, "6")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:BGC1_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C1")
-  field(SCAN, "I/O Intr")
-  field(PREC, "6")	
-}
-
-# ///
-# /// Background Polynomial 2nd Order Coefficients
-# ///
-record(ao, "ST99:Det:Det1:BGC2") {
-  field(DESC, "Background Coef 2")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C2")
-  field(PREC, "6")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:BGC2_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C2")
-  field(SCAN, "I/O Intr")
-  field(PREC, "6")	
-}
-
-# ///
-# /// Background Polynomial 3rd Order Coefficients
-# ///
-record(ao, "ST99:Det:Det1:BGC3") {
-  field(DESC, "Background Coef 3")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C3")
-  field(PREC, "6")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:BGC3_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C3")
-  field(SCAN, "I/O Intr")
-  field(PREC, "6")	
-}
-
-# ///
-# /// Background Polynomial Horizontal Shift 
-# ///
-record(ao, "ST99:Det:Det1:BGSH") {
-  field(DESC, "Background Shift")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_SH")
-  field(PREC, "6")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:BGSH_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_SH")
-  field(SCAN, "I/O Intr")
-  field(PREC, "6")	
-}
-
-############################################################
 # Noise Control
 
 # ///
@@ -1713,6 +1620,100 @@ record(ai, "ST99:Det:Det1:NoiseLevel_RBV") {
   field(PREC, "3")	
 }
 
+
+############################################################
+# Background Polynomial Coefficients (Cubic Polynomial)
+
+# ///
+# /// Background Polynomial Constant Term
+# ///
+record(ao, "ST99:Det:Det1:BGC0") {
+  field(DESC, "Background Coef 0")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C0X")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:BGC0_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C0X")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// Background Polynomial Slope
+# ///
+record(ao, "ST99:Det:Det1:BGC1") {
+  field(DESC, "Background Coef 1")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C1X")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:BGC1_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C1X")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// Background Polynomial 2nd Order Coefficients
+# ///
+record(ao, "ST99:Det:Det1:BGC2") {
+  field(DESC, "Background Coef 2")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C2X")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:BGC2_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C2X")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// Background Polynomial 3rd Order Coefficients
+# ///
+record(ao, "ST99:Det:Det1:BGC3") {
+  field(DESC, "Background Coef 3")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C3X")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:BGC3_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C3X")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
+# ///
+# /// Background Polynomial Shift 
+# ///
+record(ao, "ST99:Det:Det1:BGSH") {
+  field(DESC, "Background Shift")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_SHX")
+  field(PREC, "6")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:BGSH_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_SHX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "6")	
+}
+
 #################################################################
 #
 # Macros: (in addition to ADSimPeaks.template)
@@ -1726,7 +1727,7 @@ record(ai, "ST99:Det:Det1:NoiseLevel_RBV") {
 record(mbbo, "ST99:Det:Det1:P0Type") {
   field(PINI, "YES")
   field(DTYP, "asynInt32")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_TYPE")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_TYPE1D")
   field(VAL,  "0")
   field(ZRST, "None")
   field(ZRVL, "0")
@@ -1740,7 +1741,7 @@ record(mbbo, "ST99:Det:Det1:P0Type") {
 }
 record(mbbi, "ST99:Det:Det1:P0Type_RBV") {
   field(DTYP, "asynInt32")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_TYPE")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_TYPE1D")
   field(ZRST, "None")
   field(ZRVL, "0")
   field(ONST, "Gaussian")
@@ -1759,14 +1760,14 @@ record(ao, "ST99:Det:Det1:P0Pos") {
   field(DESC, "Peak Position")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POS")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POSX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P0Pos_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POS")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POSX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -1778,14 +1779,14 @@ record(ao, "ST99:Det:Det1:P0FWHM") {
   field(DESC, "Peak FWHM")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHM")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHMX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P0FWHM_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHM")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHMX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -1821,7 +1822,7 @@ record(ai, "ST99:Det:Det1:P0Max_RBV") {
 record(mbbo, "ST99:Det:Det1:P1Type") {
   field(PINI, "YES")
   field(DTYP, "asynInt32")
-  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_TYPE")
+  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_TYPE1D")
   field(VAL,  "0")
   field(ZRST, "None")
   field(ZRVL, "0")
@@ -1835,7 +1836,7 @@ record(mbbo, "ST99:Det:Det1:P1Type") {
 }
 record(mbbi, "ST99:Det:Det1:P1Type_RBV") {
   field(DTYP, "asynInt32")
-  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_TYPE")
+  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_TYPE1D")
   field(ZRST, "None")
   field(ZRVL, "0")
   field(ONST, "Gaussian")
@@ -1854,14 +1855,14 @@ record(ao, "ST99:Det:Det1:P1Pos") {
   field(DESC, "Peak Position")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_POS")
+  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_POSX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P1Pos_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_POS")
+  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_POSX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -1873,14 +1874,14 @@ record(ao, "ST99:Det:Det1:P1FWHM") {
   field(DESC, "Peak FWHM")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_FWHM")
+  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_FWHMX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P1FWHM_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_FWHM")
+  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_FWHMX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -1916,7 +1917,7 @@ record(ai, "ST99:Det:Det1:P1Max_RBV") {
 record(mbbo, "ST99:Det:Det1:P2Type") {
   field(PINI, "YES")
   field(DTYP, "asynInt32")
-  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_TYPE")
+  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_TYPE1D")
   field(VAL,  "0")
   field(ZRST, "None")
   field(ZRVL, "0")
@@ -1930,7 +1931,7 @@ record(mbbo, "ST99:Det:Det1:P2Type") {
 }
 record(mbbi, "ST99:Det:Det1:P2Type_RBV") {
   field(DTYP, "asynInt32")
-  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_TYPE")
+  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_TYPE1D")
   field(ZRST, "None")
   field(ZRVL, "0")
   field(ONST, "Gaussian")
@@ -1949,14 +1950,14 @@ record(ao, "ST99:Det:Det1:P2Pos") {
   field(DESC, "Peak Position")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_POS")
+  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_POSX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P2Pos_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_POS")
+  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_POSX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -1968,14 +1969,14 @@ record(ao, "ST99:Det:Det1:P2FWHM") {
   field(DESC, "Peak FWHM")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_FWHM")
+  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_FWHMX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P2FWHM_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_FWHM")
+  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_FWHMX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2011,7 +2012,7 @@ record(ai, "ST99:Det:Det1:P2Max_RBV") {
 record(mbbo, "ST99:Det:Det1:P3Type") {
   field(PINI, "YES")
   field(DTYP, "asynInt32")
-  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_TYPE")
+  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_TYPE1D")
   field(VAL,  "0")
   field(ZRST, "None")
   field(ZRVL, "0")
@@ -2025,7 +2026,7 @@ record(mbbo, "ST99:Det:Det1:P3Type") {
 }
 record(mbbi, "ST99:Det:Det1:P3Type_RBV") {
   field(DTYP, "asynInt32")
-  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_TYPE")
+  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_TYPE1D")
   field(ZRST, "None")
   field(ZRVL, "0")
   field(ONST, "Gaussian")
@@ -2044,14 +2045,14 @@ record(ao, "ST99:Det:Det1:P3Pos") {
   field(DESC, "Peak Position")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_POS")
+  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_POSX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P3Pos_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_POS")
+  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_POSX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2063,14 +2064,14 @@ record(ao, "ST99:Det:Det1:P3FWHM") {
   field(DESC, "Peak FWHM")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_FWHM")
+  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_FWHMX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P3FWHM_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_FWHM")
+  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_FWHMX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2106,7 +2107,7 @@ record(ai, "ST99:Det:Det1:P3Max_RBV") {
 record(mbbo, "ST99:Det:Det1:P4Type") {
   field(PINI, "YES")
   field(DTYP, "asynInt32")
-  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_TYPE")
+  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_TYPE1D")
   field(VAL,  "0")
   field(ZRST, "None")
   field(ZRVL, "0")
@@ -2120,7 +2121,7 @@ record(mbbo, "ST99:Det:Det1:P4Type") {
 }
 record(mbbi, "ST99:Det:Det1:P4Type_RBV") {
   field(DTYP, "asynInt32")
-  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_TYPE")
+  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_TYPE1D")
   field(ZRST, "None")
   field(ZRVL, "0")
   field(ONST, "Gaussian")
@@ -2139,14 +2140,14 @@ record(ao, "ST99:Det:Det1:P4Pos") {
   field(DESC, "Peak Position")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_POS")
+  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_POSX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P4Pos_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_POS")
+  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_POSX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2158,14 +2159,14 @@ record(ao, "ST99:Det:Det1:P4FWHM") {
   field(DESC, "Peak FWHM")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_FWHM")
+  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_FWHMX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P4FWHM_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_FWHM")
+  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_FWHMX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2201,7 +2202,7 @@ record(ai, "ST99:Det:Det1:P4Max_RBV") {
 record(mbbo, "ST99:Det:Det1:P5Type") {
   field(PINI, "YES")
   field(DTYP, "asynInt32")
-  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_TYPE")
+  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_TYPE1D")
   field(VAL,  "0")
   field(ZRST, "None")
   field(ZRVL, "0")
@@ -2215,7 +2216,7 @@ record(mbbo, "ST99:Det:Det1:P5Type") {
 }
 record(mbbi, "ST99:Det:Det1:P5Type_RBV") {
   field(DTYP, "asynInt32")
-  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_TYPE")
+  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_TYPE1D")
   field(ZRST, "None")
   field(ZRVL, "0")
   field(ONST, "Gaussian")
@@ -2234,14 +2235,14 @@ record(ao, "ST99:Det:Det1:P5Pos") {
   field(DESC, "Peak Position")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_POS")
+  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_POSX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P5Pos_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_POS")
+  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_POSX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2253,14 +2254,14 @@ record(ao, "ST99:Det:Det1:P5FWHM") {
   field(DESC, "Peak FWHM")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_FWHM")
+  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_FWHMX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P5FWHM_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_FWHM")
+  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_FWHMX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2296,7 +2297,7 @@ record(ai, "ST99:Det:Det1:P5Max_RBV") {
 record(mbbo, "ST99:Det:Det1:P6Type") {
   field(PINI, "YES")
   field(DTYP, "asynInt32")
-  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_TYPE")
+  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_TYPE1D")
   field(VAL,  "0")
   field(ZRST, "None")
   field(ZRVL, "0")
@@ -2310,7 +2311,7 @@ record(mbbo, "ST99:Det:Det1:P6Type") {
 }
 record(mbbi, "ST99:Det:Det1:P6Type_RBV") {
   field(DTYP, "asynInt32")
-  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_TYPE")
+  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_TYPE1D")
   field(ZRST, "None")
   field(ZRVL, "0")
   field(ONST, "Gaussian")
@@ -2329,14 +2330,14 @@ record(ao, "ST99:Det:Det1:P6Pos") {
   field(DESC, "Peak Position")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_POS")
+  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_POSX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P6Pos_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_POS")
+  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_POSX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2348,14 +2349,14 @@ record(ao, "ST99:Det:Det1:P6FWHM") {
   field(DESC, "Peak FWHM")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_FWHM")
+  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_FWHMX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P6FWHM_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_FWHM")
+  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_FWHMX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2391,7 +2392,7 @@ record(ai, "ST99:Det:Det1:P6Max_RBV") {
 record(mbbo, "ST99:Det:Det1:P7Type") {
   field(PINI, "YES")
   field(DTYP, "asynInt32")
-  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_TYPE")
+  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_TYPE1D")
   field(VAL,  "0")
   field(ZRST, "None")
   field(ZRVL, "0")
@@ -2405,7 +2406,7 @@ record(mbbo, "ST99:Det:Det1:P7Type") {
 }
 record(mbbi, "ST99:Det:Det1:P7Type_RBV") {
   field(DTYP, "asynInt32")
-  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_TYPE")
+  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_TYPE1D")
   field(ZRST, "None")
   field(ZRVL, "0")
   field(ONST, "Gaussian")
@@ -2424,14 +2425,14 @@ record(ao, "ST99:Det:Det1:P7Pos") {
   field(DESC, "Peak Position")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_POS")
+  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_POSX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P7Pos_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_POS")
+  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_POSX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2443,14 +2444,14 @@ record(ao, "ST99:Det:Det1:P7FWHM") {
   field(DESC, "Peak FWHM")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_FWHM")
+  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_FWHMX")
   field(VAL, "1")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
 record(ai, "ST99:Det:Det1:P7FWHM_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_FWHM")
+  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_FWHMX")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
