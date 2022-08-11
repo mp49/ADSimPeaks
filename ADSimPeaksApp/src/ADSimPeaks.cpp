@@ -68,11 +68,12 @@ const epicsFloat64 ADSimPeaks::s_zeroCheck = 1e-12;
  * \arg \c stackSize The asynPortDriver stackSize (0=default)
  *
  */
-ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
+ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int maxPeaks,
 		       NDDataType_t dataType, int maxBuffers, size_t maxMemory,
 		       int priority, int stackSize)
   : ADDriver(portName, maxPeaks, 0, maxBuffers, maxMemory, 0, 0, 0, 1, priority, stackSize),
-    m_maxSize(maxSize),
+    m_maxSizeX(maxSizeX),
+    m_maxSizeY(maxSizeY),
     m_maxPeaks(maxPeaks),
     m_initialized(false)
 {
@@ -98,21 +99,33 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
   createParam(ADSPNoiseTypeParamString, asynParamInt32, &ADSPNoiseTypeParam);
   createParam(ADSPNoiseLevelParamString, asynParamFloat64, &ADSPNoiseLevelParam);
   createParam(ADSPElapsedTimeParamString, asynParamFloat64, &ADSPElapsedTimeParam);
-  createParam(ADSPPeakTypeParamString, asynParamInt32, &ADSPPeakTypeParam);
-  createParam(ADSPPeakPosParamString, asynParamFloat64, &ADSPPeakPosParam);
-  createParam(ADSPPeakFWHMParamString, asynParamFloat64, &ADSPPeakFWHMParam);
+  createParam(ADSPPeakType1DParamString, asynParamInt32, &ADSPPeakType1DParam);
+  createParam(ADSPPeakType2DParamString, asynParamInt32, &ADSPPeakType2DParam);
+  createParam(ADSPPeakPosXParamString, asynParamFloat64, &ADSPPeakPosXParam);
+  createParam(ADSPPeakPosYParamString, asynParamFloat64, &ADSPPeakPosYParam);
+  createParam(ADSPPeakFWHMXParamString, asynParamFloat64, &ADSPPeakFWHMXParam);
+  createParam(ADSPPeakFWHMYParamString, asynParamFloat64, &ADSPPeakFWHMYParam);
   createParam(ADSPPeakMaxParamString, asynParamFloat64, &ADSPPeakMaxParam);
-  createParam(ADSPBGC0ParamString, asynParamFloat64, &ADSPBGC0Param);
-  createParam(ADSPBGC1ParamString, asynParamFloat64, &ADSPBGC1Param);
-  createParam(ADSPBGC2ParamString, asynParamFloat64, &ADSPBGC2Param);
-  createParam(ADSPBGC3ParamString, asynParamFloat64, &ADSPBGC3Param);
-  createParam(ADSPBGSHParamString, asynParamFloat64, &ADSPBGSHParam);
+  createParam(ADSPBGC0XParamString, asynParamFloat64, &ADSPBGC0XParam);
+  createParam(ADSPBGC1XParamString, asynParamFloat64, &ADSPBGC1XParam);
+  createParam(ADSPBGC2XParamString, asynParamFloat64, &ADSPBGC2XParam);
+  createParam(ADSPBGC3XParamString, asynParamFloat64, &ADSPBGC3XParam);
+  createParam(ADSPBGSHXParamString, asynParamFloat64, &ADSPBGSHXParam);
+  createParam(ADSPBGC0YParamString, asynParamFloat64, &ADSPBGC0YParam);
+  createParam(ADSPBGC1YParamString, asynParamFloat64, &ADSPBGC1YParam);
+  createParam(ADSPBGC2YParamString, asynParamFloat64, &ADSPBGC2YParam);
+  createParam(ADSPBGC3YParamString, asynParamFloat64, &ADSPBGC3YParam);
+  createParam(ADSPBGSHYParamString, asynParamFloat64, &ADSPBGSHYParam);
   
   //Initialize non static, non const, data members
   m_acquiring = 0;
   m_uniqueId = 0;
   m_needNewArray = true;
   m_needReset = false;
+  m_2d = false;
+  if (m_maxSizeY > 0) {
+    m_2d = true;
+  }
 
   //Seed the random number generator
   epicsTimeStamp nowTime;
@@ -124,26 +137,37 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
   paramStatus = ((setIntegerParam(ADAcquire, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADStatus, ADStatusIdle) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADAcquirePeriod, 1.0) == asynSuccess) && paramStatus);
-  paramStatus = ((setIntegerParam(ADMaxSizeX, m_maxSize) == asynSuccess) && paramStatus);
-  paramStatus = ((setIntegerParam(ADSizeX, m_maxSize) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADMaxSizeX, m_maxSizeX) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADMaxSizeY, m_maxSizeY) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADSizeX, m_maxSizeX) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADSizeY, m_maxSizeY) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADSPIntegrateParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADSPNoiseTypeParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPNoiseLevelParam, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPElapsedTimeParam, 0.0) == asynSuccess) && paramStatus);
   //Peak Params
   for (epicsUInt32 peak=0; peak<m_maxPeaks; peak++) {
-    paramStatus = ((setIntegerParam(ADSPPeakTypeParam, 0) == asynSuccess) && paramStatus);
-    paramStatus = ((setDoubleParam(ADSPPeakPosParam, 1.0) == asynSuccess) && paramStatus);
-    paramStatus = ((setDoubleParam(ADSPPeakFWHMParam, 1.0) == asynSuccess) && paramStatus);
+    paramStatus = ((setIntegerParam(ADSPPeakType1DParam, 0) == asynSuccess) && paramStatus);
+    paramStatus = ((setIntegerParam(ADSPPeakType2DParam, 0) == asynSuccess) && paramStatus);
+    paramStatus = ((setDoubleParam(ADSPPeakPosXParam, 1.0) == asynSuccess) && paramStatus);
+    paramStatus = ((setDoubleParam(ADSPPeakPosYParam, 1.0) == asynSuccess) && paramStatus);
+    paramStatus = ((setDoubleParam(ADSPPeakFWHMXParam, 1.0) == asynSuccess) && paramStatus);
+    paramStatus = ((setDoubleParam(ADSPPeakFWHMYParam, 1.0) == asynSuccess) && paramStatus);
     paramStatus = ((setDoubleParam(ADSPPeakMaxParam, 1.0) == asynSuccess) && paramStatus);
     callParamCallbacks(peak);
   }
-  //Background Params
-  paramStatus = ((setDoubleParam(ADSPBGC0Param, 0.0) == asynSuccess) && paramStatus);
-  paramStatus = ((setDoubleParam(ADSPBGC1Param, 0.0) == asynSuccess) && paramStatus);
-  paramStatus = ((setDoubleParam(ADSPBGC2Param, 0.0) == asynSuccess) && paramStatus);
-  paramStatus = ((setDoubleParam(ADSPBGC3Param, 0.0) == asynSuccess) && paramStatus);
-  paramStatus = ((setDoubleParam(ADSPBGSHParam, 0.0) == asynSuccess) && paramStatus);
+  //Background Params X
+  paramStatus = ((setDoubleParam(ADSPBGC0XParam, 0.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPBGC1XParam, 0.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPBGC2XParam, 0.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPBGC3XParam, 0.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPBGSHXParam, 0.0) == asynSuccess) && paramStatus);
+  //Background Params Y
+  paramStatus = ((setDoubleParam(ADSPBGC0YParam, 0.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPBGC1YParam, 0.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPBGC2YParam, 0.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPBGC3YParam, 0.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPBGSHYParam, 0.0) == asynSuccess) && paramStatus);
   callParamCallbacks();
   if (!paramStatus) {
     asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
@@ -164,8 +188,14 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSize, int maxPeaks,
     return;
   }
   
-  cout << functionName << " maxSize: " << m_maxSize << endl;
-  cout << functionName << " maxPeaks: " << m_maxPeaks << endl; 
+  cout << functionName << " maxSizeX: " << m_maxSizeX << endl;
+  cout << functionName << " maxSizeY: " << m_maxSizeY << endl;
+  cout << functionName << " maxPeaks: " << m_maxPeaks << endl;
+  if (m_2d) {
+    cout << functionName << " configured for 2D data" << endl;
+  } else {
+    cout << functionName << " configured for 1D data" << endl;
+  }
 
   m_initialized = true;
   
@@ -224,10 +254,17 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
       }
     }
   } else if (function == ADSizeX) {
-    value = std::max(1, std::min(value, static_cast<int32_t>(m_maxSize)));
+    value = std::max(1, std::min(value, static_cast<int32_t>(m_maxSizeX)));
     int currentXSize = 0;
     getIntegerParam(ADSizeX, &currentXSize);
     if (value != currentXSize) {
+      m_needNewArray = true;
+    }
+  } else if (function == ADSizeY) {
+    value = std::max(1, std::min(value, static_cast<int32_t>(m_maxSizeY)));
+    int currentYSize = 0;
+    getIntegerParam(ADSizeY, &currentYSize);
+    if (value != currentYSize) {
       m_needNewArray = true;
     }
   } else if (function == NDDataType) {
@@ -283,7 +320,9 @@ asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 
   if (function == ADAcquirePeriod) {
      value = std::max(0.0, value);
-  } else if (function == ADSPPeakFWHMParam) {
+  } else if (function == ADSPPeakFWHMXParam) {
+     value = std::max(1.0, value);
+  } else if (function == ADSPPeakFWHMYParam) {
      value = std::max(1.0, value);
   }
   
@@ -321,17 +360,21 @@ void ADSimPeaks::report(FILE *fp, int details)
   if (details > 0) {
     fprintf(fp, " Internal Data:\n");
     fprintf(fp, "  m_acquiring: %d\n", m_acquiring);
-    fprintf(fp, "  m_maxSize: %d\n", m_maxSize);
+    fprintf(fp, "  m_maxSizeX: %d\n", m_maxSizeX);
+    fprintf(fp, "  m_maxSizeY: %d\n", m_maxSizeY);
     fprintf(fp, "  m_maxPeaks: %d\n", m_maxPeaks);
     fprintf(fp, "  m_uniqueId: %d\n", m_uniqueId);
     fprintf(fp, "  m_needNewArray: %d\n", m_needNewArray);
     fprintf(fp, "  m_needReset: %d\n", m_needReset);
+    fprintf(fp, "  m_2d: %d\n", m_2d);
 
     fprintf(fp, " Simulation State:\n");
     getIntegerParam(ADAcquire, &intParam);
     fprintf(fp, "  acquire: %d\n", intParam);
     getIntegerParam(ADSizeX, &intParam);
-    fprintf(fp, "  NDArray size: %d\n", intParam);
+    fprintf(fp, "  NDArray size X: %d\n", intParam);
+    getIntegerParam(ADSizeY, &intParam);
+    fprintf(fp, "  NDArray size Y: %d\n", intParam);
     getIntegerParam(NDDataType, &intParam);
     fprintf(fp, "  NDArray data type: %d\n", intParam);
     getIntegerParam(ADImageMode, &intParam);
@@ -349,31 +392,62 @@ void ADSimPeaks::report(FILE *fp, int details)
     getDoubleParam(ADSPNoiseLevelParam, &floatParam);
     fprintf(fp, "  noise level: %f\n", floatParam);
 
-    getDoubleParam(ADSPBGC0Param, &floatParam);
-    fprintf(fp, "  background coefficient 0: %f\n", floatParam);
-    getDoubleParam(ADSPBGC1Param, &floatParam);
-    fprintf(fp, "  background coefficient 1: %f\n", floatParam);
-    getDoubleParam(ADSPBGC2Param, &floatParam);
-    fprintf(fp, "  background coefficient 2: %f\n", floatParam);
-    getDoubleParam(ADSPBGC3Param, &floatParam);
-    fprintf(fp, "  background coefficient 3: %f\n", floatParam);
-    getDoubleParam(ADSPBGSHParam, &floatParam);
-    fprintf(fp, "  background shift: %f\n", floatParam);
-
+    getDoubleParam(ADSPBGC0XParam, &floatParam);
+    fprintf(fp, "  background X coefficient 0: %f\n", floatParam);
+    getDoubleParam(ADSPBGC1XParam, &floatParam);
+    fprintf(fp, "  background X coefficient 1: %f\n", floatParam);
+    getDoubleParam(ADSPBGC2XParam, &floatParam);
+    fprintf(fp, "  background X coefficient 2: %f\n", floatParam);
+    getDoubleParam(ADSPBGC3XParam, &floatParam);
+    fprintf(fp, "  background X coefficient 3: %f\n", floatParam);
+    getDoubleParam(ADSPBGSHXParam, &floatParam);
+    fprintf(fp, "  background X shift: %f\n", floatParam);
+    if (m_2d) {
+      getDoubleParam(ADSPBGC0YParam, &floatParam);
+      fprintf(fp, "  background Y coefficient 0: %f\n", floatParam);
+      getDoubleParam(ADSPBGC1YParam, &floatParam);
+      fprintf(fp, "  background Y coefficient 1: %f\n", floatParam);
+      getDoubleParam(ADSPBGC2YParam, &floatParam);
+      fprintf(fp, "  background Y coefficient 2: %f\n", floatParam);
+      getDoubleParam(ADSPBGC3YParam, &floatParam);
+      fprintf(fp, "  background Y coefficient 3: %f\n", floatParam);
+      getDoubleParam(ADSPBGSHYParam, &floatParam);
+      fprintf(fp, "  background Y shift: %f\n", floatParam);
+    } 
+    
     fprintf(fp, " Peak Information:\n");
     for (epicsUInt32 i=0; i<m_maxPeaks; i++) {
       fprintf(fp, "  peak: %d\n", i);
-      getIntegerParam(i, ADSPPeakTypeParam, &intParam);
-      if (intParam == static_cast<epicsUInt32>(e_peak_type::none)) {
-	fprintf(fp, "   none (disabled)\n");
+      if (m_2d) {
+	getIntegerParam(i, ADSPPeakType2DParam, &intParam);
+	if (intParam == static_cast<epicsUInt32>(e_peak_type_2d::none)) {
+	  fprintf(fp, "   none (disabled)\n");
+	} else {
+	  fprintf(fp, "   type: %d\n", intParam);
+	  getDoubleParam(i, ADSPPeakPosXParam, &floatParam);
+	  fprintf(fp, "   position X: %f\n", floatParam);
+	  getDoubleParam(i, ADSPPeakPosYParam, &floatParam);
+	  fprintf(fp, "   position Y: %f\n", floatParam);
+	  getDoubleParam(i, ADSPPeakFWHMXParam, &floatParam);
+	  fprintf(fp, "   fwhm X: %f\n", floatParam);
+	  getDoubleParam(i, ADSPPeakFWHMYParam, &floatParam);
+	  fprintf(fp, "   fwhm Y: %f\n", floatParam);
+	  getDoubleParam(i, ADSPPeakMaxParam, &floatParam);
+	  fprintf(fp, "   max: %f\n", floatParam);
+	}
       } else {
-	fprintf(fp, "   type: %d\n", intParam);
-	getDoubleParam(i, ADSPPeakPosParam, &floatParam);
-	fprintf(fp, "   position: %f\n", floatParam);
-	getDoubleParam(i, ADSPPeakFWHMParam, &floatParam);
-	fprintf(fp, "   fwhm: %f\n", floatParam);
-	getDoubleParam(i, ADSPPeakMaxParam, &floatParam);
-	fprintf(fp, "   max: %f\n", floatParam);
+	getIntegerParam(i, ADSPPeakType1DParam, &intParam);
+	if (intParam == static_cast<epicsUInt32>(e_peak_type_1d::none)) {
+	  fprintf(fp, "   none (disabled)\n");
+	} else {
+	  fprintf(fp, "   type: %d\n", intParam);
+	  getDoubleParam(i, ADSPPeakPosXParam, &floatParam);
+	  fprintf(fp, "   position X: %f\n", floatParam);
+	  getDoubleParam(i, ADSPPeakFWHMXParam, &floatParam);
+	  fprintf(fp, "   fwhm X: %f\n", floatParam);
+	  getDoubleParam(i, ADSPPeakMaxParam, &floatParam);
+	  fprintf(fp, "   max: %f\n", floatParam);
+	}
       }
     }
   }
@@ -398,9 +472,10 @@ bool ADSimPeaks::getInitialized(void)
  */
 void ADSimPeaks::ADSimPeaksTask(void)
 {
-  int size = 0;
+  int sizeX = 0;
+  int sizeY = 0;
   int ndims=0;
-  size_t dims[1];
+  size_t dims[2] = {0};
   int dataTypeInt = 0;
   NDDataType_t dataType;
   NDArrayInfo_t arrayInfo;
@@ -454,9 +529,17 @@ void ADSimPeaks::ADSimPeaksTask(void)
       
       getIntegerParam(NDDataType, &dataTypeInt);
       dataType = (NDDataType_t)dataTypeInt;
-      getIntegerParam(ADSizeX, &size);
-      ndims = 1;
-      dims[0] = size;
+      getIntegerParam(ADSizeX, &sizeX);
+      getIntegerParam(ADSizeY, &sizeY);
+      if (m_2d) {
+	ndims = 2;
+	dims[0] = sizeX;
+	dims[1] = sizeY;
+      } else {
+	ndims = 1;
+	dims[0] = sizeX;
+	dims[1] = 0;
+      }
 
       if (m_needNewArray) {
 	if (p_NDArray != NULL) {
@@ -489,6 +572,7 @@ void ADSimPeaks::ADSimPeaksTask(void)
 	p_NDArray->getInfo(&arrayInfo);
 	setIntegerParam(NDArraySize, arrayInfo.totalBytes);
 	setIntegerParam(NDArraySizeX, dims[0]);
+	setIntegerParam(NDArraySizeY, dims[1]);
 	setIntegerParam(NDArrayCounter, arrayCounter);
 	setIntegerParam(ADNumImagesCounter, imagesCounter);
 	
@@ -582,18 +666,27 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   asynStatus status = asynSuccess;
   NDArrayInfo_t arrayInfo;
   epicsUInt32 size = 0;
+  epicsInt32 sizeX = 0;
+  epicsInt32 sizeY = 0;
   epicsInt32 peak_type = 0;
-  epicsFloat64 peak_pos = 0.0;
-  epicsFloat64 peak_fwhm = 0.0;
+  epicsFloat64 peak_pos_x = 0.0;
+  epicsFloat64 peak_fwhm_x = 0.0;
+  epicsFloat64 peak_pos_y = 0.0;
+  epicsFloat64 peak_fwhm_y = 0.0;
   epicsFloat64 peak_max = 0.0;
   epicsFloat64 result = 0.0;
   epicsFloat64 result_max = 0.0;
   epicsFloat64 scale_factor = 0.0;
-  epicsFloat64 bg_c0 = 0.0;
-  epicsFloat64 bg_c1 = 0.0;
-  epicsFloat64 bg_c2 = 0.0;
-  epicsFloat64 bg_c3 = 0.0;
-  epicsFloat64 bg_sh = 0.0;
+  epicsFloat64 bg_c0x = 0.0;
+  epicsFloat64 bg_c1x = 0.0;
+  epicsFloat64 bg_c2x = 0.0;
+  epicsFloat64 bg_c3x = 0.0;
+  epicsFloat64 bg_shx = 0.0;
+  epicsFloat64 bg_c0y = 0.0;
+  epicsFloat64 bg_c1y = 0.0;
+  epicsFloat64 bg_c2y = 0.0;
+  epicsFloat64 bg_c3y = 0.0;
+  epicsFloat64 bg_shy = 0.0;
   epicsInt32 noise_type = 0;
   epicsFloat64 noise_level = 0.0;
   epicsFloat64 noise = 0.0;
@@ -609,6 +702,10 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   p_NDArray->getInfo(&arrayInfo);
   T *pData = static_cast<T*>(p_NDArray->pData);
   size = arrayInfo.nElements;
+
+  getIntegerParam(ADSizeX, &sizeX);
+  getIntegerParam(ADSizeY, &sizeY);
+  sizeY = std::max(1, sizeY);
   
   //Reset the array data if we need to
   int integrate = 0;
@@ -621,45 +718,104 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   }
 
   //Calculate the background profile
-  getDoubleParam(ADSPBGC0Param, &bg_c0);
-  getDoubleParam(ADSPBGC1Param, &bg_c1);
-  getDoubleParam(ADSPBGC2Param, &bg_c2);
-  getDoubleParam(ADSPBGC3Param, &bg_c3);
-  getDoubleParam(ADSPBGSHParam, &bg_sh);
+  getDoubleParam(ADSPBGC0XParam, &bg_c0x);
+  getDoubleParam(ADSPBGC1XParam, &bg_c1x);
+  getDoubleParam(ADSPBGC2XParam, &bg_c2x);
+  getDoubleParam(ADSPBGC3XParam, &bg_c3x);
+  getDoubleParam(ADSPBGSHXParam, &bg_shx);
+  if (m_2d) {
+    getDoubleParam(ADSPBGC0YParam, &bg_c0y);
+    getDoubleParam(ADSPBGC1YParam, &bg_c1y);
+    getDoubleParam(ADSPBGC2YParam, &bg_c2y);
+    getDoubleParam(ADSPBGC3YParam, &bg_c3y);
+    getDoubleParam(ADSPBGSHYParam, &bg_shy);
+  }
+  epicsFloat64 bg_x = 0.0;
+  epicsFloat64 bg_y = 0.0;
+  epicsUInt32 bin_x = 0;
+  epicsUInt32 bin_y = 0;
   for (epicsInt32 bin=0; bin<static_cast<epicsInt32>(size); bin++) {
-    pData[bin] += bg_c0 + (bin-bg_sh)*bg_c1 + pow((bin-bg_sh),2)*bg_c2 + pow((bin-bg_sh),3)*bg_c3;
+    bin_x = bin % sizeX;
+    bg_x = bg_c0x + (bin_x-bg_shx)*bg_c1x + pow((bin_x-bg_shx),2)*bg_c2x + pow((bin_x-bg_shx),3)*bg_c3x;
+    if (m_2d) {
+      bin_y = floor(bin/sizeX);
+      bg_y = bg_c0y + (bin_y-bg_shy)*bg_c1y + pow((bin_y-bg_shy),2)*bg_c2y + pow((bin_y-bg_shy),3)*bg_c3y;
+    }
+    pData[bin] += bg_x + bg_y;
   }
   
   //Calculate the peak profile and scale it to the desired height
   for (epicsUInt32 peak=0; peak<m_maxPeaks; peak++) {
-    getIntegerParam(peak, ADSPPeakTypeParam, &peak_type);
-    getDoubleParam(peak, ADSPPeakPosParam, &peak_pos);
-    getDoubleParam(peak, ADSPPeakFWHMParam, &peak_fwhm);
+    if (m_2d) {
+      getIntegerParam(peak, ADSPPeakType2DParam, &peak_type);
+      getDoubleParam(peak, ADSPPeakPosYParam, &peak_pos_y);
+      getDoubleParam(peak, ADSPPeakFWHMYParam, &peak_fwhm_y);
+    } else {
+      getIntegerParam(peak, ADSPPeakType1DParam, &peak_type);
+    }
+    getDoubleParam(peak, ADSPPeakPosXParam, &peak_pos_x);
+    getDoubleParam(peak, ADSPPeakFWHMXParam, &peak_fwhm_x);
     getDoubleParam(peak, ADSPPeakMaxParam, &peak_max);
-    if (peak_type == static_cast<epicsUInt32>(e_peak_type::gaussian)) {
-      computeGaussian(peak_pos, peak_fwhm, peak_pos, &result_max);
-      scale_factor = peak_max / zeroCheck(result_max);
-      for (epicsUInt32 bin=0; bin<size; bin++) {
-	computeGaussian(peak_pos, peak_fwhm, bin, &result);
-	result = (result*scale_factor);
-	pData[bin] += static_cast<T>(result);
+
+    if (m_2d) {
+      if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::gaussian)) {
+	computeGaussian2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, 0.0, &result_max);
+	scale_factor = peak_max / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  bin_x = bin % sizeX;
+	  bin_y = floor(bin/sizeX);
+	  computeGaussian2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, 0.0, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::lorentz)) {
+	computeLorentz2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_pos_x, peak_pos_y, &result_max);
+	scale_factor = peak_max / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  bin_x = bin % sizeX;
+	  bin_y = floor(bin/sizeX);
+	  computeLorentz2D(peak_pos_x, peak_pos_y, peak_fwhm_x, bin_x, bin_y, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::pseudovoigt)) {
+	computePseudoVoigt2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, &result_max);
+	scale_factor = peak_max / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  bin_x = bin % sizeX;
+	  bin_y = floor(bin/sizeX);
+	  computePseudoVoigt2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
       }
-    } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::lorentz)) {
-      computeLorentz(peak_pos, peak_fwhm, peak_pos, &result_max);
-      scale_factor = peak_max / zeroCheck(result_max);
-      for (epicsUInt32 bin=0; bin<size; bin++) {
-	computeLorentz(peak_pos, peak_fwhm, bin, &result);
-	result = (result*scale_factor);
-	pData[bin] += static_cast<T>(result);
+    } else {
+      if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::gaussian)) {
+	computeGaussian(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
+	scale_factor = peak_max / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  computeGaussian(peak_pos_x, peak_fwhm_x, bin, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::lorentz)) {
+	computeLorentz(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
+	scale_factor = peak_max / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  computeLorentz(peak_pos_x, peak_fwhm_x, bin, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::pseudovoigt)) {
+	computePseudoVoigt(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
+	scale_factor = peak_max / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  computePseudoVoigt(peak_pos_x, peak_fwhm_x, bin, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
       }
-    } else if (peak_type == static_cast<epicsUInt32>(e_peak_type::pseudovoigt)) {
-      computePseudoVoigt(peak_pos, peak_fwhm, peak_pos, &result_max);
-      scale_factor = peak_max / zeroCheck(result_max);
-      for (epicsUInt32 bin=0; bin<size; bin++) {
-	computePseudoVoigt(peak_pos, peak_fwhm, bin, &result);
-	result = (result*scale_factor);
-	pData[bin] += static_cast<T>(result);
-      }
+      
     }
   }
 
@@ -981,7 +1137,7 @@ static void ADSimPeaksTaskC(void *drvPvt)
  */
 extern "C" {
 
-  asynStatus ADSimPeaksConfig(const char *portName, int maxSize, int maxPeaks,
+  asynStatus ADSimPeaksConfig(const char *portName, int maxSizeX, int maxSizeY, int maxPeaks,
 			      int dataType, int maxBuffers, size_t maxMemory,
 			      int priority, int stackSize)
   {
@@ -989,7 +1145,7 @@ extern "C" {
     
     // Instantiate class
     try {
-      ADSimPeaks *adsp = new ADSimPeaks(portName, maxSize, maxPeaks,
+      ADSimPeaks *adsp = new ADSimPeaks(portName, maxSizeX, maxSizeY, maxPeaks,
 				       static_cast<NDDataType_t>(dataType), maxBuffers, maxMemory,
 				       priority, stackSize);
       if (adsp->getInitialized()) {
@@ -1009,13 +1165,14 @@ extern "C" {
   
   // Code for iocsh registration
   static const iocshArg ADSimPeaksConfigArg0 = {"Port Name", iocshArgString};
-  static const iocshArg ADSimPeaksConfigArg1 = {"Max Size", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg2 = {"Max Peaks", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg3 = {"Data Type", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg4 = {"maxBuffers", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg5 = {"maxMemory", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg6 = {"priority", iocshArgInt};
-  static const iocshArg ADSimPeaksConfigArg7 = {"stackSize", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg1 = {"Max Size X", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg2 = {"Max Size Y", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg3 = {"Max Peaks", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg4 = {"Data Type", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg5 = {"maxBuffers", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg6 = {"maxMemory", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg7 = {"priority", iocshArgInt};
+  static const iocshArg ADSimPeaksConfigArg8 = {"stackSize", iocshArgInt};
   static const iocshArg * const ADSimPeaksConfigArgs[] =  {&ADSimPeaksConfigArg0,
 							   &ADSimPeaksConfigArg1,
 							   &ADSimPeaksConfigArg2,
@@ -1023,12 +1180,13 @@ extern "C" {
 							   &ADSimPeaksConfigArg4,
 							   &ADSimPeaksConfigArg5,
 							   &ADSimPeaksConfigArg6,
-							   &ADSimPeaksConfigArg7};
-  static const iocshFuncDef configADSimPeaks = {"ADSimPeaksConfig", 8, ADSimPeaksConfigArgs};
+							   &ADSimPeaksConfigArg7,
+  							   &ADSimPeaksConfigArg8};
+  static const iocshFuncDef configADSimPeaks = {"ADSimPeaksConfig", 9, ADSimPeaksConfigArgs};
   static void configADSimPeaksCallFunc(const iocshArgBuf *args)
   {
     ADSimPeaksConfig(args[0].sval, args[1].ival, args[2].ival, args[3].ival,
-		     args[4].ival, args[5].ival, args[6].ival, args[7].ival);
+		     args[4].ival, args[5].ival, args[6].ival, args[7].ival, args[8].ival);
   }
   
   static void ADSimPeaksRegister(void)

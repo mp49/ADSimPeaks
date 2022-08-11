@@ -26,21 +26,31 @@
 #define ADSPNoiseLevelParamString   "ADSP_NOISE_LEVEL"
 #define ADSPElapsedTimeParamString "ADSP_ELAPSEDTIME"
 // Peak Information Params
-#define ADSPPeakTypeParamString  "ADSP_PEAK_TYPE"
-#define ADSPPeakPosParamString   "ADSP_PEAK_POS"
-#define ADSPPeakFWHMParamString  "ADSP_PEAK_FWHM"
+#define ADSPPeakType1DParamString  "ADSP_PEAK_TYPE1D"
+#define ADSPPeakType2DParamString  "ADSP_PEAK_TYPE2D"
+#define ADSPPeakPosXParamString   "ADSP_PEAK_POSX"
+#define ADSPPeakPosYParamString   "ADSP_PEAK_POSY"
+#define ADSPPeakFWHMXParamString  "ADSP_PEAK_FWHMX"
+#define ADSPPeakFWHMYParamString  "ADSP_PEAK_FWHMY"
 #define ADSPPeakMaxParamString "ADSP_PEAK_MAX"
 // Background Polynomial Coefficients
-#define ADSPBGC0ParamString  "ADSP_BG_C0"
-#define ADSPBGC1ParamString  "ADSP_BG_C1"
-#define ADSPBGC2ParamString  "ADSP_BG_C2"
-#define ADSPBGC3ParamString  "ADSP_BG_C3"
-#define ADSPBGSHParamString  "ADSP_BG_SH"
+// X
+#define ADSPBGC0XParamString  "ADSP_BG_C0X"
+#define ADSPBGC1XParamString  "ADSP_BG_C1X"
+#define ADSPBGC2XParamString  "ADSP_BG_C2X"
+#define ADSPBGC3XParamString  "ADSP_BG_C3X"
+#define ADSPBGSHXParamString  "ADSP_BG_SHX"
+// Y
+#define ADSPBGC0YParamString  "ADSP_BG_C0Y"
+#define ADSPBGC1YParamString  "ADSP_BG_C1Y"
+#define ADSPBGC2YParamString  "ADSP_BG_C2Y"
+#define ADSPBGC3YParamString  "ADSP_BG_C3Y"
+#define ADSPBGSHYParamString  "ADSP_BG_SHY"
 
 class ADSimPeaks : public ADDriver {
 
  public:
-  ADSimPeaks(const char *portName, int maxSize, int maxPeaks, NDDataType_t dataType,
+  ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int maxPeaks, NDDataType_t dataType,
 	     int maxBuffers, size_t maxMemory, int priority, int stackSize);
 
   virtual ~ADSimPeaks();
@@ -60,20 +70,29 @@ class ADSimPeaks : public ADDriver {
   int ADSPNoiseTypeParam;
   int ADSPNoiseLevelParam;
   int ADSPElapsedTimeParam;
-  int ADSPPeakTypeParam;
-  int ADSPPeakPosParam;
-  int ADSPPeakFWHMParam;
+  int ADSPPeakType1DParam;
+  int ADSPPeakType2DParam;
+  int ADSPPeakPosXParam;
+  int ADSPPeakPosYParam;
+  int ADSPPeakFWHMXParam;
+  int ADSPPeakFWHMYParam;
   int ADSPPeakMaxParam;
-  int ADSPBGC0Param;
-  int ADSPBGC1Param;
-  int ADSPBGC2Param;
-  int ADSPBGC3Param;
-  int ADSPBGSHParam;
+  int ADSPBGC0XParam;
+  int ADSPBGC1XParam;
+  int ADSPBGC2XParam;
+  int ADSPBGC3XParam;
+  int ADSPBGSHXParam;
+  int ADSPBGC0YParam;
+  int ADSPBGC1YParam;
+  int ADSPBGC2YParam;
+  int ADSPBGC3YParam;
+  int ADSPBGSHYParam;
   
   //Internal data
-  epicsUInt32 m_maxSize;
+  epicsUInt32 m_maxSizeX;
+  epicsUInt32 m_maxSizeY;
   epicsUInt32 m_maxPeaks;
-
+  bool m_2d;
   bool m_acquiring;
   epicsUInt32 m_uniqueId;
   
@@ -89,10 +108,21 @@ class ADSimPeaks : public ADDriver {
   std::default_random_engine m_rand_gen;
 
   /**
-   * The enum for the type of peak function. This needs to match
+   * The enum for the type of 1D peak function. This needs to match
    * the list order presented to the user. 
    */
-  enum class e_peak_type {
+  enum class e_peak_type_1d {
+    none,
+    gaussian,
+    lorentz,
+    pseudovoigt  
+  };
+
+  /**
+   * The enum for the type of 2D peak function. This needs to match
+   * the list order presented to the user. 
+   */
+  enum class e_peak_type_2d {
     none,
     gaussian,
     lorentz,
