@@ -1623,19 +1623,27 @@ record(ai, "ST99:Det:Det1:NoiseLevel_RBV") {
 
 ############################################################
 # Background Polynomial Coefficients (Cubic Polynomial)
+#
+# This is template meant to be instantiated by either
+# the 1D or 2D case by setting the additional macro XY
+#
+# Macros (in addition to ADSimPeaks.template)
+# XY - 'X' or 'Y'
+#
+############################################################
 
 # ///
-# /// Background Polynomial Constant Term
+# /// X Background Polynomial Constant Term
 # ///
-record(ao, "ST99:Det:Det1:BGC0") {
-  field(DESC, "Background Coef 0")
+record(ao, "ST99:Det:Det1:BGC0X") {
+  field(DESC, "X Background Coef 0")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
   field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C0X")
   field(PREC, "6")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:BGC0_RBV") {
+record(ai, "ST99:Det:Det1:BGC0X_RBV") {
   field(DTYP, "asynFloat64")
   field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C0X")
   field(SCAN, "I/O Intr")
@@ -1643,17 +1651,17 @@ record(ai, "ST99:Det:Det1:BGC0_RBV") {
 }
 
 # ///
-# /// Background Polynomial Slope
+# /// X Background Polynomial Slope
 # ///
-record(ao, "ST99:Det:Det1:BGC1") {
-  field(DESC, "Background Coef 1")
+record(ao, "ST99:Det:Det1:BGC1X") {
+  field(DESC, "X Background Coef 1")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
   field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C1X")
   field(PREC, "6")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:BGC1_RBV") {
+record(ai, "ST99:Det:Det1:BGC1X_RBV") {
   field(DTYP, "asynFloat64")
   field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C1X")
   field(SCAN, "I/O Intr")
@@ -1661,17 +1669,17 @@ record(ai, "ST99:Det:Det1:BGC1_RBV") {
 }
 
 # ///
-# /// Background Polynomial 2nd Order Coefficients
+# /// X Background Polynomial 2nd Order Coefficients
 # ///
-record(ao, "ST99:Det:Det1:BGC2") {
-  field(DESC, "Background Coef 2")
+record(ao, "ST99:Det:Det1:BGC2X") {
+  field(DESC, "X Background Coef 2")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
   field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C2X")
   field(PREC, "6")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:BGC2_RBV") {
+record(ai, "ST99:Det:Det1:BGC2X_RBV") {
   field(DTYP, "asynFloat64")
   field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C2X")
   field(SCAN, "I/O Intr")
@@ -1679,17 +1687,17 @@ record(ai, "ST99:Det:Det1:BGC2_RBV") {
 }
 
 # ///
-# /// Background Polynomial 3rd Order Coefficients
+# /// X Background Polynomial 3rd Order Coefficients
 # ///
-record(ao, "ST99:Det:Det1:BGC3") {
-  field(DESC, "Background Coef 3")
+record(ao, "ST99:Det:Det1:BGC3X") {
+  field(DESC, "X Background Coef 3")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
   field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_C3X")
   field(PREC, "6")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:BGC3_RBV") {
+record(ai, "ST99:Det:Det1:BGC3X_RBV") {
   field(DTYP, "asynFloat64")
   field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_C3X")
   field(SCAN, "I/O Intr")
@@ -1697,24 +1705,32 @@ record(ai, "ST99:Det:Det1:BGC3_RBV") {
 }
 
 # ///
-# /// Background Polynomial Shift 
+# /// X Background Polynomial Shift 
 # ///
-record(ao, "ST99:Det:Det1:BGSH") {
-  field(DESC, "Background Shift")
+record(ao, "ST99:Det:Det1:BGSHX") {
+  field(DESC, "X Background Shift")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
   field(OUT,  "@asyn(D1.SIM,0,1)ADSP_BG_SHX")
   field(PREC, "6")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:BGSH_RBV") {
+record(ai, "ST99:Det:Det1:BGSHX_RBV") {
   field(DTYP, "asynFloat64")
   field(INP,  "@asyn(D1.SIM,0,1)ADSP_BG_SHX")
   field(SCAN, "I/O Intr")
   field(PREC, "6")	
 }
 
+
+
+
+
+
+
 #################################################################
+#
+# Instantiate this template for 1D peak applications.
 #
 # Macros: (in addition to ADSimPeaks.template)
 # PEAK - The peak index (0 based)
@@ -1754,44 +1770,6 @@ record(mbbi, "ST99:Det:Det1:P0Type_RBV") {
 }
 
 # ///
-# /// Peak position
-# ///
-record(ao, "ST99:Det:Det1:P0Pos") {
-  field(DESC, "Peak Position")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POSX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P0Pos_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POSX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak full width half max (FWHM)
-# ///
-record(ao, "ST99:Det:Det1:P0FWHM") {
-  field(DESC, "Peak FWHM")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHMX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P0FWHM_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHMX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
 # /// Peak max
 # ///
 record(ao, "ST99:Det:Det1:P0Max") {
@@ -1810,6 +1788,58 @@ record(ai, "ST99:Det:Det1:P0Max_RBV") {
 }
 
 #################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# XY - 'X' or 'Y'
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// X Peak position
+# ///
+record(ao, "ST99:Det:Det1:P0PosX") {
+  field(DESC, "X Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POSX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P0PosX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_POSX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// X Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P0FWHMX") {
+  field(DESC, "X Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHMX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P0FWHMX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_FWHMX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+
+
+
+
+#################################################################
+#
+# Instantiate this template for 1D peak applications.
 #
 # Macros: (in addition to ADSimPeaks.template)
 # PEAK - The peak index (0 based)
@@ -1849,44 +1879,6 @@ record(mbbi, "ST99:Det:Det1:P1Type_RBV") {
 }
 
 # ///
-# /// Peak position
-# ///
-record(ao, "ST99:Det:Det1:P1Pos") {
-  field(DESC, "Peak Position")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_POSX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P1Pos_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_POSX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak full width half max (FWHM)
-# ///
-record(ao, "ST99:Det:Det1:P1FWHM") {
-  field(DESC, "Peak FWHM")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_FWHMX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P1FWHM_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_FWHMX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
 # /// Peak max
 # ///
 record(ao, "ST99:Det:Det1:P1Max") {
@@ -1905,6 +1897,58 @@ record(ai, "ST99:Det:Det1:P1Max_RBV") {
 }
 
 #################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# XY - 'X' or 'Y'
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// X Peak position
+# ///
+record(ao, "ST99:Det:Det1:P1PosX") {
+  field(DESC, "X Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_POSX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P1PosX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_POSX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// X Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P1FWHMX") {
+  field(DESC, "X Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_FWHMX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P1FWHMX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_FWHMX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+
+
+
+
+#################################################################
+#
+# Instantiate this template for 1D peak applications.
 #
 # Macros: (in addition to ADSimPeaks.template)
 # PEAK - The peak index (0 based)
@@ -1944,44 +1988,6 @@ record(mbbi, "ST99:Det:Det1:P2Type_RBV") {
 }
 
 # ///
-# /// Peak position
-# ///
-record(ao, "ST99:Det:Det1:P2Pos") {
-  field(DESC, "Peak Position")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_POSX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P2Pos_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_POSX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak full width half max (FWHM)
-# ///
-record(ao, "ST99:Det:Det1:P2FWHM") {
-  field(DESC, "Peak FWHM")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_FWHMX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P2FWHM_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_FWHMX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
 # /// Peak max
 # ///
 record(ao, "ST99:Det:Det1:P2Max") {
@@ -2000,6 +2006,58 @@ record(ai, "ST99:Det:Det1:P2Max_RBV") {
 }
 
 #################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# XY - 'X' or 'Y'
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// X Peak position
+# ///
+record(ao, "ST99:Det:Det1:P2PosX") {
+  field(DESC, "X Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_POSX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P2PosX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_POSX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// X Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P2FWHMX") {
+  field(DESC, "X Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_FWHMX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P2FWHMX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_FWHMX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+
+
+
+
+#################################################################
+#
+# Instantiate this template for 1D peak applications.
 #
 # Macros: (in addition to ADSimPeaks.template)
 # PEAK - The peak index (0 based)
@@ -2039,44 +2097,6 @@ record(mbbi, "ST99:Det:Det1:P3Type_RBV") {
 }
 
 # ///
-# /// Peak position
-# ///
-record(ao, "ST99:Det:Det1:P3Pos") {
-  field(DESC, "Peak Position")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_POSX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P3Pos_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_POSX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak full width half max (FWHM)
-# ///
-record(ao, "ST99:Det:Det1:P3FWHM") {
-  field(DESC, "Peak FWHM")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_FWHMX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P3FWHM_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_FWHMX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
 # /// Peak max
 # ///
 record(ao, "ST99:Det:Det1:P3Max") {
@@ -2095,6 +2115,58 @@ record(ai, "ST99:Det:Det1:P3Max_RBV") {
 }
 
 #################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# XY - 'X' or 'Y'
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// X Peak position
+# ///
+record(ao, "ST99:Det:Det1:P3PosX") {
+  field(DESC, "X Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_POSX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P3PosX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_POSX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// X Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P3FWHMX") {
+  field(DESC, "X Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_FWHMX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P3FWHMX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_FWHMX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+
+
+
+
+#################################################################
+#
+# Instantiate this template for 1D peak applications.
 #
 # Macros: (in addition to ADSimPeaks.template)
 # PEAK - The peak index (0 based)
@@ -2134,44 +2206,6 @@ record(mbbi, "ST99:Det:Det1:P4Type_RBV") {
 }
 
 # ///
-# /// Peak position
-# ///
-record(ao, "ST99:Det:Det1:P4Pos") {
-  field(DESC, "Peak Position")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_POSX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P4Pos_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_POSX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak full width half max (FWHM)
-# ///
-record(ao, "ST99:Det:Det1:P4FWHM") {
-  field(DESC, "Peak FWHM")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_FWHMX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P4FWHM_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_FWHMX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
 # /// Peak max
 # ///
 record(ao, "ST99:Det:Det1:P4Max") {
@@ -2190,6 +2224,58 @@ record(ai, "ST99:Det:Det1:P4Max_RBV") {
 }
 
 #################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# XY - 'X' or 'Y'
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// X Peak position
+# ///
+record(ao, "ST99:Det:Det1:P4PosX") {
+  field(DESC, "X Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_POSX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P4PosX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_POSX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// X Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P4FWHMX") {
+  field(DESC, "X Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_FWHMX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P4FWHMX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_FWHMX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+
+
+
+
+#################################################################
+#
+# Instantiate this template for 1D peak applications.
 #
 # Macros: (in addition to ADSimPeaks.template)
 # PEAK - The peak index (0 based)
@@ -2229,44 +2315,6 @@ record(mbbi, "ST99:Det:Det1:P5Type_RBV") {
 }
 
 # ///
-# /// Peak position
-# ///
-record(ao, "ST99:Det:Det1:P5Pos") {
-  field(DESC, "Peak Position")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_POSX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P5Pos_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_POSX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak full width half max (FWHM)
-# ///
-record(ao, "ST99:Det:Det1:P5FWHM") {
-  field(DESC, "Peak FWHM")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_FWHMX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P5FWHM_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_FWHMX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
 # /// Peak max
 # ///
 record(ao, "ST99:Det:Det1:P5Max") {
@@ -2285,6 +2333,58 @@ record(ai, "ST99:Det:Det1:P5Max_RBV") {
 }
 
 #################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# XY - 'X' or 'Y'
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// X Peak position
+# ///
+record(ao, "ST99:Det:Det1:P5PosX") {
+  field(DESC, "X Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_POSX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P5PosX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_POSX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// X Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P5FWHMX") {
+  field(DESC, "X Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_FWHMX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P5FWHMX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_FWHMX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+
+
+
+
+#################################################################
+#
+# Instantiate this template for 1D peak applications.
 #
 # Macros: (in addition to ADSimPeaks.template)
 # PEAK - The peak index (0 based)
@@ -2324,44 +2424,6 @@ record(mbbi, "ST99:Det:Det1:P6Type_RBV") {
 }
 
 # ///
-# /// Peak position
-# ///
-record(ao, "ST99:Det:Det1:P6Pos") {
-  field(DESC, "Peak Position")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_POSX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P6Pos_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_POSX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak full width half max (FWHM)
-# ///
-record(ao, "ST99:Det:Det1:P6FWHM") {
-  field(DESC, "Peak FWHM")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_FWHMX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P6FWHM_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_FWHMX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
 # /// Peak max
 # ///
 record(ao, "ST99:Det:Det1:P6Max") {
@@ -2380,6 +2442,58 @@ record(ai, "ST99:Det:Det1:P6Max_RBV") {
 }
 
 #################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# XY - 'X' or 'Y'
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// X Peak position
+# ///
+record(ao, "ST99:Det:Det1:P6PosX") {
+  field(DESC, "X Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_POSX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P6PosX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_POSX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// X Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P6FWHMX") {
+  field(DESC, "X Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_FWHMX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P6FWHMX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_FWHMX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+
+
+
+
+#################################################################
+#
+# Instantiate this template for 1D peak applications.
 #
 # Macros: (in addition to ADSimPeaks.template)
 # PEAK - The peak index (0 based)
@@ -2419,44 +2533,6 @@ record(mbbi, "ST99:Det:Det1:P7Type_RBV") {
 }
 
 # ///
-# /// Peak position
-# ///
-record(ao, "ST99:Det:Det1:P7Pos") {
-  field(DESC, "Peak Position")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_POSX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P7Pos_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_POSX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak full width half max (FWHM)
-# ///
-record(ao, "ST99:Det:Det1:P7FWHM") {
-  field(DESC, "Peak FWHM")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_FWHMX")
-  field(VAL, "1")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "ST99:Det:Det1:P7FWHM_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_FWHMX")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
 # /// Peak max
 # ///
 record(ao, "ST99:Det:Det1:P7Max") {
@@ -2473,6 +2549,56 @@ record(ai, "ST99:Det:Det1:P7Max_RBV") {
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
+
+#################################################################
+#
+# Macros: (in addition to ADSimPeaks.template)
+# XY - 'X' or 'Y'
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// X Peak position
+# ///
+record(ao, "ST99:Det:Det1:P7PosX") {
+  field(DESC, "X Peak Position")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_POSX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P7PosX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_POSX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// X Peak full width half max (FWHM)
+# ///
+record(ao, "ST99:Det:Det1:P7FWHMX") {
+  field(DESC, "X Peak FWHM")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_FWHMX")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "ST99:Det:Det1:P7FWHMX_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_FWHMX")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+
+
+
 
 #=================================================================#
 # Template file: NDCodec.template

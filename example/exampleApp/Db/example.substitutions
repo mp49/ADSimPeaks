@@ -5,13 +5,13 @@ pattern {P, R, PORT, ADDR, TIMEOUT}
         {ST99:Det, :Det1:, D1.SIM, 0, 1}
 }
 
-file ADSimPeaksBackground.template
+file ADSimPeaks1DBackground.template
 {
 pattern {P, R, PORT, ADDR, TIMEOUT}
         {ST99:Det, :Det1:, D1.SIM, 0, 1}
 }
 
-file ADSimPeaksPeak.template
+file ADSimPeaks1DPeak.template
 {
 pattern {P, R, PORT, ADDR, TIMEOUT, PEAK}
         {ST99:Det, :Det1:, D1.SIM, 0, 1, 0}
