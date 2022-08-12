@@ -163,6 +163,7 @@ class ADSimPeaks : public ADDriver {
 				  epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
 				  epicsInt32 x_bin, epicsInt32 y_bin,
 				  epicsFloat64 *result);
+  asynStatus computePseudoVoigtEta(epicsFloat64 fwhm_g, epicsFloat64 fwhm_l, epicsFloat64 *eta);
 
   //Utilty Functions
   epicsFloat64 zeroCheck(epicsFloat64 value);

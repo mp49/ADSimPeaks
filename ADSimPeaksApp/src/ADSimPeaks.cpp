@@ -193,10 +193,10 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
   cout << functionName << " maxSizeX: " << m_maxSizeX << endl;
   cout << functionName << " maxSizeY: " << m_maxSizeY << endl;
   cout << functionName << " maxPeaks: " << m_maxPeaks << endl;
-  if (m_2d) {
-    cout << functionName << " configured for 2D data" << endl;
-  } else {
+  if (!m_2d) {
     cout << functionName << " configured for 1D data" << endl;
+  } else {
+    cout << functionName << " configured for 2D data" << endl;
   }
 
   m_initialized = true;
@@ -422,7 +422,20 @@ void ADSimPeaks::report(FILE *fp, int details)
     fprintf(fp, " Peak Information:\n");
     for (epicsUInt32 i=0; i<m_maxPeaks; i++) {
       fprintf(fp, "  peak: %d\n", i);
-      if (m_2d) {
+      if (!m_2d) {
+	getIntegerParam(i, ADSPPeakType1DParam, &intParam);
+	if (intParam == static_cast<epicsUInt32>(e_peak_type_1d::none)) {
+	  fprintf(fp, "   none (disabled)\n");
+	} else {
+	  fprintf(fp, "   type: %d\n", intParam);
+	  getDoubleParam(i, ADSPPeakPosXParam, &floatParam);
+	  fprintf(fp, "   position X: %f\n", floatParam);
+	  getDoubleParam(i, ADSPPeakFWHMXParam, &floatParam);
+	  fprintf(fp, "   fwhm X: %f\n", floatParam);
+	  getDoubleParam(i, ADSPPeakMaxParam, &floatParam);
+	  fprintf(fp, "   max: %f\n", floatParam);
+	}
+      } else {
 	getIntegerParam(i, ADSPPeakType2DParam, &intParam);
 	if (intParam == static_cast<epicsUInt32>(e_peak_type_2d::none)) {
 	  fprintf(fp, "   none (disabled)\n");
@@ -441,22 +454,10 @@ void ADSimPeaks::report(FILE *fp, int details)
 	  getDoubleParam(i, ADSPPeakMaxParam, &floatParam);
 	  fprintf(fp, "   max: %f\n", floatParam);
 	}
-      } else {
-	getIntegerParam(i, ADSPPeakType1DParam, &intParam);
-	if (intParam == static_cast<epicsUInt32>(e_peak_type_1d::none)) {
-	  fprintf(fp, "   none (disabled)\n");
-	} else {
-	  fprintf(fp, "   type: %d\n", intParam);
-	  getDoubleParam(i, ADSPPeakPosXParam, &floatParam);
-	  fprintf(fp, "   position X: %f\n", floatParam);
-	  getDoubleParam(i, ADSPPeakFWHMXParam, &floatParam);
-	  fprintf(fp, "   fwhm X: %f\n", floatParam);
-	  getDoubleParam(i, ADSPPeakMaxParam, &floatParam);
-	  fprintf(fp, "   max: %f\n", floatParam);
-	}
-      }
-    }
-  }
+      } // end of if (!m_2d)
+    } // end of peak loop
+  } // end of if (details > 0)
+
   // Invoke the base class method.
   // This will by default print the addr=0 parameters.
   ADDriver::report(fp, details);
@@ -537,16 +538,17 @@ void ADSimPeaks::ADSimPeaksTask(void)
       dataType = (NDDataType_t)dataTypeInt;
       getIntegerParam(ADSizeX, &sizeX);
       getIntegerParam(ADSizeY, &sizeY);
-      if (m_2d) {
-	ndims = 2;
-	dims[0] = sizeX;
-	dims[1] = sizeY;
-      } else {
+
+      if (!m_2d) {
 	ndims = 1;
 	dims[0] = sizeX;
 	dims[1] = 0;
+      } else {
+	ndims = 2;
+	dims[0] = sizeX;
+	dims[1] = sizeY;
       }
-
+      
       if (m_needNewArray) {
 	if (p_NDArray != NULL) {
 	  p_NDArray->release();
@@ -753,19 +755,48 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   
   //Calculate the peak profile and scale it to the desired height
   for (epicsUInt32 peak=0; peak<m_maxPeaks; peak++) {
-    if (m_2d) {
-      getIntegerParam(peak, ADSPPeakType2DParam, &peak_type);
-      getDoubleParam(peak, ADSPPeakPosYParam, &peak_pos_y);
-      getDoubleParam(peak, ADSPPeakFWHMYParam, &peak_fwhm_y);
-    } else {
-      getIntegerParam(peak, ADSPPeakType1DParam, &peak_type);
-    }
+    
     getDoubleParam(peak, ADSPPeakPosXParam, &peak_pos_x);
     getDoubleParam(peak, ADSPPeakFWHMXParam, &peak_fwhm_x);
     getDoubleParam(peak, ADSPPeakCorrParam, &peak_corr);
     getDoubleParam(peak, ADSPPeakMaxParam, &peak_max);
+    if (!m_2d) {
+      getIntegerParam(peak, ADSPPeakType1DParam, &peak_type);
+    } else {
+      getIntegerParam(peak, ADSPPeakType2DParam, &peak_type);
+      getDoubleParam(peak, ADSPPeakPosYParam, &peak_pos_y);
+      getDoubleParam(peak, ADSPPeakFWHMYParam, &peak_fwhm_y);
+    }
 
-    if (m_2d) {
+    if (!m_2d) {
+      // Compute 1D peaks
+      if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::gaussian)) {
+	computeGaussian(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
+	scale_factor = peak_max / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  computeGaussian(peak_pos_x, peak_fwhm_x, bin, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::lorentz)) {
+	computeLorentz(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
+	scale_factor = peak_max / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  computeLorentz(peak_pos_x, peak_fwhm_x, bin, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::pseudovoigt)) {
+	computePseudoVoigt(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
+	scale_factor = peak_max / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  computePseudoVoigt(peak_pos_x, peak_fwhm_x, bin, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
+      }
+    } else {
+      // Compute 2D peaks
       if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::gaussian)) {
 	computeGaussian2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, peak_corr, &result_max);
 	scale_factor = peak_max / zeroCheck(result_max);
@@ -797,35 +828,9 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  pData[bin] += static_cast<T>(result);
 	}
       }
-    } else {
-      if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::gaussian)) {
-	computeGaussian(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
-	scale_factor = peak_max / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  computeGaussian(peak_pos_x, peak_fwhm_x, bin, &result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::lorentz)) {
-	computeLorentz(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
-	scale_factor = peak_max / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  computeLorentz(peak_pos_x, peak_fwhm_x, bin, &result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::pseudovoigt)) {
-	computePseudoVoigt(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
-	scale_factor = peak_max / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  computePseudoVoigt(peak_pos_x, peak_fwhm_x, bin, &result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      }
-      
-    }
-  }
+    } // end of if (!m_2d)
+    
+  } // end of peak loop
 
   //Generate noise
   getIntegerParam(ADSPNoiseTypeParam, &noise_type);
@@ -882,15 +887,12 @@ epicsFloat64 ADSimPeaks::zeroCheck(epicsFloat64 value)
  */
 asynStatus ADSimPeaks::computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
 {
-  asynStatus status = asynSuccess;
-  string functionName(s_className + "::" + __func__);
-
   fwhm = std::max(1.0, fwhm);
   
   epicsFloat64 sigma = fwhm / (2.0*sqrt(2.0*log(2.0)));
   *result = (1.0 / (sigma*sqrt(2.0*M_PI))) * exp(-(((bin-pos)*(bin-pos))) / (2.0*(sigma*sigma)));
 
-  return status;
+  return asynSuccess;
 }
 
 /**
@@ -908,15 +910,12 @@ asynStatus ADSimPeaks::computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epic
  */
 asynStatus ADSimPeaks::computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
 {
-  asynStatus status = asynSuccess;
-  string functionName(s_className + "::" + __func__);
-
   fwhm = std::max(1.0, fwhm);
   
   epicsFloat64 gamma = fwhm / 2.0;
   *result = (1 / (M_PI*gamma)) * ((gamma*gamma) / (((bin-pos)*(bin-pos)) + (gamma*gamma)));
 
-  return status;
+  return asynSuccess;
 }
 
 /**
@@ -935,17 +934,11 @@ asynStatus ADSimPeaks::computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epics
  */
 asynStatus ADSimPeaks::computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
 {
-  asynStatus status = asynSuccess;
-
   epicsFloat64 fwhm_g = 0.0;
   epicsFloat64 fwhm_l = 0.0;
-  epicsFloat64 fwhm_sum = 0.0;
-  epicsFloat64 fwhm_tot = 0.0;
   epicsFloat64 eta = 0.0;
   epicsFloat64 gaussian = 0.0;
   epicsFloat64 lorentz = 0.0;
-  
-  string functionName(s_className + "::" + __func__);
 
   fwhm = std::max(1.0, fwhm);
   
@@ -953,30 +946,17 @@ asynStatus ADSimPeaks::computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, e
   //still use the full approximation for the Pseudo-Voigt total FWHM (fwhm_tot) and use two FWHM parameters
   //(fwhm_g and fwhm_l), so that this function can easily be modified to use a different Gaussian
   //and Lorentzian FWHM.
-
-  epicsFloat64 p1 = 2.69269;
-  epicsFloat64 p2 = 2.42843;
-  epicsFloat64 p3 = 4.47163;
-  epicsFloat64 p4 = 0.07842;
-
-  epicsFloat64 e1 = 1.36603;
-  epicsFloat64 e2 = 0.47719;
-  epicsFloat64 e3 = 0.11116;
   
   fwhm_g = fwhm;
   fwhm_l = fwhm;
-  fwhm_sum = pow(fwhm_g,5) + (p1*pow(fwhm_g,4)*fwhm_l) + (p2*pow(fwhm_g,3)*pow(fwhm_l,2)) +
-            (p3*pow(fwhm_g,2)*pow(fwhm_l,3)) + (p4*fwhm_g*pow(fwhm_l,4)) + pow(fwhm_l,5);
-  fwhm_tot = pow(fwhm_sum,0.2);
-  
-  eta = ((e1*(fwhm_l/fwhm_tot)) - (e2*pow((fwhm_l/fwhm_tot),2)) + (e3*pow((fwhm_l/fwhm_tot),3)));
-  
+
+  computePseudoVoigtEta(fwhm_g, fwhm_l, &eta);
   computeGaussian(pos, fwhm, bin, &gaussian);
   computeLorentz(pos, fwhm, bin, &lorentz);
 
   *result = ((1.0 - eta)*gaussian) + (eta*lorentz);
 
-  return status;
+  return asynSuccess;
 }
 
 /**
@@ -1003,9 +983,6 @@ asynStatus ADSimPeaks::computeGaussian2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
 					 epicsInt32 x_bin, epicsInt32 y_bin,
 					 epicsFloat64 rho, epicsFloat64 *result)
 {
-  asynStatus status = asynSuccess;
-  string functionName(s_className + "::" + __func__);
-
   x_fwhm = std::max(1.0, x_fwhm);
   y_fwhm = std::max(1.0, y_fwhm);
   rho = std::min(1.0, std::max(-1.0, rho));
@@ -1020,7 +997,7 @@ asynStatus ADSimPeaks::computeGaussian2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
     
   *result = xy_amp * exp(xy_factor*(xy_calc1*xy_calc1 - 2*rho*xy_calc1*xy_calc2 + xy_calc2*xy_calc2));
 
-  return status;
+  return asynSuccess;
 }
 
 /**
@@ -1046,9 +1023,6 @@ asynStatus ADSimPeaks::computeLorentz2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
 					epicsFloat64 fwhm, epicsInt32 x_bin,
 					epicsInt32 y_bin, epicsFloat64 *result)
 {
-  asynStatus status = asynSuccess;
-  string functionName(s_className + "::" + __func__);
-  
   fwhm = std::max(1.0, fwhm);
   
   epicsFloat64 gamma = fwhm / 2.0;
@@ -1057,7 +1031,7 @@ asynStatus ADSimPeaks::computeLorentz2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
   
   *result = (1 / (2*M_PI)) * (gamma / pow(((xy_calc1*xy_calc1) + (xy_calc2*xy_calc2) + gamma*gamma),1.5));
 
-  return status;
+  return asynSuccess;
 }
 
 /**
@@ -1087,22 +1061,34 @@ asynStatus ADSimPeaks::computePseudoVoigt2D(epicsFloat64 x_pos, epicsFloat64 y_p
 					    epicsInt32 x_bin, epicsInt32 y_bin,
 					    epicsFloat64 *result)
 {
-  asynStatus status = asynSuccess;
-
   epicsFloat64 fwhm_av = 0.0;
   epicsFloat64 fwhm_g = 0.0;
   epicsFloat64 fwhm_l = 0.0;
-  epicsFloat64 fwhm_sum = 0.0;
-  epicsFloat64 fwhm_tot = 0.0;
   epicsFloat64 eta = 0.0;
   epicsFloat64 gaussian = 0.0;
   epicsFloat64 lorentz = 0.0;
   
-  string functionName(s_className + "::" + __func__);
-
   x_fwhm = std::max(1.0, x_fwhm);
   y_fwhm = std::max(1.0, y_fwhm);
   
+  fwhm_av = (x_fwhm+y_fwhm)/2.0;
+  fwhm_g = fwhm_av;
+  fwhm_l = fwhm_av;
+
+  computePseudoVoigtEta(fwhm_g, fwhm_l, &eta);
+  computeGaussian2D(x_pos, y_pos, x_fwhm, y_fwhm, x_bin, y_bin, 0.0, &gaussian);
+  computeLorentz2D(x_pos, y_pos, fwhm_av, x_bin, y_bin, &lorentz);
+
+  *result = ((1.0 - eta)*gaussian) + (eta*lorentz);
+
+  return asynSuccess;
+}
+
+asynStatus ADSimPeaks::computePseudoVoigtEta(epicsFloat64 fwhm_g, epicsFloat64 fwhm_l, epicsFloat64 *eta)
+{
+  epicsFloat64 fwhm_sum = 0.0;
+  epicsFloat64 fwhm_tot = 0.0;
+
   epicsFloat64 p1 = 2.69269;
   epicsFloat64 p2 = 2.42843;
   epicsFloat64 p3 = 4.47163;
@@ -1111,22 +1097,14 @@ asynStatus ADSimPeaks::computePseudoVoigt2D(epicsFloat64 x_pos, epicsFloat64 y_p
   epicsFloat64 e1 = 1.36603;
   epicsFloat64 e2 = 0.47719;
   epicsFloat64 e3 = 0.11116;
-
-  fwhm_av = (x_fwhm+y_fwhm)/2.0;
-  fwhm_g = fwhm_av;
-  fwhm_l = fwhm_av;
+  
   fwhm_sum = pow(fwhm_g,5) + (p1*pow(fwhm_g,4)*fwhm_l) + (p2*pow(fwhm_g,3)*pow(fwhm_l,2)) +
             (p3*pow(fwhm_g,2)*pow(fwhm_l,3)) + (p4*fwhm_g*pow(fwhm_l,4)) + pow(fwhm_l,5);
   fwhm_tot = pow(fwhm_sum,0.2);
   
-  eta = ((e1*(fwhm_l/fwhm_tot)) - (e2*pow((fwhm_l/fwhm_tot),2)) + (e3*pow((fwhm_l/fwhm_tot),3)));
+  *eta = ((e1*(fwhm_l/fwhm_tot)) - (e2*pow((fwhm_l/fwhm_tot),2)) + (e3*pow((fwhm_l/fwhm_tot),3)));
   
-  computeGaussian2D(x_pos, y_pos, x_fwhm, y_fwhm, x_bin, y_bin, 0.0, &gaussian);
-  computeLorentz2D(x_pos, y_pos, fwhm_av, x_bin, y_bin, &lorentz);
-
-  *result = ((1.0 - eta)*gaussian) + (eta*lorentz);
-
-  return status;
+  return asynSuccess;
 }
 
 
