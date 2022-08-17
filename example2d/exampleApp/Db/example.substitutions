@@ -2,50 +2,50 @@
 file ADSimPeaks.template
 {
 pattern {P, R, PORT, ADDR, TIMEOUT}
-        {ST99:Det, :Det4:, D4.SIM, 0, 1}
+        {ST99:Det, :Det2:, D2.SIM, 0, 1}
 }
 
 file ADSimPeaks2DBackground.template
 {
 pattern {P, R, PORT, ADDR, TIMEOUT}
-        {ST99:Det, :Det4:, D4.SIM, 0, 1}
+        {ST99:Det, :Det2:, D2.SIM, 0, 1}
 }
 
 file ADSimPeaks2DPeak.template
 {
 pattern {P, R, PORT, ADDR, TIMEOUT, PEAK}
-        {ST99:Det, :Det4:, D4.SIM, 0, 1, 0}
-	{ST99:Det, :Det4:, D4.SIM, 0, 1, 1}
-	{ST99:Det, :Det4:, D4.SIM, 0, 1, 2}
-	{ST99:Det, :Det4:, D4.SIM, 0, 1, 3}
-	{ST99:Det, :Det4:, D4.SIM, 0, 1, 4}
-	{ST99:Det, :Det4:, D4.SIM, 0, 1, 5}
-	{ST99:Det, :Det4:, D4.SIM, 0, 1, 6}
-	{ST99:Det, :Det4:, D4.SIM, 0, 1, 7}
+        {ST99:Det, :Det2:, D2.SIM, 0, 1, 0}
+	{ST99:Det, :Det2:, D2.SIM, 0, 1, 1}
+	{ST99:Det, :Det2:, D2.SIM, 0, 1, 2}
+	{ST99:Det, :Det2:, D2.SIM, 0, 1, 3}
+	{ST99:Det, :Det2:, D2.SIM, 0, 1, 4}
+	{ST99:Det, :Det2:, D2.SIM, 0, 1, 5}
+	{ST99:Det, :Det2:, D2.SIM, 0, 1, 6}
+	{ST99:Det, :Det2:, D2.SIM, 0, 1, 7}
 }
 
 file NDCodec.template
 {
 pattern {P, R, PORT, ADDR, TIMEOUT, NDARRAY_PORT, NDARRAY_ADDR}
-        {ST99:Det, :Det4:CO1:, D4.CO1, 0, 1, D4.SIM, 0}
+        {ST99:Det, :Det2:CO1:, D2.CO1, 0, 1, D2.SIM, 0}
 }
 
 file NDPva.template
 {
 pattern {P, R, PORT, ADDR, TIMEOUT, NDARRAY_PORT, NDARRAY_ADDR}
-        {ST99:Det, :Det4:PV1:, D4.PV1, 0, 1, D4.CO1, 0}
+        {ST99:Det, :Det2:PV1:, D2.PV1, 0, 1, D2.CO1, 0}
 }
 
 file save_restoreStatus.db
 {
 pattern {P}
-        {ST99:Det:IOC_SADet4:}
+        {ST99:Det:IOC_SADet2:}
 }
 
 file ioc_sns.db
 {
 pattern {IOCNAME}
-        {ST99:Det:IOC_SIDet4}
+        {ST99:Det:IOC_SIDet2}
 }
 
 

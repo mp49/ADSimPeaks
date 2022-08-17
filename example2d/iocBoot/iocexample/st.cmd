@@ -14,11 +14,11 @@ example_registerRecordDeviceDriver pdbbase
 ###############################################
 # Start the ADSimPeaks driver (2D version)
 
-ADSimPeaksConfig(D4.SIM,1024,1024,10,3,0,0,0,0)
+ADSimPeaksConfig(D2.SIM,1024,1024,10,3,0,0,0,0)
 
-NDCodecConfigure(D4.CO1,100,0,D4.SIM,0,0,0,0,0)
+NDCodecConfigure(D2.CO1,100,0,D2.SIM,0,0,0,0,0)
 
-NDPvaConfigure(D4.PV1,100,0,D4.CO1,0,"ST99:Det:Det4:PV1:Array",0,0,0)
+NDPvaConfigure(D2.PV1,100,0,D2.CO1,0,"ST99:Det:Det2:PV1:Array",0,0,0)
 
 ###############################################
 
@@ -34,7 +34,7 @@ epicsEnvSet("SAVE_DIR","/home/controls/var/$(IOCNAME)")
 save_restoreSet_Debug(0)
 
 ### status-PV prefix, so save_restore can find its status PV's.
-save_restoreSet_status_prefix("ST99:Det:IOC_SADet4:")
+save_restoreSet_status_prefix("ST99:Det:IOC_SADet2:")
 
 set_requestfile_path("$(SAVE_DIR)")
 set_savefile_path("$(SAVE_DIR)")
