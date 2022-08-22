@@ -831,6 +831,14 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::triangle)) {
+	computeTriangle(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  computeTriangle(peak_pos_x, peak_fwhm_x, bin, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
       }
     } else {
       // Compute 2D peaks
@@ -1041,6 +1049,22 @@ asynStatus ADSimPeaks::computeLaplace(epicsFloat64 pos, epicsFloat64 fwhm, epics
   // This uses some class static constant data that has been pre-computed
   epicsFloat64 b = fwhm / s_2l2;
   *result = (1.0/(2.0*b)) * exp(-((abs(bin - pos))/b));
+
+  return asynSuccess;
+}
+
+asynStatus ADSimPeaks::computeTriangle(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
+{
+  fwhm = std::max(1.0, fwhm);
+
+  epicsFloat64 peak = 1.0;
+  epicsFloat64 b = peak/fwhm;
+  if (bin <= static_cast<epicsInt32>(pos)) {
+    *result = peak + b*(bin-pos);
+  } else {
+    *result = peak - b*(bin-pos);
+  }
+  *result = std::max(0.0, *result);
 
   return asynSuccess;
 }

@@ -124,7 +124,8 @@ class ADSimPeaks : public ADDriver {
     gaussian,
     lorentz,
     pseudovoigt,
-    laplace
+    laplace,
+    triangle
   };
 
   /**
@@ -171,6 +172,7 @@ class ADSimPeaks : public ADDriver {
   asynStatus computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
   asynStatus computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
   asynStatus computeLaplace(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
+  asynStatus computeTriangle(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
 
   // 2D Profiles
   asynStatus computeGaussian2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
