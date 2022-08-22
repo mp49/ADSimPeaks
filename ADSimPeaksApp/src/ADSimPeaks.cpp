@@ -98,6 +98,9 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
   createParam(ADSPIntegrateParamString, asynParamInt32, &ADSPIntegrateParam);
   createParam(ADSPNoiseTypeParamString, asynParamInt32, &ADSPNoiseTypeParam);
   createParam(ADSPNoiseLevelParamString, asynParamFloat64, &ADSPNoiseLevelParam);
+  createParam(ADSPNoiseClampParamString, asynParamInt32, &ADSPNoiseClampParam);
+  createParam(ADSPNoiseLowerParamString, asynParamFloat64, &ADSPNoiseLowerParam);
+  createParam(ADSPNoiseUpperParamString, asynParamFloat64, &ADSPNoiseUpperParam);
   createParam(ADSPElapsedTimeParamString, asynParamFloat64, &ADSPElapsedTimeParam);
   createParam(ADSPPeakType1DParamString, asynParamInt32, &ADSPPeakType1DParam);
   createParam(ADSPPeakType2DParamString, asynParamInt32, &ADSPPeakType2DParam);
@@ -145,6 +148,9 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
   paramStatus = ((setIntegerParam(ADSPIntegrateParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setIntegerParam(ADSPNoiseTypeParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPNoiseLevelParam, 0.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setIntegerParam(ADSPNoiseClampParam, 0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPNoiseLowerParam, 0.0) == asynSuccess) && paramStatus);
+  paramStatus = ((setDoubleParam(ADSPNoiseUpperParam, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPElapsedTimeParam, 0.0) == asynSuccess) && paramStatus);
   //Peak Params
   for (epicsUInt32 peak=0; peak<m_maxPeaks; peak++) {
@@ -395,6 +401,10 @@ void ADSimPeaks::report(FILE *fp, int details)
     fprintf(fp, "  noise type: %d\n", intParam);
     getDoubleParam(ADSPNoiseLevelParam, &floatParam);
     fprintf(fp, "  noise level: %f\n", floatParam);
+    getDoubleParam(ADSPNoiseLowerParam, &floatParam);
+    fprintf(fp, "  noise lower: %f\n", floatParam);
+    getDoubleParam(ADSPNoiseUpperParam, &floatParam);
+    fprintf(fp, "  noise upper: %f\n", floatParam);
 
     getDoubleParam(ADSPBGC0XParam, &floatParam);
     fprintf(fp, "  background X coefficient 0: %f\n", floatParam);
@@ -698,6 +708,9 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   epicsFloat64 bg_shy = 0.0;
   epicsInt32 noise_type = 0;
   epicsFloat64 noise_level = 0.0;
+  epicsInt32 noise_clamp = 0;
+  epicsFloat64 noise_lower = 0.0;
+  epicsFloat64 noise_upper = 0.0;
   epicsFloat64 noise = 0.0;
 
   string functionName(s_className + "::" + __func__);
@@ -835,11 +848,17 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   //Generate noise
   getIntegerParam(ADSPNoiseTypeParam, &noise_type);
   getDoubleParam(ADSPNoiseLevelParam, &noise_level);
+  getIntegerParam(ADSPNoiseClampParam, &noise_clamp);
+  getDoubleParam(ADSPNoiseLowerParam, &noise_lower);
+  getDoubleParam(ADSPNoiseUpperParam, &noise_upper);
   if (noise_type == static_cast<epicsUInt32>(e_noise_type::uniform)) {
     std::uniform_real_distribution<double> dist(-1.0,1.0);
     for (epicsUInt32 bin=0; bin<size; bin++) {
       noise = dist(m_rand_gen);
       noise = noise_level * noise;
+      if (noise_clamp != 0) {
+	noise = std::max(noise_lower, std::min(noise_upper, noise));
+      }
       pData[bin] += static_cast<T>(noise);
     }
   } else if (noise_type == static_cast<epicsUInt32>(e_noise_type::gaussian)) {
@@ -847,6 +866,9 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
     for (epicsUInt32 bin=0; bin<size; bin++) {
       noise = dist(m_rand_gen);
       noise = noise_level * noise;
+      if (noise_clamp != 0) {
+	noise = std::max(noise_lower, std::min(noise_upper, noise));
+      } 
       pData[bin] += static_cast<T>(noise);
     }
   }

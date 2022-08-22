@@ -24,6 +24,9 @@
 #define ADSPIntegrateParamString   "ADSP_INTEGRATE"
 #define ADSPNoiseTypeParamString   "ADSP_NOISE_TYPE"
 #define ADSPNoiseLevelParamString  "ADSP_NOISE_LEVEL"
+#define ADSPNoiseClampParamString   "ADSP_NOISE_CLAMP"
+#define ADSPNoiseLowerParamString  "ADSP_NOISE_LOWER"
+#define ADSPNoiseUpperParamString  "ADSP_NOISE_UPPER"
 #define ADSPElapsedTimeParamString "ADSP_ELAPSEDTIME"
 // Peak Information Params
 #define ADSPPeakType1DParamString  "ADSP_PEAK_TYPE1D"
@@ -70,6 +73,9 @@ class ADSimPeaks : public ADDriver {
   int ADSPIntegrateParam;
   int ADSPNoiseTypeParam;
   int ADSPNoiseLevelParam;
+  int ADSPNoiseClampParam;
+  int ADSPNoiseLowerParam;
+  int ADSPNoiseUpperParam;
   int ADSPElapsedTimeParam;
   int ADSPPeakType1DParam;
   int ADSPPeakType2DParam;

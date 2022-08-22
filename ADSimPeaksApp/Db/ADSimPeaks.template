@@ -77,3 +77,50 @@ record(ai, "$(P)$(R)NoiseLevel_RBV") {
   field(PREC, "3")	
 }
 
+record(bo, "$(P)$(R)NoiseClamp") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_CLAMP")
+  field(ZNAM, "Disabled")
+  field(ONAM, "Enabled")
+  info(autosaveFields, "VAL")
+}
+record(bi, "$(P)$(R)NoiseClamp_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_CLAMP")
+  field(ZNAM, "Disabled")
+  field(ONAM, "Enabled")
+  field(SCAN, "I/O Intr")
+}
+record(ao, "$(P)$(R)NoiseLower") {
+  field(DESC, "Noise Lower Bound")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_LOWER")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)NoiseLower_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_LOWER")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+record(ao, "$(P)$(R)NoiseUpper") {
+  field(DESC, "Noise Upper Bound")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_UPPER")
+  field(VAL, "1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)NoiseUpper_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_NOISE_UPPER")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+
