@@ -152,6 +152,16 @@ class ADSimPeaks : public ADDriver {
   // Static Data
   static const std::string s_className;
   static const epicsFloat64 s_zeroCheck;
+  static const epicsFloat64 s_2s2l2;
+  static const epicsFloat64 s_s2pi;
+  static const epicsFloat64 s_2l2;
+  static const epicsFloat64 s_pv_p1;
+  static const epicsFloat64 s_pv_p2;
+  static const epicsFloat64 s_pv_p3;
+  static const epicsFloat64 s_pv_p4;
+  static const epicsFloat64 s_pv_e1;
+  static const epicsFloat64 s_pv_e2;
+  static const epicsFloat64 s_pv_e3;
 
   asynStatus computeData(NDDataType_t dataType);
   template <typename T> asynStatus computeDataT();

@@ -50,9 +50,25 @@ using std::string;
 
 static void ADSimPeaksTaskC(void *drvPvt);
 
-//Static Data
+// Static Data (including some precalculated data for the function distributions)
+// Class name
 const string ADSimPeaks::s_className = "ADSimPeaks";
+// Constant used to test for 0.0
 const epicsFloat64 ADSimPeaks::s_zeroCheck = 1e-12;
+// Constant 2.0*sqrt(2.0*log(2.0))
+const epicsFloat64 ADSimPeaks::s_2s2l2 = 2.3548200450309493;
+// Constant sqrt(2.0*M_PI)
+const epicsFloat64 ADSimPeaks::s_s2pi = 2.5066282746310002;
+// Constat 2.0*log(2.0)
+const epicsFloat64 ADSimPeaks::s_2l2 = 1.3862943611198906;
+// Constant data for the psudoVoigt eta parameter
+const epicsFloat64 ADSimPeaks::s_pv_p1 = 2.69269;
+const epicsFloat64 ADSimPeaks::s_pv_p2 = 2.42843;
+const epicsFloat64 ADSimPeaks::s_pv_p3 = 4.47163;
+const epicsFloat64 ADSimPeaks::s_pv_p4 = 0.07842;
+const epicsFloat64 ADSimPeaks::s_pv_e1 = 1.36603;
+const epicsFloat64 ADSimPeaks::s_pv_e2 = 0.47719;
+const epicsFloat64 ADSimPeaks::s_pv_e3 = 0.11116;
 
 /**
  * Constructor. This creates the driver object and the thread used for
@@ -928,9 +944,11 @@ epicsFloat64 ADSimPeaks::zeroCheck(epicsFloat64 value)
 asynStatus ADSimPeaks::computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
 {
   fwhm = std::max(1.0, fwhm);
+
+  // This uses some class static constant data that has been pre-computed
+  epicsFloat64 sigma = fwhm / s_2s2l2;
   
-  epicsFloat64 sigma = fwhm / (2.0*sqrt(2.0*log(2.0)));
-  *result = (1.0 / (sigma*sqrt(2.0*M_PI))) * exp(-(((bin-pos)*(bin-pos))) / (2.0*(sigma*sigma)));
+  *result = (1.0 / (sigma*s_s2pi)) * exp(-(((bin-pos)*(bin-pos))) / (2.0*(sigma*sigma)));
 
   return asynSuccess;
 }
@@ -1020,7 +1038,8 @@ asynStatus ADSimPeaks::computeLaplace(epicsFloat64 pos, epicsFloat64 fwhm, epics
 {
   fwhm = std::max(1.0, fwhm);
 
-  epicsFloat64 b = fwhm / (2.0 * log(2.0));
+  // This uses some class static constant data that has been pre-computed
+  epicsFloat64 b = fwhm / s_2l2;
   *result = (1.0/(2.0*b)) * exp(-((abs(bin - pos))/b));
 
   return asynSuccess;
@@ -1054,9 +1073,10 @@ asynStatus ADSimPeaks::computeGaussian2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
   x_fwhm = std::max(1.0, x_fwhm);
   y_fwhm = std::max(1.0, y_fwhm);
   rho = std::min(1.0, std::max(-1.0, rho));
-  
-  epicsFloat64 x_sig = x_fwhm / (2.0*sqrt(2.0*log(2.0)));
-  epicsFloat64 y_sig = y_fwhm / (2.0*sqrt(2.0*log(2.0)));
+
+  // This uses some class static constant data that has been pre-computed
+  epicsFloat64 x_sig = x_fwhm / s_2s2l2;
+  epicsFloat64 y_sig = y_fwhm / s_2s2l2;
 
   epicsFloat64 xy_amp = 1.0 / (2.0 * M_PI * x_sig * y_sig * sqrt(1-(rho*rho)));
   epicsFloat64 xy_factor = -1 / (2*(1-(rho*rho)));
@@ -1157,20 +1177,12 @@ asynStatus ADSimPeaks::computePseudoVoigtEta(epicsFloat64 fwhm_g, epicsFloat64 f
   epicsFloat64 fwhm_sum = 0.0;
   epicsFloat64 fwhm_tot = 0.0;
 
-  epicsFloat64 p1 = 2.69269;
-  epicsFloat64 p2 = 2.42843;
-  epicsFloat64 p3 = 4.47163;
-  epicsFloat64 p4 = 0.07842;
-
-  epicsFloat64 e1 = 1.36603;
-  epicsFloat64 e2 = 0.47719;
-  epicsFloat64 e3 = 0.11116;
-  
-  fwhm_sum = pow(fwhm_g,5) + (p1*pow(fwhm_g,4)*fwhm_l) + (p2*pow(fwhm_g,3)*pow(fwhm_l,2)) +
-            (p3*pow(fwhm_g,2)*pow(fwhm_l,3)) + (p4*fwhm_g*pow(fwhm_l,4)) + pow(fwhm_l,5);
+  // This uses some class static constant data that has been pre-computed
+  fwhm_sum = pow(fwhm_g,5) + (s_pv_p1*pow(fwhm_g,4)*fwhm_l) + (s_pv_p2*pow(fwhm_g,3)*pow(fwhm_l,2)) +
+            (s_pv_p3*pow(fwhm_g,2)*pow(fwhm_l,3)) + (s_pv_p4*fwhm_g*pow(fwhm_l,4)) + pow(fwhm_l,5);
   fwhm_tot = pow(fwhm_sum,0.2);
   
-  *eta = ((e1*(fwhm_l/fwhm_tot)) - (e2*pow((fwhm_l/fwhm_tot),2)) + (e3*pow((fwhm_l/fwhm_tot),3)));
+  *eta = ((s_pv_e1*(fwhm_l/fwhm_tot)) - (s_pv_e2*pow((fwhm_l/fwhm_tot),2)) + (s_pv_e3*pow((fwhm_l/fwhm_tot),3)));
   
   return asynSuccess;
 }
@@ -1209,9 +1221,10 @@ asynStatus ADSimPeaks::computeLaplace2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
   y_fwhm = std::max(1.0, y_fwhm);
   rho = std::min(1.0, std::max(-1.0, rho));
 
+  // This uses some class static constant data that has been pre-computed
   // Standard deviation is sqrt(2) * the scale factor b
-  epicsFloat64 x_sig = sqrt(2.0) * (x_fwhm / (2.0 * log(2.0)));
-  epicsFloat64 y_sig = sqrt(2.0) * (y_fwhm / (2.0 * log(2.0)));
+  epicsFloat64 x_sig = sqrt(2.0) * (x_fwhm / s_2l2);
+  epicsFloat64 y_sig = sqrt(2.0) * (y_fwhm / s_2l2);
 
   epicsFloat64 xy_amp = 1.0 / (M_PI * x_sig * y_sig * sqrt(1-(rho*rho)));
   epicsFloat64 xy_calc1 = (x_bin-x_pos)/x_sig;
