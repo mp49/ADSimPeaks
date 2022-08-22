@@ -40,19 +40,19 @@ record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
 }
 
 # ///
-# /// Peak max
+# /// Peak amplitude
 # ///
-record(ao, "$(P)$(R)P$(PEAK)Max") {
-  field(DESC, "Peak Max")
+record(ao, "$(P)$(R)P$(PEAK)Amp") {
+  field(DESC, "Peak Amplitude")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_MAX")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_AMP")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
-record(ai, "$(P)$(R)P$(PEAK)Max_RBV") {
+record(ai, "$(P)$(R)P$(PEAK)Amp_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_MAX")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_AMP")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }

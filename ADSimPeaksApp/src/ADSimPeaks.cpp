@@ -106,7 +106,7 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
   createParam(ADSPPeakFWHMXParamString, asynParamFloat64, &ADSPPeakFWHMXParam);
   createParam(ADSPPeakFWHMYParamString, asynParamFloat64, &ADSPPeakFWHMYParam);
   createParam(ADSPPeakCorrParamString, asynParamFloat64, &ADSPPeakCorrParam);
-  createParam(ADSPPeakMaxParamString, asynParamFloat64, &ADSPPeakMaxParam);
+  createParam(ADSPPeakAmpParamString, asynParamFloat64, &ADSPPeakAmpParam);
   createParam(ADSPBGC0XParamString, asynParamFloat64, &ADSPBGC0XParam);
   createParam(ADSPBGC1XParamString, asynParamFloat64, &ADSPBGC1XParam);
   createParam(ADSPBGC2XParamString, asynParamFloat64, &ADSPBGC2XParam);
@@ -155,7 +155,7 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
     paramStatus = ((setDoubleParam(ADSPPeakFWHMXParam, 1.0) == asynSuccess) && paramStatus);
     paramStatus = ((setDoubleParam(ADSPPeakFWHMYParam, 1.0) == asynSuccess) && paramStatus);
     paramStatus = ((setDoubleParam(ADSPPeakCorrParam, 0.0) == asynSuccess) && paramStatus);
-    paramStatus = ((setDoubleParam(ADSPPeakMaxParam, 1.0) == asynSuccess) && paramStatus);
+    paramStatus = ((setDoubleParam(ADSPPeakAmpParam, 1.0) == asynSuccess) && paramStatus);
     callParamCallbacks(peak);
   }
   //Background Params X
@@ -328,7 +328,7 @@ asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
      value = std::max(1.0, value);
   } else if (function == ADSPPeakCorrParam) {
     value = std::min(1.0, std::max(-1.0, value));
-  }
+  } 
   
   if (status != asynSuccess) {
     callParamCallbacks();
@@ -432,8 +432,8 @@ void ADSimPeaks::report(FILE *fp, int details)
 	  fprintf(fp, "   position X: %f\n", floatParam);
 	  getDoubleParam(i, ADSPPeakFWHMXParam, &floatParam);
 	  fprintf(fp, "   fwhm X: %f\n", floatParam);
-	  getDoubleParam(i, ADSPPeakMaxParam, &floatParam);
-	  fprintf(fp, "   max: %f\n", floatParam);
+	  getDoubleParam(i, ADSPPeakAmpParam, &floatParam);
+	  fprintf(fp, "   amplitude: %f\n", floatParam);
 	}
       } else {
 	getIntegerParam(i, ADSPPeakType2DParam, &intParam);
@@ -451,8 +451,8 @@ void ADSimPeaks::report(FILE *fp, int details)
 	  fprintf(fp, "   fwhm Y: %f\n", floatParam);
 	  getDoubleParam(i, ADSPPeakCorrParam, &floatParam);
 	  fprintf(fp, "   correlation: %f\n", floatParam);
-	  getDoubleParam(i, ADSPPeakMaxParam, &floatParam);
-	  fprintf(fp, "   max: %f\n", floatParam);
+	  getDoubleParam(i, ADSPPeakAmpParam, &floatParam);
+	  fprintf(fp, "   amplitude: %f\n", floatParam);
 	}
       } // end of if (!m_2d)
     } // end of peak loop
@@ -682,7 +682,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   epicsFloat64 peak_pos_y = 0.0;
   epicsFloat64 peak_fwhm_y = 0.0;
   epicsFloat64 peak_corr = 0.0;
-  epicsFloat64 peak_max = 0.0;
+  epicsFloat64 peak_amp = 0.0;
   epicsFloat64 result = 0.0;
   epicsFloat64 result_max = 0.0;
   epicsFloat64 scale_factor = 0.0;
@@ -759,7 +759,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
     getDoubleParam(peak, ADSPPeakPosXParam, &peak_pos_x);
     getDoubleParam(peak, ADSPPeakFWHMXParam, &peak_fwhm_x);
     getDoubleParam(peak, ADSPPeakCorrParam, &peak_corr);
-    getDoubleParam(peak, ADSPPeakMaxParam, &peak_max);
+    getDoubleParam(peak, ADSPPeakAmpParam, &peak_amp);
     if (!m_2d) {
       getIntegerParam(peak, ADSPPeakType1DParam, &peak_type);
     } else {
@@ -772,7 +772,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
       // Compute 1D peaks
       if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::gaussian)) {
 	computeGaussian(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
-	scale_factor = peak_max / zeroCheck(result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  computeGaussian(peak_pos_x, peak_fwhm_x, bin, &result);
 	  result = (result*scale_factor);
@@ -780,7 +780,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::lorentz)) {
 	computeLorentz(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
-	scale_factor = peak_max / zeroCheck(result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  computeLorentz(peak_pos_x, peak_fwhm_x, bin, &result);
 	  result = (result*scale_factor);
@@ -788,7 +788,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::pseudovoigt)) {
 	computePseudoVoigt(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
-	scale_factor = peak_max / zeroCheck(result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  computePseudoVoigt(peak_pos_x, peak_fwhm_x, bin, &result);
 	  result = (result*scale_factor);
@@ -799,7 +799,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
       // Compute 2D peaks
       if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::gaussian)) {
 	computeGaussian2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, peak_corr, &result_max);
-	scale_factor = peak_max / zeroCheck(result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
@@ -809,7 +809,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::lorentz)) {
 	computeLorentz2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_pos_x, peak_pos_y, &result_max);
-	scale_factor = peak_max / zeroCheck(result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
@@ -819,7 +819,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::pseudovoigt)) {
 	computePseudoVoigt2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, &result_max);
-	scale_factor = peak_max / zeroCheck(result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);

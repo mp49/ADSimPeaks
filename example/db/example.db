@@ -1770,19 +1770,19 @@ record(mbbi, "ST99:Det:Det1:P0Type_RBV") {
 }
 
 # ///
-# /// Peak max
+# /// Peak amplitude
 # ///
-record(ao, "ST99:Det:Det1:P0Max") {
-  field(DESC, "Peak Max")
+record(ao, "ST99:Det:Det1:P0Amp") {
+  field(DESC, "Peak Amplitude")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_MAX")
+  field(OUT,  "@asyn(D1.SIM,0,1)ADSP_PEAK_AMP")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:P0Max_RBV") {
+record(ai, "ST99:Det:Det1:P0Amp_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_MAX")
+  field(INP,  "@asyn(D1.SIM,0,1)ADSP_PEAK_AMP")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -1879,19 +1879,19 @@ record(mbbi, "ST99:Det:Det1:P1Type_RBV") {
 }
 
 # ///
-# /// Peak max
+# /// Peak amplitude
 # ///
-record(ao, "ST99:Det:Det1:P1Max") {
-  field(DESC, "Peak Max")
+record(ao, "ST99:Det:Det1:P1Amp") {
+  field(DESC, "Peak Amplitude")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_MAX")
+  field(OUT,  "@asyn(D1.SIM,1,1)ADSP_PEAK_AMP")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:P1Max_RBV") {
+record(ai, "ST99:Det:Det1:P1Amp_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_MAX")
+  field(INP,  "@asyn(D1.SIM,1,1)ADSP_PEAK_AMP")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -1988,19 +1988,19 @@ record(mbbi, "ST99:Det:Det1:P2Type_RBV") {
 }
 
 # ///
-# /// Peak max
+# /// Peak amplitude
 # ///
-record(ao, "ST99:Det:Det1:P2Max") {
-  field(DESC, "Peak Max")
+record(ao, "ST99:Det:Det1:P2Amp") {
+  field(DESC, "Peak Amplitude")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_MAX")
+  field(OUT,  "@asyn(D1.SIM,2,1)ADSP_PEAK_AMP")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:P2Max_RBV") {
+record(ai, "ST99:Det:Det1:P2Amp_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_MAX")
+  field(INP,  "@asyn(D1.SIM,2,1)ADSP_PEAK_AMP")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2097,19 +2097,19 @@ record(mbbi, "ST99:Det:Det1:P3Type_RBV") {
 }
 
 # ///
-# /// Peak max
+# /// Peak amplitude
 # ///
-record(ao, "ST99:Det:Det1:P3Max") {
-  field(DESC, "Peak Max")
+record(ao, "ST99:Det:Det1:P3Amp") {
+  field(DESC, "Peak Amplitude")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_MAX")
+  field(OUT,  "@asyn(D1.SIM,3,1)ADSP_PEAK_AMP")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:P3Max_RBV") {
+record(ai, "ST99:Det:Det1:P3Amp_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_MAX")
+  field(INP,  "@asyn(D1.SIM,3,1)ADSP_PEAK_AMP")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2206,19 +2206,19 @@ record(mbbi, "ST99:Det:Det1:P4Type_RBV") {
 }
 
 # ///
-# /// Peak max
+# /// Peak amplitude
 # ///
-record(ao, "ST99:Det:Det1:P4Max") {
-  field(DESC, "Peak Max")
+record(ao, "ST99:Det:Det1:P4Amp") {
+  field(DESC, "Peak Amplitude")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_MAX")
+  field(OUT,  "@asyn(D1.SIM,4,1)ADSP_PEAK_AMP")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:P4Max_RBV") {
+record(ai, "ST99:Det:Det1:P4Amp_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_MAX")
+  field(INP,  "@asyn(D1.SIM,4,1)ADSP_PEAK_AMP")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2315,19 +2315,19 @@ record(mbbi, "ST99:Det:Det1:P5Type_RBV") {
 }
 
 # ///
-# /// Peak max
+# /// Peak amplitude
 # ///
-record(ao, "ST99:Det:Det1:P5Max") {
-  field(DESC, "Peak Max")
+record(ao, "ST99:Det:Det1:P5Amp") {
+  field(DESC, "Peak Amplitude")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_MAX")
+  field(OUT,  "@asyn(D1.SIM,5,1)ADSP_PEAK_AMP")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:P5Max_RBV") {
+record(ai, "ST99:Det:Det1:P5Amp_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_MAX")
+  field(INP,  "@asyn(D1.SIM,5,1)ADSP_PEAK_AMP")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2424,19 +2424,19 @@ record(mbbi, "ST99:Det:Det1:P6Type_RBV") {
 }
 
 # ///
-# /// Peak max
+# /// Peak amplitude
 # ///
-record(ao, "ST99:Det:Det1:P6Max") {
-  field(DESC, "Peak Max")
+record(ao, "ST99:Det:Det1:P6Amp") {
+  field(DESC, "Peak Amplitude")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_MAX")
+  field(OUT,  "@asyn(D1.SIM,6,1)ADSP_PEAK_AMP")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:P6Max_RBV") {
+record(ai, "ST99:Det:Det1:P6Amp_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_MAX")
+  field(INP,  "@asyn(D1.SIM,6,1)ADSP_PEAK_AMP")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }
@@ -2533,19 +2533,19 @@ record(mbbi, "ST99:Det:Det1:P7Type_RBV") {
 }
 
 # ///
-# /// Peak max
+# /// Peak amplitude
 # ///
-record(ao, "ST99:Det:Det1:P7Max") {
-  field(DESC, "Peak Max")
+record(ao, "ST99:Det:Det1:P7Amp") {
+  field(DESC, "Peak Amplitude")
   field(PINI, "YES")	       
   field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_MAX")
+  field(OUT,  "@asyn(D1.SIM,7,1)ADSP_PEAK_AMP")
   field(PREC, "3")
   info(autosaveFields, "VAL")
 }
-record(ai, "ST99:Det:Det1:P7Max_RBV") {
+record(ai, "ST99:Det:Det1:P7Amp_RBV") {
   field(DTYP, "asynFloat64")
-  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_MAX")
+  field(INP,  "@asyn(D1.SIM,7,1)ADSP_PEAK_AMP")
   field(SCAN, "I/O Intr")
   field(PREC, "3")	
 }

@@ -33,7 +33,7 @@
 #define ADSPPeakFWHMXParamString   "ADSP_PEAK_FWHMX"
 #define ADSPPeakFWHMYParamString   "ADSP_PEAK_FWHMY"
 #define ADSPPeakCorrParamString    "ADSP_PEAK_CORR"
-#define ADSPPeakMaxParamString     "ADSP_PEAK_MAX"
+#define ADSPPeakAmpParamString     "ADSP_PEAK_AMP"
 // Background Polynomial Coefficients
 // X
 #define ADSPBGC0XParamString  "ADSP_BG_C0X"
@@ -78,7 +78,7 @@ class ADSimPeaks : public ADDriver {
   int ADSPPeakFWHMXParam;
   int ADSPPeakFWHMYParam;
   int ADSPPeakCorrParam;
-  int ADSPPeakMaxParam;
+  int ADSPPeakAmpParam;
   int ADSPBGC0XParam;
   int ADSPBGC1XParam;
   int ADSPBGC2XParam;
