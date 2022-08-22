@@ -807,6 +807,14 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::laplace)) {
+	computeLaplace(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  computeLaplace(peak_pos_x, peak_fwhm_x, bin, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
       }
     } else {
       // Compute 2D peaks
@@ -837,6 +845,16 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
 	  computePseudoVoigt2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::laplace)) {
+	computeLaplace2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, peak_corr, &result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  bin_x = bin % sizeX;
+	  bin_y = floor(bin/sizeX);
+	  computeLaplace2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, peak_corr, &result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
@@ -980,6 +998,34 @@ asynStatus ADSimPeaks::computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, e
 
   return asynSuccess;
 }
+
+/**
+ * Implementation of a Laplace function which has center 'pos' and full width half max 'fwhm'.
+ * 
+ * For more information on this see:
+ * https://en.wikipedia.org/wiki/Laplace_distribution
+ *
+ * The FWHM can be calculated by determining the height when pos=bin, then taking 1/2 
+ * that value and determining the value of 'bin' when the function equals that height, 
+ * then doubling the result. Then we can calculate 'b' from our input FWHM.
+ *
+ * /arg /c pos The center of the distribution
+ * /arg /c fwhm The FWHM of the distribution
+ * /arg /c bin The position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
+asynStatus ADSimPeaks::computeLaplace(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
+{
+  fwhm = std::max(1.0, fwhm);
+
+  epicsFloat64 b = fwhm / (2.0 * log(2.0));
+  *result = (1.0/(2.0*b)) * exp(-((abs(bin - pos))/b));
+
+  return asynSuccess;
+}
+
 
 /**
  * Implementation of a bivariate Gaussian function which has center (x,y) and full width half max 
@@ -1126,6 +1172,53 @@ asynStatus ADSimPeaks::computePseudoVoigtEta(epicsFloat64 fwhm_g, epicsFloat64 f
   
   *eta = ((e1*(fwhm_l/fwhm_tot)) - (e2*pow((fwhm_l/fwhm_tot),2)) + (e3*pow((fwhm_l/fwhm_tot),3)));
   
+  return asynSuccess;
+}
+
+/**
+ * Implementation of a bivariate Laplace function which has center (x,y) and full width half max 
+ * 'x_fwhm' and 'y_fwhm', with X and Y correlation rho (where -1<=rho<=1).
+ * 
+ * For more information on this see:
+ * https://en.wikipedia.org/wiki/Multivariate_Laplace_distribution
+ *
+ * We calculate the 'b' scale factor in the same way as for ADSimPeaks::computeLaplace,
+ * then we calculate the standard deviation. The actual bivariate Laplace uses a modified
+ * Bessle function of the second kind, see:
+ * https://en.wikipedia.org/wiki/Bessel_function#Modified_Bessel_functions:_I%CE%B1,_K%CE%B1
+ * but to avoid having to calculate this we just assume a decaying expoential, which seems 
+ * like a good approximation. 
+ *
+ * /arg /c x_pos The X coordinate of the distribution
+ * /arg /c y_pos The Y coordinate of the distribution
+ * /arg /c x_fwhm The X dimension FWHM of the distribution
+ * /arg /c y_fwhm The Y dimension FWHM of the distribution
+ * /arg /c x_bin The X position to use for the function
+ * /arg /c y_bin The Y position to use for the function
+ * /arg /c rho The X/Y correlation
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
+asynStatus ADSimPeaks::computeLaplace2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
+					epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
+					epicsInt32 x_bin, epicsInt32 y_bin,
+					epicsFloat64 rho, epicsFloat64 *result)
+{
+  x_fwhm = std::max(1.0, x_fwhm);
+  y_fwhm = std::max(1.0, y_fwhm);
+  rho = std::min(1.0, std::max(-1.0, rho));
+
+  // Standard deviation is sqrt(2) * the scale factor b
+  epicsFloat64 x_sig = sqrt(2.0) * (x_fwhm / (2.0 * log(2.0)));
+  epicsFloat64 y_sig = sqrt(2.0) * (y_fwhm / (2.0 * log(2.0)));
+
+  epicsFloat64 xy_amp = 1.0 / (M_PI * x_sig * y_sig * sqrt(1-(rho*rho)));
+  epicsFloat64 xy_calc1 = (x_bin-x_pos)/x_sig;
+  epicsFloat64 xy_calc2 = (y_bin-y_pos)/y_sig;
+    
+  *result = xy_amp * exp(-sqrt((2.0*(xy_calc1*xy_calc1 - 2*rho*xy_calc1*xy_calc2 + xy_calc2*xy_calc2))/(1-(rho*rho))));
+
   return asynSuccess;
 }
 

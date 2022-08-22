@@ -23,6 +23,8 @@ record(mbbo, "$(P)$(R)P$(PEAK)Type") {
   field(TWVL, "2")
   field(THST, "Pseudo-Voigt")
   field(THVL, "3")
+  field(FRST, "Laplace")
+  field(FRVL, "4")
   info(autosaveFields, "VAL")
 }
 record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
@@ -35,7 +37,9 @@ record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
   field(TWST, "Lorentz")
   field(TWVL, "2")
   field(THST, "Pseudo-Voigt")
-  field(THVL, "3") 
+  field(THVL, "3")
+  field(FRST, "Laplace")
+  field(FRVL, "4")
   field(SCAN, "I/O Intr")
 }
 
