@@ -1053,6 +1053,18 @@ asynStatus ADSimPeaks::computeLaplace(epicsFloat64 pos, epicsFloat64 fwhm, epics
   return asynSuccess;
 }
 
+
+/**
+ * Implementation of a simple isosceles triangle which has center 'pos' and full width 
+ * half max 'fwhm'.
+ *
+ * /arg /c pos The center of the distribution
+ * /arg /c fwhm The FWHM of the distribution
+ * /arg /c bin The position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
 asynStatus ADSimPeaks::computeTriangle(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
 {
   fwhm = std::max(1.0, fwhm);
