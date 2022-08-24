@@ -137,7 +137,8 @@ class ADSimPeaks : public ADDriver {
     gaussian,
     lorentz,
     pseudovoigt,
-    laplace
+    laplace,
+    cone
   };
 
   /**
@@ -191,6 +192,10 @@ class ADSimPeaks : public ADDriver {
 			       epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
 			       epicsInt32 x_bin, epicsInt32 y_bin,
 			       epicsFloat64 rho, epicsFloat64 *result);
+  asynStatus computeCone2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
+			   epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
+			   epicsInt32 x_bin, epicsInt32 y_bin,
+			   epicsFloat64 *result);
 
   //Utilty Functions
   epicsFloat64 zeroCheck(epicsFloat64 value);

@@ -882,6 +882,16 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::cone)) {
+	computeCone2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, &result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  bin_x = bin % sizeX;
+	  bin_y = floor(bin/sizeX);
+	  computeCone2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
       }
     } // end of if (!m_2d)
     
@@ -1071,11 +1081,14 @@ asynStatus ADSimPeaks::computeTriangle(epicsFloat64 pos, epicsFloat64 fwhm, epic
 
   epicsFloat64 peak = 1.0;
   epicsFloat64 b = peak/fwhm;
+
   if (bin <= static_cast<epicsInt32>(pos)) {
-    *result = peak + b*(bin-pos);
+    b = b*1.0;
   } else {
-    *result = peak - b*(bin-pos);
+    b = b*-1.0;
   }
+
+  *result = peak + b*(bin-pos);
   *result = std::max(0.0, *result);
 
   return asynSuccess;
@@ -1267,6 +1280,48 @@ asynStatus ADSimPeaks::computeLaplace2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
   epicsFloat64 xy_calc2 = (y_bin-y_pos)/y_sig;
     
   *result = xy_amp * exp(-sqrt((2.0*(xy_calc1*xy_calc1 - 2*rho*xy_calc1*xy_calc2 + xy_calc2*xy_calc2))/(1-(rho*rho))));
+
+  return asynSuccess;
+}
+
+/**
+ * Implementation of a simple cone which has center 'pos' and full width 
+ * half max 'fwhm'.
+ *
+ * /arg /c pos The center of the distribution
+ * /arg /c fwhm The FWHM of the distribution
+ * /arg /c bin The position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
+asynStatus ADSimPeaks::computeCone2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
+				     epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
+				     epicsInt32 x_bin, epicsInt32 y_bin,
+				     epicsFloat64 *result)
+{
+  x_fwhm = std::max(1.0, x_fwhm);
+  y_fwhm = std::max(1.0, y_fwhm);
+
+  epicsFloat64 peak = 1.0;
+  epicsFloat64 b = peak/x_fwhm;
+  epicsFloat64 c = peak/y_fwhm;
+  if ((x_bin <= static_cast<epicsInt32>(x_pos)) && (y_bin <= static_cast<epicsInt32>(y_pos))) {
+    b = b*1.0;
+    c = c*1.0;
+  } else if ((x_bin <= static_cast<epicsInt32>(x_pos)) && (y_bin > static_cast<epicsInt32>(y_pos))) {
+    b = b*1.0;
+    c = c*-1.0;
+  } else if ((x_bin > static_cast<epicsInt32>(x_pos)) && (y_bin <= static_cast<epicsInt32>(y_pos))) {
+    b = b*-1.0;
+    c = c*1.0;
+  } else {
+    b = b*-1.0;
+    c = c*-1.0;
+  }
+  
+  *result = peak + b*(x_bin-x_pos) + c*(y_bin-y_pos);
+  *result = std::max(0.0, *result);
 
   return asynSuccess;
 }
