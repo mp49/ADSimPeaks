@@ -882,13 +882,13 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::cone)) {
-	computeCone2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, &result_max);
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::pyramid)) {
+	computePyramid2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, &result_max);
 	scale_factor = peak_amp / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
-	  computeCone2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
+	  computePyramid2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
@@ -1285,17 +1285,20 @@ asynStatus ADSimPeaks::computeLaplace2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
 }
 
 /**
- * Implementation of a simple cone which has center 'pos' and full width 
- * half max 'fwhm'.
+ * Implementation of a simple pyramid which has center 'pos' and full width 
+ * half max 'x_fwhm' and 'y_fwhm'.
  *
- * /arg /c pos The center of the distribution
- * /arg /c fwhm The FWHM of the distribution
- * /arg /c bin The position to use for the function
+ * /arg /c x_pos The X coordinate of the distribution
+ * /arg /c y_pos The Y coordinate of the distribution
+ * /arg /c x_fwhm The X dimension FWHM of the distribution
+ * /arg /c y_fwhm The Y dimension FWHM of the distribution
+ * /arg /c x_bin The X position to use for the function
+ * /arg /c y_bin The Y position to use for the function
  * /arg /c result Pointer which will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeCone2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
+asynStatus ADSimPeaks::computePyramid2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
 				     epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
 				     epicsInt32 x_bin, epicsInt32 y_bin,
 				     epicsFloat64 *result)
@@ -1304,8 +1307,8 @@ asynStatus ADSimPeaks::computeCone2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
   y_fwhm = std::max(1.0, y_fwhm);
 
   epicsFloat64 peak = 1.0;
-  epicsFloat64 b = peak/x_fwhm;
-  epicsFloat64 c = peak/y_fwhm;
+  epicsFloat64 b = peak/x_fwhm/2.0;
+  epicsFloat64 c = peak/y_fwhm/2.0;
   if ((x_bin <= static_cast<epicsInt32>(x_pos)) && (y_bin <= static_cast<epicsInt32>(y_pos))) {
     b = b*1.0;
     c = c*1.0;
