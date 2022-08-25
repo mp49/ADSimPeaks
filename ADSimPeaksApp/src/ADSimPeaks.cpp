@@ -892,6 +892,16 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::cone)) {
+	computeCone2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, &result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  bin_x = bin % sizeX;
+	  bin_y = floor(bin/sizeX);
+	  computeCone2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
       }
     } // end of if (!m_2d)
     
@@ -1325,7 +1335,51 @@ asynStatus ADSimPeaks::computePyramid2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
   
   *result = peak + b*(x_bin-x_pos) + c*(y_bin-y_pos);
   *result = std::max(0.0, *result);
+  
+  return asynSuccess;
+}
 
+/**
+ * Implementation of an eliptical cone which has center 'pos' and full width 
+ * half max 'x_fwhm' and 'y_fwhm'.
+ *
+ * /arg /c x_pos The X coordinate of the distribution
+ * /arg /c y_pos The Y coordinate of the distribution
+ * /arg /c x_fwhm The X dimension FWHM of the distribution
+ * /arg /c y_fwhm The Y dimension FWHM of the distribution
+ * /arg /c x_bin The X position to use for the function
+ * /arg /c y_bin The Y position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
+asynStatus ADSimPeaks::computeCone2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
+				     epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
+				     epicsInt32 x_bin, epicsInt32 y_bin,
+				     epicsFloat64 *result)
+{
+  x_fwhm = std::max(1.0, x_fwhm);
+  y_fwhm = std::max(1.0, y_fwhm);
+
+  epicsFloat64 peak = x_fwhm + y_fwhm;
+
+  epicsFloat64 height = 0.0;
+  // Find the distance of this point from the center of the ellipse
+  epicsFloat64 d = sqrt((x_bin-x_pos)*(x_bin-x_pos) + (y_bin-y_pos)*(y_bin-y_pos));
+  if (d != 0) {
+    // Find the angle of this point
+    epicsFloat64 theta = asin((y_bin-y_pos)/d);
+    // Find the radius of the ellipse defining the edge of the cone at this same angle 
+    epicsFloat64 r = (x_fwhm * y_fwhm) / sqrt(pow(y_fwhm*cos(theta),2) + pow(x_fwhm*sin(theta),2));
+    // Find the height of the cone inside the ellipse
+    height = (r-d) * (peak/r);
+  } else {
+    height = peak;
+  }
+  
+  *result = height;
+  *result = std::max(0.0, *result);
+  
   return asynSuccess;
 }
 

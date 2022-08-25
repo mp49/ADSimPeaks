@@ -26,7 +26,9 @@ record(mbbo, "$(P)$(R)P$(PEAK)Type") {
   field(FRST, "Laplace")
   field(FRVL, "4")
   field(FVST, "Pyramid")
-  field(FVVL, "5")	
+  field(FVVL, "5")
+  field(SXST, "Cone")
+  field(SXVL, "6")
   info(autosaveFields, "VAL")
 }
 record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
@@ -43,7 +45,9 @@ record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
   field(FRST, "Laplace")
   field(FRVL, "4")
   field(FVST, "Pyramid")
-  field(FVVL, "5")	
+  field(FVVL, "5")
+  field(SXST, "Cone")
+  field(SXVL, "6")
   field(SCAN, "I/O Intr")
 }
 
