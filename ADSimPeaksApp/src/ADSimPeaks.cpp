@@ -1,17 +1,29 @@
 /**
- * \brief areaDetector driver to simulate 1D peaks with background 
+ * \brief areaDetector driver to simulate 1D and 2D peaks with background 
  *        profiles and noise. 
  *
  * This areaDetector driver can be used to simulate semi-realistic looking
- * data in 1D. It can produce a 1D NDArray object of variable size and 
+ * data in 1D and 2D. It can produce a 1D or 2D NDArray object of variable size and 
  * of different data types. The data can contain a background and any number 
- * of peaks of a few different shapes, with the option to add noise to the 
- * signal.
+ * of peaks of a few different shapes, with the option to add different kinds of 
+ * noise to the signal.
  *
- * Currently the supported peak shapes are:
- * 1) Gaussian
- * 2) Lorentzian (also known as Cauchy)
- * 3) Voigt (implemented as a psudo-Voigt, which is an approximation)
+ * Supported 1D peak shapes are:
+ * 1) Square
+ * 2) Triangle
+ * 3) Gaussian (normal
+ * 4) Lorentzian (also known as Cauchy)
+ * 5) Voigt (implemented as a psudo-Voigt, which is an approximation)
+ * 6) Laplace
+ *
+ * Supported 2D peak shapes are:
+ * 1) Square
+ * 2) Pyramid
+ * 3) Eliptical Cone
+ * 4) Gaussian (normal)
+ * 5) Lorentzian (also known as Cauchy)
+ * 6) Voigt (implemented as a psudo-Voigt, which is an approximation)
+ * 7) Laplace
  *
  * The background is defined as a 3rd order polynomial so that the shape
  * can be a flat offset, a slope or a curve.
@@ -23,7 +35,6 @@
  * \date July 11th, 2022
  *
  */
-
 
 //Standard 
 #include <iostream>
@@ -1361,8 +1372,8 @@ asynStatus ADSimPeaks::computePyramid2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
   y_fwhm = std::max(1.0, y_fwhm);
 
   epicsFloat64 peak = 1.0;
-  epicsFloat64 b = peak/x_fwhm/2.0;
-  epicsFloat64 c = peak/y_fwhm/2.0;
+  epicsFloat64 b = peak/x_fwhm;
+  epicsFloat64 c = peak/y_fwhm;
   if ((x_bin <= static_cast<epicsInt32>(x_pos)) && (y_bin <= static_cast<epicsInt32>(y_pos))) {
     b = b*1.0;
     c = c*1.0;

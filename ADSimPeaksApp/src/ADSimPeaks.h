@@ -121,32 +121,32 @@ class ADSimPeaks : public ADDriver {
    */
   enum class e_peak_type_1d {
     none,
+    square,
+    triangle,
     gaussian,
     lorentz,
     pseudovoigt,
-    laplace,
-    triangle,
-    square
+    laplace
   };
 
   /**
    * The enum for the type of 2D peak function. This needs to match
-   * the list order presented to the user. 
+   * the list order presented to the user in the database.
    */
   enum class e_peak_type_2d {
     none,
+    square,
+    pyramid,
+    cone,
     gaussian,
     lorentz,
     pseudovoigt,
-    laplace,
-    pyramid,
-    cone,
-    square
+    laplace
   };
 
   /**
    * The enum for the type of noise. This needs to match
-   * the list order presented to the user. 
+   * the list order presented to the user in the database.
    */
   enum class e_noise_type {
     none,
