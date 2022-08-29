@@ -29,6 +29,8 @@ record(mbbo, "$(P)$(R)P$(PEAK)Type") {
   field(FVVL, "5")
   field(SXST, "Cone")
   field(SXVL, "6")
+  field(SVST, "Square")
+  field(SVVL, "7")
   info(autosaveFields, "VAL")
 }
 record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
@@ -48,6 +50,8 @@ record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
   field(FVVL, "5")
   field(SXST, "Cone")
   field(SXVL, "6")
+  field(SVST, "Square")
+  field(SVVL, "7")
   field(SCAN, "I/O Intr")
 }
 

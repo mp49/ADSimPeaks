@@ -839,6 +839,14 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::square)) {
+	computeSquare(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  computeSquare(peak_pos_x, peak_fwhm_x, bin, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
       }
     } else {
       // Compute 2D peaks
@@ -899,6 +907,16 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
 	  computeCone2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::square)) {
+	computeSquare2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, &result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  bin_x = bin % sizeX;
+	  bin_y = floor(bin/sizeX);
+	  computeSquare2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
@@ -1100,6 +1118,32 @@ asynStatus ADSimPeaks::computeTriangle(epicsFloat64 pos, epicsFloat64 fwhm, epic
 
   *result = peak + b*(bin-pos);
   *result = std::max(0.0, *result);
+
+  return asynSuccess;
+}
+
+/**
+ * Implementation of a simple square which has center 'pos' and full width 
+ * half max 'fwhm'.
+ *
+ * /arg /c pos The center of the distribution
+ * /arg /c fwhm The FWHM of the distribution
+ * /arg /c bin The position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
+asynStatus ADSimPeaks::computeSquare(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
+{
+  fwhm = std::max(1.0, fwhm);
+
+  epicsFloat64 peak = 1.0;
+  
+  if ((bin > static_cast<epicsInt32>(pos - fwhm/2.0)) && (bin <= static_cast<epicsInt32>(pos + fwhm/2.0))) {
+    *result = peak;
+  } else {
+    *result = 0.0;
+  }
 
   return asynSuccess;
 }
@@ -1382,6 +1426,43 @@ asynStatus ADSimPeaks::computeCone2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
   
   return asynSuccess;
 }
+
+/**
+ * Implementation of a cube peak, which looks like a square from the top,
+ *  which has center 'pos' and full width half max 'x_fwhm' and 'y_fwhm'.
+ *
+ * /arg /c x_pos The X coordinate of the distribution
+ * /arg /c y_pos The Y coordinate of the distribution
+ * /arg /c x_fwhm The X dimension FWHM of the distribution
+ * /arg /c y_fwhm The Y dimension FWHM of the distribution
+ * /arg /c x_bin The X position to use for the function
+ * /arg /c y_bin The Y position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
+asynStatus ADSimPeaks::computeSquare2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
+				       epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
+				       epicsInt32 x_bin, epicsInt32 y_bin,
+				       epicsFloat64 *result)
+{
+  x_fwhm = std::max(1.0, x_fwhm);
+  y_fwhm = std::max(1.0, y_fwhm);
+
+  epicsFloat64 peak = 1.0;
+
+  if ((x_bin >  static_cast<epicsInt32>(x_pos - x_fwhm/2.0)) &&
+      (x_bin <= static_cast<epicsInt32>(x_pos + x_fwhm/2.0)) &&
+      (y_bin >  static_cast<epicsInt32>(y_pos - y_fwhm/2.0)) &&
+      (y_bin <= static_cast<epicsInt32>(y_pos + y_fwhm/2.0))) {
+    *result = peak;
+  } else {
+    *result = 0.0;
+  }
+  
+  return asynSuccess;
+}
+
 
 
 /**
