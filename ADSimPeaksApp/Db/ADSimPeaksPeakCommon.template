@@ -1,0 +1,67 @@
+#################################################################
+#
+# This contains records that are common between the 1D and 2D peak
+# template, and should be included in both of those. 
+#
+# Macros: (in addition to ADSimPeaks.template)
+# PEAK - The peak index (0 based)
+#
+#################################################################
+
+# ///
+# /// Peak max
+# ///
+record(ao, "$(P)$(R)P$(PEAK)Amp") {
+  field(DESC, "Peak Amplitude")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_AMP")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)P$(PEAK)Amp_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_AMP")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak parameter 1
+# /// The use of this will depend on the peak type.
+# ///
+record(ao, "$(P)$(R)P$(PEAK)P1") {
+  field(DESC, "Peak Param 1")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_P1")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)P$(PEAK)P1_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_P1")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+# ///
+# /// Peak parameter 2
+# /// The use of this will depend on the peak type.
+# ///
+record(ao, "$(P)$(R)P$(PEAK)P2") {
+  field(DESC, "Peak Param 2")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_P2")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)P$(PEAK)P2_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_P2")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
+
+

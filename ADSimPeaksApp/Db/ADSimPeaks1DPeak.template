@@ -51,23 +51,7 @@ record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
   field(SCAN, "I/O Intr")
 }
 
-# ///
-# /// Peak amplitude
-# ///
-record(ao, "$(P)$(R)P$(PEAK)Amp") {
-  field(DESC, "Peak Amplitude")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_AMP")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "$(P)$(R)P$(PEAK)Amp_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_AMP")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
+include "ADSimPeaksPeakCommon.template"
 
 substitute "XY=X"
 include "ADSimPeaksNPeak.template"

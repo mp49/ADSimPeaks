@@ -24,7 +24,7 @@
 #define ADSPIntegrateParamString   "ADSP_INTEGRATE"
 #define ADSPNoiseTypeParamString   "ADSP_NOISE_TYPE"
 #define ADSPNoiseLevelParamString  "ADSP_NOISE_LEVEL"
-#define ADSPNoiseClampParamString   "ADSP_NOISE_CLAMP"
+#define ADSPNoiseClampParamString  "ADSP_NOISE_CLAMP"
 #define ADSPNoiseLowerParamString  "ADSP_NOISE_LOWER"
 #define ADSPNoiseUpperParamString  "ADSP_NOISE_UPPER"
 #define ADSPElapsedTimeParamString "ADSP_ELAPSEDTIME"
@@ -35,8 +35,11 @@
 #define ADSPPeakPosYParamString    "ADSP_PEAK_POSY"
 #define ADSPPeakFWHMXParamString   "ADSP_PEAK_FWHMX"
 #define ADSPPeakFWHMYParamString   "ADSP_PEAK_FWHMY"
-#define ADSPPeakCorrParamString    "ADSP_PEAK_CORR"
 #define ADSPPeakAmpParamString     "ADSP_PEAK_AMP"
+#define ADSPPeakCorParamString     "ADSP_PEAK_COR"
+#define ADSPPeakP1ParamString      "ADSP_PEAK_P1"
+#define ADSPPeakP2ParamString      "ADSP_PEAK_P2"
+
 // Background Polynomial Coefficients
 // X
 #define ADSPBGC0XParamString  "ADSP_BG_C0X"
@@ -53,7 +56,7 @@
 
 class ADSimPeaks : public ADDriver {
 
- public:
+public:
   ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int maxPeaks, NDDataType_t dataType,
 	     int maxBuffers, size_t maxMemory, int priority, int stackSize);
 
@@ -67,7 +70,7 @@ class ADSimPeaks : public ADDriver {
 
   bool getInitialized(void);
 
- private:
+private:
 
   //Values used for pasynUser->reason, and indexes into the parameter library.
   int ADSPIntegrateParam;
@@ -83,8 +86,10 @@ class ADSimPeaks : public ADDriver {
   int ADSPPeakPosYParam;
   int ADSPPeakFWHMXParam;
   int ADSPPeakFWHMYParam;
-  int ADSPPeakCorrParam;
   int ADSPPeakAmpParam;
+  int ADSPPeakCorParam;
+  int ADSPPeakP1Param;
+  int ADSPPeakP2Param;
   int ADSPBGC0XParam;
   int ADSPBGC1XParam;
   int ADSPBGC2XParam;
@@ -178,7 +183,7 @@ class ADSimPeaks : public ADDriver {
   asynStatus computeLaplace(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
   asynStatus computeTriangle(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
   asynStatus computeSquare(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
-
+  
   // 2D Profiles
   asynStatus computeGaussian2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
 			       epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
@@ -193,9 +198,9 @@ class ADSimPeaks : public ADDriver {
 				  epicsFloat64 *result);
   asynStatus computePseudoVoigtEta(epicsFloat64 fwhm_g, epicsFloat64 fwhm_l, epicsFloat64 *eta);
   asynStatus computeLaplace2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-			       epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-			       epicsInt32 x_bin, epicsInt32 y_bin,
-			       epicsFloat64 rho, epicsFloat64 *result);
+			      epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
+			      epicsInt32 x_bin, epicsInt32 y_bin,
+			      epicsFloat64 rho, epicsFloat64 *result);
   asynStatus computePyramid2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
 			      epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
 			      epicsInt32 x_bin, epicsInt32 y_bin,
@@ -216,3 +221,4 @@ class ADSimPeaks : public ADDriver {
 
 
 #endif /* ADSIMPEAKS_H */
+

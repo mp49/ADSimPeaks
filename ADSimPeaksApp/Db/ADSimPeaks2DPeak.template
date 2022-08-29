@@ -55,41 +55,7 @@ record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
   field(SCAN, "I/O Intr")
 }
 
-# ///
-# /// X and Y Correlation
-# ///
-record(ao, "$(P)$(R)P$(PEAK)Corr") {
-  field(DESC, "Peak X/Y Corrleation")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_CORR")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "$(P)$(R)P$(PEAK)Corr_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_CORR")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
-
-# ///
-# /// Peak max
-# ///
-record(ao, "$(P)$(R)P$(PEAK)Amp") {
-  field(DESC, "Peak Amplitude")
-  field(PINI, "YES")	       
-  field(DTYP, "asynFloat64")
-  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_AMP")
-  field(PREC, "3")
-  info(autosaveFields, "VAL")
-}
-record(ai, "$(P)$(R)P$(PEAK)Amp_RBV") {
-  field(DTYP, "asynFloat64")
-  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_AMP")
-  field(SCAN, "I/O Intr")
-  field(PREC, "3")	
-}
+include "ADSimPeaksPeakCommon.template"
 
 substitute "XY=X"
 include "ADSimPeaksNPeak.template"
@@ -97,5 +63,23 @@ include "ADSimPeaksNPeak.template"
 substitute "XY=Y"
 include "ADSimPeaksNPeak.template"
 
+# ///
+# /// Peak X/Y Correlation
+# /// This is used for some of the 2D functions
+# ///
+record(ao, "$(P)$(R)P$(PEAK)Cor") {
+  field(DESC, "Peak XY Correlation")
+  field(PINI, "YES")	       
+  field(DTYP, "asynFloat64")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_COR")
+  field(PREC, "3")
+  info(autosaveFields, "VAL")
+}
+record(ai, "$(P)$(R)P$(PEAK)Cor_RBV") {
+  field(DTYP, "asynFloat64")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_COR")
+  field(SCAN, "I/O Intr")
+  field(PREC, "3")	
+}
 
 

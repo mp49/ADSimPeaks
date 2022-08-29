@@ -11,6 +11,7 @@ DB += ADSimPeaksNBackground.template
 DB += ADSimPeaks1DBackground.template
 DB += ADSimPeaks2DBackground.template
 DB += ADSimPeaksNPeak.template
+DB += ADSimPeaksPeakCommon.template
 DB += ADSimPeaks1DPeak.template
 DB += ADSimPeaks2DPeak.template
 
