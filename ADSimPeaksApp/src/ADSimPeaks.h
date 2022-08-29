@@ -131,7 +131,8 @@ private:
     gaussian,
     lorentz,
     pseudovoigt,
-    laplace
+    laplace,
+    moffat
   };
 
   /**
@@ -146,7 +147,8 @@ private:
     gaussian,
     lorentz,
     pseudovoigt,
-    laplace
+    laplace,
+    moffat
   };
 
   /**
@@ -183,6 +185,7 @@ private:
   asynStatus computeLaplace(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
   asynStatus computeTriangle(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
   asynStatus computeSquare(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
+  asynStatus computeMoffat(epicsFloat64 pos, epicsFloat64 fwhm, epicsFloat64 beta, epicsInt32 bin, epicsFloat64 *result);
   
   // 2D Profiles
   asynStatus computeGaussian2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
@@ -211,6 +214,10 @@ private:
 			   epicsFloat64 *result);
   asynStatus computeSquare2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
 			     epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
+			     epicsInt32 x_bin, epicsInt32 y_bin,
+			     epicsFloat64 *result);
+  asynStatus computeMoffat2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
+			     epicsFloat64 fwhm, epicsFloat64 beta,
 			     epicsInt32 x_bin, epicsInt32 y_bin,
 			     epicsFloat64 *result);
   

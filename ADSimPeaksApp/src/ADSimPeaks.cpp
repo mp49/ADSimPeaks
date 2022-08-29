@@ -861,6 +861,15 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::moffat)) {
+	// Use P1 as the 'beta' parameter
+	computeMoffat(peak_pos_x, peak_fwhm_x, peak_p1, peak_pos_x, &result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  computeMoffat(peak_pos_x, peak_fwhm_x, peak_p1, bin, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
       }
     } else {
       // Compute 2D peaks
@@ -895,7 +904,6 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::laplace)) {
-	// Use P1 as the X/Y correlation 
 	computeLaplace2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, peak_cor, &result_max);
 	scale_factor = peak_amp / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
@@ -932,6 +940,17 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
 	  computeSquare2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
+	  result = (result*scale_factor);
+	  pData[bin] += static_cast<T>(result);
+	}
+      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::moffat)) {
+	// Use P1 as the 'beta' parameter, and use the X FWHM as the overall FWHM
+	computeMoffat2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_p1, peak_pos_x, peak_pos_y, &result_max);
+	scale_factor = peak_amp / zeroCheck(result_max);
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  bin_x = bin % sizeX;
+	  bin_y = floor(bin/sizeX);
+	  computeMoffat2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_p1, bin_x, bin_y, &result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
@@ -1163,6 +1182,39 @@ asynStatus ADSimPeaks::computeSquare(epicsFloat64 pos, epicsFloat64 fwhm, epicsI
   return asynSuccess;
 }
 
+/**
+ * Implementation of a Moffat distribution which has center 'pos' and full width 
+ * half max 'fwhm'. The Moffat function is determined by the alpha and beta 'seeing'
+ * parameters. We calculate alpha based on the input FWHM and beta. The beta parameter
+ * determins the shape of the function.
+ *
+ * For more information on this see:
+ * https://en.wikipedia.org/wiki/Moffat_distribution
+ *
+ * alpha = FWHM / (2 * sqrt(2^(1/beta) - 1))
+ *
+ * /arg /c pos The center of the distribution
+ * /arg /c fwhm The FWHM of the distribution
+ * /arg /c beta The beta seeing parameter
+ * /arg /c bin The position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
+asynStatus ADSimPeaks::computeMoffat(epicsFloat64 pos, epicsFloat64 fwhm, epicsFloat64 beta,
+				     epicsInt32 bin, epicsFloat64 *result)
+{
+  fwhm = std::max(1.0, fwhm);
+  beta = zeroCheck(beta);
+  epicsFloat64 peak = 1.0;
+  epicsFloat64 alpha = fwhm / (2.0 * sqrt(pow(2.0,1.0/beta) - 1));
+  epicsFloat64 alpha2 = alpha*alpha;
+
+  *result = peak * pow((1 + (((bin-pos)*(bin-pos))/alpha2)),-beta);
+
+  return asynSuccess;
+}
+
 
 /**
  * Implementation of a bivariate Gaussian function which has center (x,y) and full width half max 
@@ -1354,7 +1406,7 @@ asynStatus ADSimPeaks::computeLaplace2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
 }
 
 /**
- * Implementation of a simple pyramid which has center 'pos' and full width 
+ * Implementation of a simple pyramid which has center (x_pos,y_pos) and full width 
  * half max 'x_fwhm' and 'y_fwhm'.
  *
  * /arg /c x_pos The X coordinate of the distribution
@@ -1399,7 +1451,7 @@ asynStatus ADSimPeaks::computePyramid2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
 }
 
 /**
- * Implementation of an eliptical cone which has center 'pos' and full width 
+ * Implementation of an eliptical cone which has center (x_pos,y_pos) and full width 
  * half max 'x_fwhm' and 'y_fwhm'.
  *
  * /arg /c x_pos The X coordinate of the distribution
@@ -1444,7 +1496,7 @@ asynStatus ADSimPeaks::computeCone2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
 
 /**
  * Implementation of a cube peak, which looks like a square from the top,
- *  which has center 'pos' and full width half max 'x_fwhm' and 'y_fwhm'.
+ *  which has center (x_pos,y_pos) and full width half max 'x_fwhm' and 'y_fwhm'.
  *
  * /arg /c x_pos The X coordinate of the distribution
  * /arg /c y_pos The Y coordinate of the distribution
@@ -1474,6 +1526,44 @@ asynStatus ADSimPeaks::computeSquare2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
   } else {
     *result = 0.0;
   }
+  
+  return asynSuccess;
+}
+
+/**
+ * Implementation of a Moffat distribution which has center (x_pos,y_pos) and full width 
+ * half max 'fwhm'. The Moffat function is determined by the alpha and beta 'seeing'
+ * parameters. We calculate alpha based on the input FWHM and beta. The beta parameter
+ * determins the shape of the function. Large values of beta (>>1) will cause the distribution
+ * to be similar to a gaussian, and small values (<1) will cause it to look like an exponential.
+ *
+ * For more information on this see:
+ * https://en.wikipedia.org/wiki/Moffat_distribution
+ *
+ * alpha = FWHM / (2 * sqrt(2^(1/beta) - 1))
+
+ * /arg /c x_pos The X coordinate of the distribution
+ * /arg /c y_pos The Y coordinate of the distribution
+ * /arg /c fwhm The FWHM of the distribution (in X and Y)
+ * /arg /c beta The beta seeing parameter
+ * /arg /c x_bin The X position to use for the function
+ * /arg /c y_bin The Y position to use for the function
+ * /arg /c result Pointer which will be used to return the result of the calculation
+ *
+ * /return asynStatus
+ */
+asynStatus ADSimPeaks::computeMoffat2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
+				       epicsFloat64 fwhm, epicsFloat64 beta,
+				       epicsInt32 x_bin, epicsInt32 y_bin,
+				       epicsFloat64 *result)
+{
+  fwhm = std::max(1.0, fwhm);
+  beta = zeroCheck(beta);
+  epicsFloat64 peak = 1.0;
+  epicsFloat64 alpha = fwhm / (2.0 * sqrt(pow(2.0,1.0/beta) - 1));
+  epicsFloat64 alpha2 = alpha*alpha;
+
+  *result = peak * pow((1 + ((((x_bin-x_pos)*(x_bin-x_pos)) + ((y_bin-y_pos)*(y_bin-y_pos)))/alpha2)),-beta);
   
   return asynSuccess;
 }
