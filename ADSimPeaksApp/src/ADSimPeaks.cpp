@@ -884,6 +884,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::lorentz)) {
+	// Use the X FWHM as the overall FWHM
 	computeLorentz2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_pos_x, peak_pos_y, &result_max);
 	scale_factor = peak_amp / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
