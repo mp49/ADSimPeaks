@@ -713,14 +713,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   epicsInt32 sizeX = 0;
   epicsInt32 sizeY = 0;
   epicsInt32 peak_type = 0;
-  epicsFloat64 peak_pos_x = 0.0;
-  epicsFloat64 peak_fwhm_x = 0.0;
-  epicsFloat64 peak_pos_y = 0.0;
-  epicsFloat64 peak_fwhm_y = 0.0;
-  epicsFloat64 peak_amp = 0.0;
-  epicsFloat64 peak_cor = 0.0;
-  epicsFloat64 peak_p1 = 0.0;
-  epicsFloat64 peak_p2 = 0.0;
+  epicsFloat64 floatParam = 0.0;
   epicsFloat64 result = 0.0;
   epicsFloat64 result_max = 0.0;
   epicsFloat64 scale_factor = 0.0;
@@ -740,7 +733,8 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   epicsFloat64 noise_lower = 0.0;
   epicsFloat64 noise_upper = 0.0;
   epicsFloat64 noise = 0.0;
-
+  ADSimPeaksData peak_data;
+  
   string functionName(s_className + "::" + __func__);
   
   if (p_NDArray == NULL) {
@@ -796,77 +790,101 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   
   //Calculate the peak profile and scale it to the desired height
   for (epicsUInt32 peak=0; peak<m_maxPeaks; peak++) {
+
+    // Get the peak parameters and initialize our peak data object
+    peak_data.clear();
+    getDoubleParam(peak, ADSPPeakPosXParam, &floatParam);
+    peak_data.setPositionX(floatParam);
+    getDoubleParam(peak, ADSPPeakPosYParam, &floatParam);
+    peak_data.setPositionY(floatParam);
+    getDoubleParam(peak, ADSPPeakFWHMXParam, &floatParam);
+    peak_data.setFWHMX(floatParam);    
+    getDoubleParam(peak, ADSPPeakFWHMYParam, &floatParam);
+    peak_data.setFWHMY(floatParam);    
+    getDoubleParam(peak, ADSPPeakAmpParam, &floatParam);
+    peak_data.setAmplitude(floatParam);
+    getDoubleParam(peak, ADSPPeakCorParam, &floatParam);
+    peak_data.setCorrelation(floatParam);
+    getDoubleParam(peak, ADSPPeakP1Param, &floatParam);
+    peak_data.setParam1(floatParam);
+    getDoubleParam(peak, ADSPPeakP2Param, &floatParam);
+    peak_data.setParam2(floatParam);
     
-    getDoubleParam(peak, ADSPPeakPosXParam, &peak_pos_x);
-    getDoubleParam(peak, ADSPPeakFWHMXParam, &peak_fwhm_x);
-    getDoubleParam(peak, ADSPPeakAmpParam, &peak_amp);
-    getDoubleParam(peak, ADSPPeakP1Param, &peak_p1);
-    getDoubleParam(peak, ADSPPeakP2Param, &peak_p2);
     if (!m_2d) {
       getIntegerParam(peak, ADSPPeakType1DParam, &peak_type);
     } else {
-      getIntegerParam(peak, ADSPPeakType2DParam, &peak_type);
-      getDoubleParam(peak, ADSPPeakPosYParam, &peak_pos_y);
-      getDoubleParam(peak, ADSPPeakFWHMYParam, &peak_fwhm_y);
-      getDoubleParam(peak, ADSPPeakCorParam, &peak_cor);
+      getIntegerParam(peak, ADSPPeakType2DParam, &peak_type);      
     }
 
     if (!m_2d) {
       // Compute 1D peaks
       if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::gaussian)) {
-	computeGaussian(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());	
+	computeGaussian(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  computeGaussian(peak_pos_x, peak_fwhm_x, bin, &result);
+	  peak_data.setBinX(bin);
+	  computeGaussian(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::lorentz)) {
-	computeLorentz(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	computeLorentz(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  computeLorentz(peak_pos_x, peak_fwhm_x, bin, &result);
+	  peak_data.setBinX(bin);
+	  computeLorentz(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::pseudovoigt)) {
-	computePseudoVoigt(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	computePseudoVoigt(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  computePseudoVoigt(peak_pos_x, peak_fwhm_x, bin, &result);
+	  peak_data.setBinX(bin);
+	  computePseudoVoigt(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::laplace)) {
-	computeLaplace(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	computeLaplace(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  computeLaplace(peak_pos_x, peak_fwhm_x, bin, &result);
+	  peak_data.setBinX(bin);
+	  computeLaplace(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::triangle)) {
-	computeTriangle(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	computeTriangle(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  computeTriangle(peak_pos_x, peak_fwhm_x, bin, &result);
+	  peak_data.setBinX(bin);
+	  computeTriangle(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::square)) {
-	computeSquare(peak_pos_x, peak_fwhm_x, peak_pos_x, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	computeSquare(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  computeSquare(peak_pos_x, peak_fwhm_x, bin, &result);
+	  peak_data.setBinX(bin);
+	  computeSquare(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::moffat)) {
-	// Use P1 as the 'beta' parameter
-	computeMoffat(peak_pos_x, peak_fwhm_x, peak_p1, peak_pos_x, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	computeMoffat(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  computeMoffat(peak_pos_x, peak_fwhm_x, peak_p1, bin, &result);
+	  peak_data.setBinX(bin);
+	  computeMoffat(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
@@ -874,84 +892,116 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
     } else {
       // Compute 2D peaks
       if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::gaussian)) {
-	computeGaussian2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, peak_cor, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	peak_data.setBinY(peak_data.getPositionY());
+	computeGaussian2D(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
-	  computeGaussian2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, peak_cor, &result);
+	  peak_data.setBinX(bin_x);
+	  peak_data.setBinY(bin_y);
+	  computeGaussian2D(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::lorentz)) {
-	// Use the X FWHM as the overall FWHM
-	computeLorentz2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_pos_x, peak_pos_y, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	peak_data.setBinY(peak_data.getPositionY());
+	computeLorentz2D(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
-	  computeLorentz2D(peak_pos_x, peak_pos_y, peak_fwhm_x, bin_x, bin_y, &result);
+	  peak_data.setBinX(bin_x);
+	  peak_data.setBinY(bin_y);
+	  computeLorentz2D(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::pseudovoigt)) {
-	computePseudoVoigt2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	peak_data.setBinY(peak_data.getPositionY());
+	peak_data.setCorrelation(0.0);
+	computePseudoVoigt2D(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
-	  computePseudoVoigt2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
+	  peak_data.setBinX(bin_x);
+	  peak_data.setBinY(bin_y);
+	  computePseudoVoigt2D(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::laplace)) {
-	computeLaplace2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, peak_cor, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	peak_data.setBinY(peak_data.getPositionY());
+	computeLaplace2D(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
-	  computeLaplace2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, peak_cor, &result);
+	  peak_data.setBinX(bin_x);
+	  peak_data.setBinY(bin_y);
+	  computeLaplace2D(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::pyramid)) {
-	computePyramid2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	peak_data.setBinY(peak_data.getPositionY());
+	computePyramid2D(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
-	  computePyramid2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
+	  peak_data.setBinX(bin_x);
+	  peak_data.setBinY(bin_y);
+	  computePyramid2D(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::cone)) {
-	computeCone2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	peak_data.setBinY(peak_data.getPositionY());
+	computeCone2D(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
-	  computeCone2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
+	  peak_data.setBinX(bin_x);
+	  peak_data.setBinY(bin_y);
+	  computeCone2D(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::square)) {
-	computeSquare2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, peak_pos_x, peak_pos_y, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	peak_data.setBinX(peak_data.getPositionX());
+	peak_data.setBinY(peak_data.getPositionY());
+	computeSquare2D(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
-	  computeSquare2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_fwhm_y, bin_x, bin_y, &result);
+	  peak_data.setBinX(bin_x);
+	  peak_data.setBinY(bin_y);
+	  computeSquare2D(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::moffat)) {
+	peak_data.setBinX(peak_data.getPositionX());
+	peak_data.setBinY(peak_data.getPositionY());
 	// Use P1 as the 'beta' parameter, and use the X FWHM as the overall FWHM
-	computeMoffat2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_p1, peak_pos_x, peak_pos_y, &result_max);
-	scale_factor = peak_amp / zeroCheck(result_max);
+	computeMoffat2D(peak_data, result_max);
+	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
-	  computeMoffat2D(peak_pos_x, peak_pos_y, peak_fwhm_x, peak_p1, bin_x, bin_y, &result);
+	  peak_data.setBinX(bin_x);
+	  peak_data.setBinY(bin_y);
+	  computeMoffat2D(peak_data, result);
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
@@ -1009,97 +1059,94 @@ epicsFloat64 ADSimPeaks::zeroCheck(epicsFloat64 value)
  
 
 /**
- * Implementation of a Gaussian function which has center 'pos' and full width half max 'fwhm'.
+ * Implementation of a Gaussian function.
  * 
  * For more information on this see:
  * https://en.wikipedia.org/wiki/Normal_distribution
  * https://en.wikipedia.org/wiki/Gaussian_function
  *
- * /arg /c pos The center of the distribution
- * /arg /c fwhm The FWHM of the distribution
- * /arg /c bin The position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
+asynStatus ADSimPeaks::computeGaussian(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 pos = data.getPositionX();
+  epicsFloat64 fwhm = data.getFWHMX();
+  epicsInt32 bin = data.getBinX();  
   fwhm = std::max(1.0, fwhm);
 
   // This uses some class static constant data that has been pre-computed
   epicsFloat64 sigma = fwhm / s_2s2l2;
   
-  *result = (1.0 / (sigma*s_s2pi)) * exp(-(((bin-pos)*(bin-pos))) / (2.0*(sigma*sigma)));
+  result = (1.0 / (sigma*s_s2pi)) * exp(-(((bin-pos)*(bin-pos))) / (2.0*(sigma*sigma)));
 
   return asynSuccess;
 }
 
 /**
- * Implementation of a Cauchy-Lorentz function which has center 'pos' and full width half max 'fwhm'.
+ * Implementation of a Cauchy-Lorentz function.
  * 
  * For more information on this see:
  * https://en.wikipedia.org/wiki/Cauchy_distribution
  *
- * /arg /c pos The center of the distribution
- * /arg /c fwhm The FWHM of the distribution
- * /arg /c bin The position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
+asynStatus ADSimPeaks::computeLorentz(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 pos = data.getPositionX();
+  epicsFloat64 fwhm = data.getFWHMX();
+  epicsInt32 bin = data.getBinX();  
   fwhm = std::max(1.0, fwhm);
   
   epicsFloat64 gamma = fwhm / 2.0;
-  *result = (1 / (M_PI*gamma)) * ((gamma*gamma) / (((bin-pos)*(bin-pos)) + (gamma*gamma)));
+  result = (1 / (M_PI*gamma)) * ((gamma*gamma) / (((bin-pos)*(bin-pos)) + (gamma*gamma)));
 
   return asynSuccess;
 }
 
 /**
- * Implementation of the approximation of the Voigt function (known as the Psudo-Voigt) 
- * which has center 'pos' and full width half max 'fwhm'.
+ * Implementation of the approximation of the Voigt function (known as the Psudo-Voigt).
  * 
  * For more information on this see:
  * https://en.wikipedia.org/wiki/Voigt_profile
  *
- * /arg /c pos The center of the distribution
- * /arg /c fwhm The FWHM of the distribution
- * /arg /c bin The position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
+asynStatus ADSimPeaks::computePseudoVoigt(const ADSimPeaksData& data, epicsFloat64 &result)
 {
-  epicsFloat64 fwhm_g = 0.0;
-  epicsFloat64 fwhm_l = 0.0;
-  epicsFloat64 eta = 0.0;
-  epicsFloat64 gaussian = 0.0;
-  epicsFloat64 lorentz = 0.0;
-
-  fwhm = std::max(1.0, fwhm);
-  
   //This implementation assumes the FWHM of the Gaussian and Lorentz is the same. However, we
   //still use the full approximation for the Pseudo-Voigt total FWHM (fwhm_tot) and use two FWHM parameters
   //(fwhm_g and fwhm_l), so that this function can easily be modified to use a different Gaussian
   //and Lorentzian FWHM.
   
-  fwhm_g = fwhm;
-  fwhm_l = fwhm;
+  epicsFloat64 fwhm_g = data.getFWHMX(); 
+  epicsFloat64 fwhm_l = data.getFWHMX(); 
+  epicsFloat64 eta = 0.0;
+  epicsFloat64 gaussian = 0.0;
+  epicsFloat64 lorentz = 0.0;
 
+  fwhm_g = std::max(1.0, fwhm_g);
+  fwhm_l = std::max(1.0, fwhm_l);
+  
   computePseudoVoigtEta(fwhm_g, fwhm_l, &eta);
-  computeGaussian(pos, fwhm, bin, &gaussian);
-  computeLorentz(pos, fwhm, bin, &lorentz);
+  computeGaussian(data, gaussian);
+  computeLorentz(data, lorentz);
 
-  *result = ((1.0 - eta)*gaussian) + (eta*lorentz);
+  result = ((1.0 - eta)*gaussian) + (eta*lorentz);
 
   return asynSuccess;
 }
 
 /**
- * Implementation of a Laplace function which has center 'pos' and full width half max 'fwhm'.
+ * Implementation of a Laplace function.
  * 
  * For more information on this see:
  * https://en.wikipedia.org/wiki/Laplace_distribution
@@ -1108,38 +1155,41 @@ asynStatus ADSimPeaks::computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, e
  * that value and determining the value of 'bin' when the function equals that height, 
  * then doubling the result. Then we can calculate 'b' from our input FWHM.
  *
- * /arg /c pos The center of the distribution
- * /arg /c fwhm The FWHM of the distribution
- * /arg /c bin The position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeLaplace(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
+asynStatus ADSimPeaks::computeLaplace(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 pos = data.getPositionX();
+  epicsFloat64 fwhm = data.getFWHMX();
+  epicsInt32 bin = data.getBinX();
+  
   fwhm = std::max(1.0, fwhm);
 
   // This uses some class static constant data that has been pre-computed
   epicsFloat64 b = fwhm / s_2l2;
-  *result = (1.0/(2.0*b)) * exp(-((abs(bin - pos))/b));
+  result = (1.0/(2.0*b)) * exp(-((abs(bin - pos))/b));
 
   return asynSuccess;
 }
 
 
 /**
- * Implementation of a simple isosceles triangle which has center 'pos' and full width 
- * half max 'fwhm'.
+ * Implementation of a simple isosceles triangle.
  *
- * /arg /c pos The center of the distribution
- * /arg /c fwhm The FWHM of the distribution
- * /arg /c bin The position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeTriangle(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
+asynStatus ADSimPeaks::computeTriangle(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 pos = data.getPositionX();
+  epicsFloat64 fwhm = data.getFWHMX();
+  epicsInt32 bin = data.getBinX();  
+
   fwhm = std::max(1.0, fwhm);
 
   epicsFloat64 peak = 1.0;
@@ -1151,96 +1201,96 @@ asynStatus ADSimPeaks::computeTriangle(epicsFloat64 pos, epicsFloat64 fwhm, epic
     b = b*-1.0;
   }
 
-  *result = peak + b*(bin-pos);
-  *result = std::max(0.0, *result);
+  result = peak + b*(bin-pos);
+  result = std::max(0.0, result);
 
   return asynSuccess;
 }
 
 /**
- * Implementation of a simple square which has center 'pos' and full width 
- * half max 'fwhm'.
+ * Implementation of a simple square.
  *
- * /arg /c pos The center of the distribution
- * /arg /c fwhm The FWHM of the distribution
- * /arg /c bin The position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeSquare(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result)
+asynStatus ADSimPeaks::computeSquare(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 pos = data.getPositionX();
+  epicsFloat64 fwhm = data.getFWHMX();
+  epicsInt32 bin = data.getBinX();  
+
   fwhm = std::max(1.0, fwhm);
 
   epicsFloat64 peak = 1.0;
   
   if ((bin > static_cast<epicsInt32>(pos - fwhm/2.0)) && (bin <= static_cast<epicsInt32>(pos + fwhm/2.0))) {
-    *result = peak;
+    result = peak;
   } else {
-    *result = 0.0;
+    result = 0.0;
   }
 
   return asynSuccess;
 }
 
 /**
- * Implementation of a Moffat distribution which has center 'pos' and full width 
- * half max 'fwhm'. The Moffat function is determined by the alpha and beta 'seeing'
- * parameters. We calculate alpha based on the input FWHM and beta. The beta parameter
- * determins the shape of the function.
+ * Implementation of a Moffat distribution. The Moffat function is determined by 
+ * the alpha and beta 'seeing' parameters. We calculate alpha based on the input 
+ * FWHM and beta. The beta parameter determins the shape of the function. Large 
+ * values of beta (>>1) will cause the distribution to be similar to a gaussian, 
+ * and small values (<1) will cause it to look like an exponential.
  *
  * For more information on this see:
  * https://en.wikipedia.org/wiki/Moffat_distribution
  *
- * alpha = FWHM / (2 * sqrt(2^(1/beta) - 1))
- *
- * /arg /c pos The center of the distribution
- * /arg /c fwhm The FWHM of the distribution
- * /arg /c beta The beta seeing parameter
- * /arg /c bin The position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeMoffat(epicsFloat64 pos, epicsFloat64 fwhm, epicsFloat64 beta,
-				     epicsInt32 bin, epicsFloat64 *result)
+asynStatus ADSimPeaks::computeMoffat(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 pos = data.getPositionX();
+  epicsFloat64 fwhm = data.getFWHMX();
+  epicsFloat64 beta = data.getParam1();
+  epicsInt32 bin = data.getBinX();  
+
   fwhm = std::max(1.0, fwhm);
   beta = zeroCheck(beta);
+
   epicsFloat64 peak = 1.0;
   epicsFloat64 alpha = fwhm / (2.0 * sqrt(pow(2.0,1.0/beta) - 1));
   epicsFloat64 alpha2 = alpha*alpha;
 
-  *result = peak * pow((1 + (((bin-pos)*(bin-pos))/alpha2)),-beta);
+  result = peak * pow((1 + (((bin-pos)*(bin-pos))/alpha2)),-beta);
 
   return asynSuccess;
 }
 
 
 /**
- * Implementation of a bivariate Gaussian function which has center (x,y) and full width half max 
- * 'x_fwhm' and 'y_fwhm', with X and Y correlation rho (where -1<=rho<=1).
+ * Implementation of a bivariate Gaussian function.
  * 
  * For more information on this see:
  * https://en.wikipedia.org/wiki/Normal_distribution
  * https://en.wikipedia.org/wiki/Gaussian_function
  *
- * /arg /c x_pos The X coordinate of the distribution
- * /arg /c y_pos The Y coordinate of the distribution
- * /arg /c x_fwhm The X dimension FWHM of the distribution
- * /arg /c y_fwhm The Y dimension FWHM of the distribution
- * /arg /c x_bin The X position to use for the function
- * /arg /c y_bin The Y position to use for the function
- * /arg /c rho The X/Y correlation
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeGaussian2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-					 epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-					 epicsInt32 x_bin, epicsInt32 y_bin,
-					 epicsFloat64 rho, epicsFloat64 *result)
+asynStatus ADSimPeaks::computeGaussian2D(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 x_pos = data.getPositionX();
+  epicsFloat64 y_pos = data.getPositionY();
+  epicsFloat64 x_fwhm = data.getFWHMX();
+  epicsFloat64 y_fwhm = data.getFWHMY();
+  epicsFloat64 rho = data.getCorrelation();
+  epicsInt32 x_bin = data.getBinX();
+  epicsInt32 y_bin = data.getBinY();
+  
   x_fwhm = std::max(1.0, x_fwhm);
   y_fwhm = std::max(1.0, y_fwhm);
   rho = std::min(1.0, std::max(-1.0, rho));
@@ -1254,49 +1304,47 @@ asynStatus ADSimPeaks::computeGaussian2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
   epicsFloat64 xy_calc1 = (x_bin-x_pos)/x_sig;
   epicsFloat64 xy_calc2 = (y_bin-y_pos)/y_sig;
     
-  *result = xy_amp * exp(xy_factor*(xy_calc1*xy_calc1 - 2*rho*xy_calc1*xy_calc2 + xy_calc2*xy_calc2));
+  result = xy_amp * exp(xy_factor*(xy_calc1*xy_calc1 - 2*rho*xy_calc1*xy_calc2 + xy_calc2*xy_calc2));
 
   return asynSuccess;
 }
 
 /**
- * Implementation of a bivariate Cauchy-Lorentz function which has center (x,y) and 
- * full width half max 'fwhm'.
+ * Implementation of a bivariate Cauchy-Lorentz function.
  * 
  * For more information on this see:
  * https://en.wikipedia.org/wiki/Cauchy_distribution
- *
- * I can only find bivariate Cauchy functions that are symmetric in X and Y so we just use
- * a single FWHM argument and there is no covariance factor.
  * 
- * /arg /c x_pos The X coordinate of the distribution
- * /arg /c y_pos The Y coordinate of the distribution
- * /arg /c fwhm The FWHM of the distribution
- * /arg /c x_bin The X position to use for the function
- * /arg /c y_bin The Y position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * I can only find bivariate Cauchy functions that are symmetric in X and Y so we just use
+ * a single FWHM (taken as the X FWHM). 
+ *
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeLorentz2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-					epicsFloat64 fwhm, epicsInt32 x_bin,
-					epicsInt32 y_bin, epicsFloat64 *result)
+asynStatus ADSimPeaks::computeLorentz2D(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 x_pos = data.getPositionX();
+  epicsFloat64 y_pos = data.getPositionY(); 
+  epicsFloat64 fwhm = data.getFWHMX();
+  epicsInt32 x_bin = data.getBinX();
+  epicsInt32 y_bin = data.getBinY();
+
   fwhm = std::max(1.0, fwhm);
   
   epicsFloat64 gamma = fwhm / 2.0;
   epicsFloat64 xy_calc1 = x_bin-x_pos;
   epicsFloat64 xy_calc2 = y_bin-y_pos;
   
-  *result = (1 / (2*M_PI)) * (gamma / pow(((xy_calc1*xy_calc1) + (xy_calc2*xy_calc2) + gamma*gamma),1.5));
+  result = (1 / (2*M_PI)) * (gamma / pow(((xy_calc1*xy_calc1) + (xy_calc2*xy_calc2) + gamma*gamma),1.5));
 
   return asynSuccess;
 }
 
 /**
  * Implementation of the approximation of the bivariate Voigt function 
- * (known as the Psudo-Voigt) which has center (x,y) and 
- * full width half max 'fwhm'. The Guassian part of the function 
+ * (known as the Psudo-Voigt). The Guassian part of the function 
  * can be defined with different FWHM parameters in X and Y, and with
  * a skewed shape, but for the purposes of this approximation we
  * assume it has zero skew and an average is taken 
@@ -1305,21 +1353,15 @@ asynStatus ADSimPeaks::computeLorentz2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
  * For more information on this see:
  * https://en.wikipedia.org/wiki/Voigt_profile
  *
- * /arg /c x_pos The X coordinate of the distribution
- * /arg /c y_pos The Y coordinate of the distribution
- * /arg /c x_fwhm The X dimension FWHM of the distribution
- * /arg /c y_fwhm The Y dimension FWHM of the distribution
- * /arg /c x_bin The X position to use for the function
- * /arg /c y_bin The Y position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computePseudoVoigt2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-					    epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-					    epicsInt32 x_bin, epicsInt32 y_bin,
-					    epicsFloat64 *result)
+asynStatus ADSimPeaks::computePseudoVoigt2D(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 x_fwhm = data.getFWHMX();
+  epicsFloat64 y_fwhm = data.getFWHMY();   
   epicsFloat64 fwhm_av = 0.0;
   epicsFloat64 fwhm_g = 0.0;
   epicsFloat64 fwhm_l = 0.0;
@@ -1335,10 +1377,10 @@ asynStatus ADSimPeaks::computePseudoVoigt2D(epicsFloat64 x_pos, epicsFloat64 y_p
   fwhm_l = fwhm_av;
 
   computePseudoVoigtEta(fwhm_g, fwhm_l, &eta);
-  computeGaussian2D(x_pos, y_pos, x_fwhm, y_fwhm, x_bin, y_bin, 0.0, &gaussian);
-  computeLorentz2D(x_pos, y_pos, fwhm_av, x_bin, y_bin, &lorentz);
+  computeGaussian2D(data, gaussian);
+  computeLorentz2D(data, lorentz);
 
-  *result = ((1.0 - eta)*gaussian) + (eta*lorentz);
+  result = ((1.0 - eta)*gaussian) + (eta*lorentz);
 
   return asynSuccess;
 }
@@ -1359,8 +1401,7 @@ asynStatus ADSimPeaks::computePseudoVoigtEta(epicsFloat64 fwhm_g, epicsFloat64 f
 }
 
 /**
- * Implementation of a bivariate Laplace function which has center (x,y) and full width half max 
- * 'x_fwhm' and 'y_fwhm', with X and Y correlation rho (where -1<=rho<=1).
+ * Implementation of a bivariate Laplace function.
  * 
  * For more information on this see:
  * https://en.wikipedia.org/wiki/Multivariate_Laplace_distribution
@@ -1372,22 +1413,21 @@ asynStatus ADSimPeaks::computePseudoVoigtEta(epicsFloat64 fwhm_g, epicsFloat64 f
  * but to avoid having to calculate this we just assume a decaying expoential, which seems 
  * like a good approximation. 
  *
- * /arg /c x_pos The X coordinate of the distribution
- * /arg /c y_pos The Y coordinate of the distribution
- * /arg /c x_fwhm The X dimension FWHM of the distribution
- * /arg /c y_fwhm The Y dimension FWHM of the distribution
- * /arg /c x_bin The X position to use for the function
- * /arg /c y_bin The Y position to use for the function
- * /arg /c rho The X/Y correlation
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeLaplace2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-					epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-					epicsInt32 x_bin, epicsInt32 y_bin,
-					epicsFloat64 rho, epicsFloat64 *result)
+asynStatus ADSimPeaks::computeLaplace2D(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 x_pos = data.getPositionX();
+  epicsFloat64 y_pos = data.getPositionY();
+  epicsFloat64 x_fwhm = data.getFWHMX();
+  epicsFloat64 y_fwhm = data.getFWHMY();
+  epicsFloat64 rho = data.getCorrelation();
+  epicsInt32 x_bin = data.getBinX();
+  epicsInt32 y_bin = data.getBinY();
+    
   x_fwhm = std::max(1.0, x_fwhm);
   y_fwhm = std::max(1.0, y_fwhm);
   rho = std::min(1.0, std::max(-1.0, rho));
@@ -1401,30 +1441,28 @@ asynStatus ADSimPeaks::computeLaplace2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
   epicsFloat64 xy_calc1 = (x_bin-x_pos)/x_sig;
   epicsFloat64 xy_calc2 = (y_bin-y_pos)/y_sig;
     
-  *result = xy_amp * exp(-sqrt((2.0*(xy_calc1*xy_calc1 - 2*rho*xy_calc1*xy_calc2 + xy_calc2*xy_calc2))/(1-(rho*rho))));
+  result = xy_amp * exp(-sqrt((2.0*(xy_calc1*xy_calc1 - 2*rho*xy_calc1*xy_calc2 + xy_calc2*xy_calc2))/(1-(rho*rho))));
 
   return asynSuccess;
 }
 
 /**
- * Implementation of a simple pyramid which has center (x_pos,y_pos) and full width 
- * half max 'x_fwhm' and 'y_fwhm'.
+ * Implementation of a simple pyramid.
  *
- * /arg /c x_pos The X coordinate of the distribution
- * /arg /c y_pos The Y coordinate of the distribution
- * /arg /c x_fwhm The X dimension FWHM of the distribution
- * /arg /c y_fwhm The Y dimension FWHM of the distribution
- * /arg /c x_bin The X position to use for the function
- * /arg /c y_bin The Y position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computePyramid2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-				     epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-				     epicsInt32 x_bin, epicsInt32 y_bin,
-				     epicsFloat64 *result)
+asynStatus ADSimPeaks::computePyramid2D(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 x_pos = data.getPositionX();
+  epicsFloat64 y_pos = data.getPositionY();
+  epicsFloat64 x_fwhm = data.getFWHMX();
+  epicsFloat64 y_fwhm = data.getFWHMY();
+  epicsInt32 x_bin = data.getBinX();
+  epicsInt32 y_bin = data.getBinY();
+    
   x_fwhm = std::max(1.0, x_fwhm);
   y_fwhm = std::max(1.0, y_fwhm);
 
@@ -1445,31 +1483,29 @@ asynStatus ADSimPeaks::computePyramid2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
     c = c*-1.0;
   }
   
-  *result = peak + b*(x_bin-x_pos) + c*(y_bin-y_pos);
-  *result = std::max(0.0, *result);
+  result = peak + b*(x_bin-x_pos) + c*(y_bin-y_pos);
+  result = std::max(0.0, result);
   
   return asynSuccess;
 }
 
 /**
- * Implementation of an eliptical cone which has center (x_pos,y_pos) and full width 
- * half max 'x_fwhm' and 'y_fwhm'.
+ * Implementation of an eliptical cone.
  *
- * /arg /c x_pos The X coordinate of the distribution
- * /arg /c y_pos The Y coordinate of the distribution
- * /arg /c x_fwhm The X dimension FWHM of the distribution
- * /arg /c y_fwhm The Y dimension FWHM of the distribution
- * /arg /c x_bin The X position to use for the function
- * /arg /c y_bin The Y position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeCone2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-				     epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-				     epicsInt32 x_bin, epicsInt32 y_bin,
-				     epicsFloat64 *result)
+asynStatus ADSimPeaks::computeCone2D(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 x_pos = data.getPositionX();
+  epicsFloat64 y_pos = data.getPositionY();
+  epicsFloat64 x_fwhm = data.getFWHMX();
+  epicsFloat64 y_fwhm = data.getFWHMY();
+  epicsInt32 x_bin = data.getBinX();
+  epicsInt32 y_bin = data.getBinY();
+  
   x_fwhm = std::max(1.0, x_fwhm);
   y_fwhm = std::max(1.0, y_fwhm);
 
@@ -1489,31 +1525,29 @@ asynStatus ADSimPeaks::computeCone2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
     height = peak;
   }
   
-  *result = height;
-  *result = std::max(0.0, *result);
+  result = height;
+  result = std::max(0.0, result);
   
   return asynSuccess;
 }
 
 /**
- * Implementation of a cube peak, which looks like a square from the top,
- *  which has center (x_pos,y_pos) and full width half max 'x_fwhm' and 'y_fwhm'.
+ * Implementation of a cube peak, which looks like a square from the top.
  *
- * /arg /c x_pos The X coordinate of the distribution
- * /arg /c y_pos The Y coordinate of the distribution
- * /arg /c x_fwhm The X dimension FWHM of the distribution
- * /arg /c y_fwhm The Y dimension FWHM of the distribution
- * /arg /c x_bin The X position to use for the function
- * /arg /c y_bin The Y position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeSquare2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-				       epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-				       epicsInt32 x_bin, epicsInt32 y_bin,
-				       epicsFloat64 *result)
+asynStatus ADSimPeaks::computeSquare2D(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 x_pos = data.getPositionX();
+  epicsFloat64 y_pos = data.getPositionY();
+  epicsFloat64 x_fwhm = data.getFWHMX();
+  epicsFloat64 y_fwhm = data.getFWHMY();
+  epicsInt32 x_bin = data.getBinX();
+  epicsInt32 y_bin = data.getBinY();
+  
   x_fwhm = std::max(1.0, x_fwhm);
   y_fwhm = std::max(1.0, y_fwhm);
 
@@ -1523,48 +1557,46 @@ asynStatus ADSimPeaks::computeSquare2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
       (x_bin <= static_cast<epicsInt32>(x_pos + x_fwhm/2.0)) &&
       (y_bin >  static_cast<epicsInt32>(y_pos - y_fwhm/2.0)) &&
       (y_bin <= static_cast<epicsInt32>(y_pos + y_fwhm/2.0))) {
-    *result = peak;
+    result = peak;
   } else {
-    *result = 0.0;
+    result = 0.0;
   }
   
   return asynSuccess;
 }
 
 /**
- * Implementation of a Moffat distribution which has center (x_pos,y_pos) and full width 
- * half max 'fwhm'. The Moffat function is determined by the alpha and beta 'seeing'
- * parameters. We calculate alpha based on the input FWHM and beta. The beta parameter
- * determins the shape of the function. Large values of beta (>>1) will cause the distribution
- * to be similar to a gaussian, and small values (<1) will cause it to look like an exponential.
+ * Implementation of a Moffat distribution. The Moffat function is determined by the alpha 
+ * and beta 'seeing' parameters. We calculate alpha based on the input FWHM and beta. The 
+ * beta parameter determins the shape of the function. Large values of beta (>>1) will cause 
+ * the distribution to be similar to a gaussian, and small values (<1) will cause it to look 
+ * like an exponential.
  *
  * For more information on this see:
  * https://en.wikipedia.org/wiki/Moffat_distribution
  *
- * alpha = FWHM / (2 * sqrt(2^(1/beta) - 1))
-
- * /arg /c x_pos The X coordinate of the distribution
- * /arg /c y_pos The Y coordinate of the distribution
- * /arg /c fwhm The FWHM of the distribution (in X and Y)
- * /arg /c beta The beta seeing parameter
- * /arg /c x_bin The X position to use for the function
- * /arg /c y_bin The Y position to use for the function
- * /arg /c result Pointer which will be used to return the result of the calculation
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
+ * /arg /c result This will be used to return the result of the calculation
  *
  * /return asynStatus
  */
-asynStatus ADSimPeaks::computeMoffat2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-				       epicsFloat64 fwhm, epicsFloat64 beta,
-				       epicsInt32 x_bin, epicsInt32 y_bin,
-				       epicsFloat64 *result)
+asynStatus ADSimPeaks::computeMoffat2D(const ADSimPeaksData& data, epicsFloat64 &result)
 {
+  epicsFloat64 x_pos = data.getPositionX();
+  epicsFloat64 y_pos = data.getPositionY();
+  epicsFloat64 fwhm = data.getFWHMX();
+  epicsFloat64 beta = data.getParam1();
+  epicsInt32 x_bin = data.getBinX();
+  epicsInt32 y_bin = data.getBinY();
+  
   fwhm = std::max(1.0, fwhm);
   beta = zeroCheck(beta);
+
   epicsFloat64 peak = 1.0;
   epicsFloat64 alpha = fwhm / (2.0 * sqrt(pow(2.0,1.0/beta) - 1));
   epicsFloat64 alpha2 = alpha*alpha;
 
-  *result = peak * pow((1 + ((((x_bin-x_pos)*(x_bin-x_pos)) + ((y_bin-y_pos)*(y_bin-y_pos)))/alpha2)),-beta);
+  result = peak * pow((1 + ((((x_bin-x_pos)*(x_bin-x_pos)) + ((y_bin-y_pos)*(y_bin-y_pos)))/alpha2)),-beta);
   
   return asynSuccess;
 }

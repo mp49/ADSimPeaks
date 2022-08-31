@@ -17,6 +17,7 @@
 
 #include <epicsEvent.h>
 #include "ADDriver.h"
+#include "ADSimPeaksData.h"
 
 /* These are the drvInfo strings that are used to identify the parameters.
  * They are used by asyn clients, including standard asyn device support */
@@ -179,47 +180,24 @@ private:
   template <typename T> asynStatus computeDataT();
 
   // 1D Profiles
-  asynStatus computeGaussian(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
-  asynStatus computeLorentz(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
-  asynStatus computePseudoVoigt(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
-  asynStatus computeLaplace(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
-  asynStatus computeTriangle(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
-  asynStatus computeSquare(epicsFloat64 pos, epicsFloat64 fwhm, epicsInt32 bin, epicsFloat64 *result);
-  asynStatus computeMoffat(epicsFloat64 pos, epicsFloat64 fwhm, epicsFloat64 beta, epicsInt32 bin, epicsFloat64 *result);
+  asynStatus computeGaussian(const ADSimPeaksData &data, epicsFloat64 &result); 
+  asynStatus computeLorentz(const ADSimPeaksData &data, epicsFloat64 &result); 
+  asynStatus computePseudoVoigt(const ADSimPeaksData &data, epicsFloat64 &result); 
+  asynStatus computeLaplace(const ADSimPeaksData &data, epicsFloat64 &result); 
+  asynStatus computeTriangle(const ADSimPeaksData &data, epicsFloat64 &result); 
+  asynStatus computeSquare(const ADSimPeaksData &data, epicsFloat64 &result); 
+  asynStatus computeMoffat(const ADSimPeaksData &data, epicsFloat64 &result); 
   
   // 2D Profiles
-  asynStatus computeGaussian2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-			       epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-			       epicsInt32 x_bin, epicsInt32 y_bin,
-			       epicsFloat64 rho, epicsFloat64 *result);
-  asynStatus computeLorentz2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-			      epicsFloat64 fwhm, epicsInt32 x_bin,
-			      epicsInt32 y_bin, epicsFloat64 *result);
-  asynStatus computePseudoVoigt2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-				  epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-				  epicsInt32 x_bin, epicsInt32 y_bin,
-				  epicsFloat64 *result);
+  asynStatus computeGaussian2D(const ADSimPeaksData &data, epicsFloat64 &result); 
+  asynStatus computeLorentz2D(const ADSimPeaksData &data, epicsFloat64 &result); 
+  asynStatus computePseudoVoigt2D(const ADSimPeaksData &data, epicsFloat64 &result); 
   asynStatus computePseudoVoigtEta(epicsFloat64 fwhm_g, epicsFloat64 fwhm_l, epicsFloat64 *eta);
-  asynStatus computeLaplace2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-			      epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-			      epicsInt32 x_bin, epicsInt32 y_bin,
-			      epicsFloat64 rho, epicsFloat64 *result);
-  asynStatus computePyramid2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-			      epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-			      epicsInt32 x_bin, epicsInt32 y_bin,
-			      epicsFloat64 *result);
-  asynStatus computeCone2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-			   epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-			   epicsInt32 x_bin, epicsInt32 y_bin,
-			   epicsFloat64 *result);
-  asynStatus computeSquare2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-			     epicsFloat64 x_fwhm, epicsFloat64 y_fwhm,
-			     epicsInt32 x_bin, epicsInt32 y_bin,
-			     epicsFloat64 *result);
-  asynStatus computeMoffat2D(epicsFloat64 x_pos, epicsFloat64 y_pos,
-			     epicsFloat64 fwhm, epicsFloat64 beta,
-			     epicsInt32 x_bin, epicsInt32 y_bin,
-			     epicsFloat64 *result);
+  asynStatus computeLaplace2D(const ADSimPeaksData &data, epicsFloat64 &result); 
+  asynStatus computePyramid2D(const ADSimPeaksData &data, epicsFloat64 &result); 
+  asynStatus computeCone2D(const ADSimPeaksData &data, epicsFloat64 &result); 
+  asynStatus computeSquare2D(const ADSimPeaksData &data, epicsFloat64 &result); 
+  asynStatus computeMoffat2D(const ADSimPeaksData &data, epicsFloat64 &result); 
   
   //Utilty Functions
   epicsFloat64 zeroCheck(epicsFloat64 value);
