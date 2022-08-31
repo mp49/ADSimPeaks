@@ -1,3 +1,13 @@
+/**
+ * \brief Container class for data associated with the peaks produced
+ *        by the ADSimPeaks areaDetector driver.
+ *
+ * More detailed documentation can be found in the source file.
+ *
+ * \author Matt Pearson 
+ * \date Aug 31st, 2022 
+ *
+ */
 
 #ifndef ADSIMPEAKSDATA_H
 #define ADSIMPEAKSDATA_H

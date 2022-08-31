@@ -15,6 +15,7 @@
  * 4) Lorentzian (also known as Cauchy)
  * 5) Voigt (implemented as a psudo-Voigt, which is an approximation)
  * 6) Laplace
+ * 7) Moffat
  *
  * Supported 2D peak shapes are:
  * 1) Square
@@ -24,6 +25,7 @@
  * 5) Lorentzian (also known as Cauchy)
  * 6) Voigt (implemented as a psudo-Voigt, which is an approximation)
  * 7) Laplace
+ * 8) Moffat
  *
  * The background is defined as a 3rd order polynomial so that the shape
  * can be a flat offset, a slope or a curve.
