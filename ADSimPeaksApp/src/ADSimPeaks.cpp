@@ -1259,11 +1259,10 @@ asynStatus ADSimPeaks::computeMoffat(const ADSimPeaksData& data, epicsFloat64 &r
   fwhm = std::max(1.0, fwhm);
   beta = zeroCheck(beta);
 
-  epicsFloat64 peak = 1.0;
   epicsFloat64 alpha = fwhm / (2.0 * sqrt(pow(2.0,1.0/beta) - 1));
   epicsFloat64 alpha2 = alpha*alpha;
-
-  result = peak * pow((1 + (((bin-pos)*(bin-pos))/alpha2)),-beta);
+  
+  result = ((beta-1)/(M_PI*alpha2)) * pow((1 + (((bin-pos)*(bin-pos))/alpha2)),-beta);
 
   return asynSuccess;
 }
@@ -1592,11 +1591,11 @@ asynStatus ADSimPeaks::computeMoffat2D(const ADSimPeaksData& data, epicsFloat64 
   fwhm = std::max(1.0, fwhm);
   beta = zeroCheck(beta);
 
-  epicsFloat64 peak = 1.0;
   epicsFloat64 alpha = fwhm / (2.0 * sqrt(pow(2.0,1.0/beta) - 1));
   epicsFloat64 alpha2 = alpha*alpha;
 
-  result = peak * pow((1 + ((((x_bin-x_pos)*(x_bin-x_pos)) + ((y_bin-y_pos)*(y_bin-y_pos)))/alpha2)),-beta);
+  result = ((beta-1)/(M_PI*alpha2))
+    * pow((1 + ((((x_bin-x_pos)*(x_bin-x_pos)) + ((y_bin-y_pos)*(y_bin-y_pos)))/alpha2)),-beta);
   
   return asynSuccess;
 }
