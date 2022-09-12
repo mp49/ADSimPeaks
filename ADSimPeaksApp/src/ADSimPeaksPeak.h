@@ -17,8 +17,6 @@
 #include <epicsTypes.h>
 #include <ADSimPeaksData.h>
 
-//using std::string;
-
 class ADSimPeaksPeak
 {
  public:
