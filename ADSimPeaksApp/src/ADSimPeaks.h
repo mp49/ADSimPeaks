@@ -5,7 +5,7 @@
  * More detailed documentation can be found in the source file.
  *
  * \author Matt Pearson 
- * \date July 11th, 2022 
+ * \date Aug 31st, 2022 
  *
  */
 
@@ -18,6 +18,7 @@
 #include <epicsEvent.h>
 #include "ADDriver.h"
 #include "ADSimPeaksData.h"
+#include "ADSimPeaksPeak.h"
 
 /* These are the drvInfo strings that are used to identify the parameters.
  * They are used by asyn clients, including standard asyn device support */
@@ -121,37 +122,10 @@ private:
 
   std::default_random_engine m_rand_gen;
 
-  /**
-   * The enum for the type of 1D peak function. This needs to match
-   * the list order presented to the user. 
-   */
-  enum class e_peak_type_1d {
-    none,
-    square,
-    triangle,
-    gaussian,
-    lorentz,
-    pseudovoigt,
-    laplace,
-    moffat
-  };
-
-  /**
-   * The enum for the type of 2D peak function. This needs to match
-   * the list order presented to the user in the database.
-   */
-  enum class e_peak_type_2d {
-    none,
-    square,
-    pyramid,
-    cone,
-    gaussian,
-    lorentz,
-    pseudovoigt,
-    laplace,
-    moffat
-  };
-
+  // Create object used to access the various probability
+  // distributions and other types of peaks.
+  ADSimPeaksPeak m_peaks;
+  
   /**
    * The enum for the type of noise. This needs to match
    * the list order presented to the user in the database.
@@ -165,41 +139,11 @@ private:
   // Static Data
   static const std::string s_className;
   static const epicsFloat64 s_zeroCheck;
-  static const epicsFloat64 s_2s2l2;
-  static const epicsFloat64 s_s2pi;
-  static const epicsFloat64 s_2l2;
-  static const epicsFloat64 s_pv_p1;
-  static const epicsFloat64 s_pv_p2;
-  static const epicsFloat64 s_pv_p3;
-  static const epicsFloat64 s_pv_p4;
-  static const epicsFloat64 s_pv_e1;
-  static const epicsFloat64 s_pv_e2;
-  static const epicsFloat64 s_pv_e3;
 
   asynStatus computeData(NDDataType_t dataType);
   template <typename T> asynStatus computeDataT();
-
-  // 1D Profiles
-  asynStatus computeGaussian(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computeLorentz(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computePseudoVoigt(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computeLaplace(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computeTriangle(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computeSquare(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computeMoffat(const ADSimPeaksData &data, epicsFloat64 &result); 
   
-  // 2D Profiles
-  asynStatus computeGaussian2D(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computeLorentz2D(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computePseudoVoigt2D(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computePseudoVoigtEta(epicsFloat64 fwhm_g, epicsFloat64 fwhm_l, epicsFloat64 *eta);
-  asynStatus computeLaplace2D(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computePyramid2D(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computeCone2D(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computeSquare2D(const ADSimPeaksData &data, epicsFloat64 &result); 
-  asynStatus computeMoffat2D(const ADSimPeaksData &data, epicsFloat64 &result); 
-  
-  //Utilty Functions
+  // Utilty Functions
   epicsFloat64 zeroCheck(epicsFloat64 value);
   
 };

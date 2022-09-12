@@ -2,30 +2,11 @@
  * \brief areaDetector driver to simulate 1D and 2D peaks with background 
  *        profiles and noise. 
  *
- * This areaDetector driver can be used to simulate semi-realistic looking
+ * This areaDetector driver can be used to simulate semi-realistic diffraction
  * data in 1D and 2D. It can produce a 1D or 2D NDArray object of variable size and 
- * of different data types. The data can contain a background and any number 
+ * of different data types. The data can contain a polynomial background and any number 
  * of peaks of a few different shapes, with the option to add different kinds of 
  * noise to the signal.
- *
- * Supported 1D peak shapes are:
- * 1) Square
- * 2) Triangle
- * 3) Gaussian (normal
- * 4) Lorentzian (also known as Cauchy)
- * 5) Voigt (implemented as a psudo-Voigt, which is an approximation)
- * 6) Laplace
- * 7) Moffat
- *
- * Supported 2D peak shapes are:
- * 1) Square
- * 2) Pyramid
- * 3) Eliptical Cone
- * 4) Gaussian (normal)
- * 5) Lorentzian (also known as Cauchy)
- * 6) Voigt (implemented as a psudo-Voigt, which is an approximation)
- * 7) Laplace
- * 8) Moffat
  *
  * The background is defined as a 3rd order polynomial so that the shape
  * can be a flat offset, a slope or a curve.
@@ -33,8 +14,12 @@
  * The noise type can be either uniformly distributed or distributed
  * according to a Gaussian profile. 
  *
+ * There are other classes defined in other files that are used by ADSimPeaks:
+ * ADSimPeaksPeak - contains the implementation of the various peak shapes
+ * ADSimPeaksData - container class to hold peak information
+ * 
  * \author Matt Pearson 
- * \date July 11th, 2022
+ * \date Aug 31st, 2022 
  *
  */
 
@@ -63,25 +48,11 @@ using std::string;
 
 static void ADSimPeaksTaskC(void *drvPvt);
 
-// Static Data (including some precalculated data for the function distributions)
+// Static Data
 // Class name
 const string ADSimPeaks::s_className = "ADSimPeaks";
 // Constant used to test for 0.0
 const epicsFloat64 ADSimPeaks::s_zeroCheck = 1e-12;
-// Constant 2.0*sqrt(2.0*log(2.0))
-const epicsFloat64 ADSimPeaks::s_2s2l2 = 2.3548200450309493;
-// Constant sqrt(2.0*M_PI)
-const epicsFloat64 ADSimPeaks::s_s2pi = 2.5066282746310002;
-// Constat 2.0*log(2.0)
-const epicsFloat64 ADSimPeaks::s_2l2 = 1.3862943611198906;
-// Constant data for the psudoVoigt eta parameter
-const epicsFloat64 ADSimPeaks::s_pv_p1 = 2.69269;
-const epicsFloat64 ADSimPeaks::s_pv_p2 = 2.42843;
-const epicsFloat64 ADSimPeaks::s_pv_p3 = 4.47163;
-const epicsFloat64 ADSimPeaks::s_pv_p4 = 0.07842;
-const epicsFloat64 ADSimPeaks::s_pv_e1 = 1.36603;
-const epicsFloat64 ADSimPeaks::s_pv_e2 = 0.47719;
-const epicsFloat64 ADSimPeaks::s_pv_e3 = 0.11116;
 
 /**
  * Constructor. This creates the driver object and the thread used for
@@ -467,12 +438,12 @@ void ADSimPeaks::report(FILE *fp, int details)
       fprintf(fp, "  peak: %d\n", i);
       if (!m_2d) {
 	getIntegerParam(i, ADSPPeakType1DParam, &intParam);
-	if (intParam == static_cast<epicsUInt32>(e_peak_type_1d::none)) {
+	if (intParam == static_cast<epicsUInt32>(m_peaks.e_type_1d::none)) {
 	  fprintf(fp, "   none (disabled)\n");
 	}
       } else {
 	getIntegerParam(i, ADSPPeakType2DParam, &intParam);
-	if (intParam == static_cast<epicsUInt32>(e_peak_type_2d::none)) {
+	if (intParam == static_cast<epicsUInt32>(m_peaks.e_type_2d::none)) {
 	  fprintf(fp, "   none (disabled)\n");
 	}
       }
@@ -736,6 +707,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   epicsFloat64 noise_upper = 0.0;
   epicsFloat64 noise = 0.0;
   ADSimPeaksData peak_data;
+  ADSimPeaksPeak::e_status peak_status;
   
   string functionName(s_className + "::" + __func__);
   
@@ -793,6 +765,21 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   //Calculate the peak profile and scale it to the desired height
   for (epicsUInt32 peak=0; peak<m_maxPeaks; peak++) {
 
+    bool no_peak = false;
+    if (!m_2d) {
+      getIntegerParam(peak, ADSPPeakType1DParam, &peak_type);
+      if (peak_type == static_cast<epicsUInt32>(m_peaks.e_type_1d::none)) {
+	no_peak = true;
+      }
+    } else {
+      getIntegerParam(peak, ADSPPeakType2DParam, &peak_type);
+      if (peak_type == static_cast<epicsUInt32>(m_peaks.e_type_2d::none)) {
+	no_peak = true;
+      }
+    }
+
+    if (!no_peak) {
+    
     // Get the peak parameters and initialize our peak data object
     peak_data.clear();
     getDoubleParam(peak, ADSPPeakPosXParam, &floatParam);
@@ -813,202 +800,42 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
     peak_data.setParam2(floatParam);
     
     if (!m_2d) {
-      getIntegerParam(peak, ADSPPeakType1DParam, &peak_type);
-    } else {
-      getIntegerParam(peak, ADSPPeakType2DParam, &peak_type);      
-    }
-
-    if (!m_2d) {
-      // Compute 1D peaks
-      if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::gaussian)) {
-	peak_data.setBinX(peak_data.getPositionX());	
-	computeGaussian(peak_data, result_max);
+      // Compute 1D peak data
+      peak_data.setBinX(peak_data.getPositionX());	
+      peak_status = m_peaks.compute1D(peak_data, peak_type, result_max);
+      if (peak_status == m_peaks.e_status::success) {
 	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  peak_data.setBinX(bin);
-	  computeGaussian(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::lorentz)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	computeLorentz(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  peak_data.setBinX(bin);
-	  computeLorentz(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::pseudovoigt)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	computePseudoVoigt(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  peak_data.setBinX(bin);
-	  computePseudoVoigt(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::laplace)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	computeLaplace(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  peak_data.setBinX(bin);
-	  computeLaplace(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::triangle)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	computeTriangle(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  peak_data.setBinX(bin);
-	  computeTriangle(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::square)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	computeSquare(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  peak_data.setBinX(bin);
-	  computeSquare(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_1d::moffat)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	computeMoffat(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  peak_data.setBinX(bin);
-	  computeMoffat(peak_data, result);
+      }
+      for (epicsUInt32 bin=0; bin<size; bin++) {
+	peak_data.setBinX(bin);
+	peak_status = m_peaks.compute1D(peak_data, peak_type, result);
+	if (peak_status == m_peaks.e_status::success) {
 	  result = (result*scale_factor);
 	  pData[bin] += static_cast<T>(result);
 	}
       }
     } else {
-      // Compute 2D peaks
-      if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::gaussian)) {
+      // Compute 2D peak data
 	peak_data.setBinX(peak_data.getPositionX());
 	peak_data.setBinY(peak_data.getPositionY());
-	computeGaussian2D(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
+	peak_status = m_peaks.compute2D(peak_data, peak_type, result_max);
+	if (peak_status == m_peaks.e_status::success) {
+	  scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
+	}
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
 	  peak_data.setBinX(bin_x);
 	  peak_data.setBinY(bin_y);
-	  computeGaussian2D(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::lorentz)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	peak_data.setBinY(peak_data.getPositionY());
-	computeLorentz2D(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  bin_x = bin % sizeX;
-	  bin_y = floor(bin/sizeX);
-	  peak_data.setBinX(bin_x);
-	  peak_data.setBinY(bin_y);
-	  computeLorentz2D(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::pseudovoigt)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	peak_data.setBinY(peak_data.getPositionY());
-	peak_data.setCorrelation(0.0);
-	computePseudoVoigt2D(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  bin_x = bin % sizeX;
-	  bin_y = floor(bin/sizeX);
-	  peak_data.setBinX(bin_x);
-	  peak_data.setBinY(bin_y);
-	  computePseudoVoigt2D(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::laplace)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	peak_data.setBinY(peak_data.getPositionY());
-	computeLaplace2D(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  bin_x = bin % sizeX;
-	  bin_y = floor(bin/sizeX);
-	  peak_data.setBinX(bin_x);
-	  peak_data.setBinY(bin_y);
-	  computeLaplace2D(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::pyramid)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	peak_data.setBinY(peak_data.getPositionY());
-	computePyramid2D(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  bin_x = bin % sizeX;
-	  bin_y = floor(bin/sizeX);
-	  peak_data.setBinX(bin_x);
-	  peak_data.setBinY(bin_y);
-	  computePyramid2D(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::cone)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	peak_data.setBinY(peak_data.getPositionY());
-	computeCone2D(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  bin_x = bin % sizeX;
-	  bin_y = floor(bin/sizeX);
-	  peak_data.setBinX(bin_x);
-	  peak_data.setBinY(bin_y);
-	  computeCone2D(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::square)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	peak_data.setBinY(peak_data.getPositionY());
-	computeSquare2D(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  bin_x = bin % sizeX;
-	  bin_y = floor(bin/sizeX);
-	  peak_data.setBinX(bin_x);
-	  peak_data.setBinY(bin_y);
-	  computeSquare2D(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      } else if (peak_type == static_cast<epicsUInt32>(e_peak_type_2d::moffat)) {
-	peak_data.setBinX(peak_data.getPositionX());
-	peak_data.setBinY(peak_data.getPositionY());
-	// Use P1 as the 'beta' parameter, and use the X FWHM as the overall FWHM
-	computeMoffat2D(peak_data, result_max);
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
-	for (epicsUInt32 bin=0; bin<size; bin++) {
-	  bin_x = bin % sizeX;
-	  bin_y = floor(bin/sizeX);
-	  peak_data.setBinX(bin_x);
-	  peak_data.setBinY(bin_y);
-	  computeMoffat2D(peak_data, result);
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
-	}
-      }
+	  peak_status = m_peaks.compute2D(peak_data, peak_type, result);
+	  if (peak_status == m_peaks.e_status::success) {
+	    result = (result*scale_factor);
+	    pData[bin] += static_cast<T>(result);
+	  }
+	} 
     } // end of if (!m_2d)
+
+    } // end of if (!no_peak)
     
   } // end of peak loop
 
@@ -1060,547 +887,6 @@ epicsFloat64 ADSimPeaks::zeroCheck(epicsFloat64 value)
 }
  
 
-/**
- * Implementation of a Gaussian function.
- * 
- * For more information on this see:
- * https://en.wikipedia.org/wiki/Normal_distribution
- * https://en.wikipedia.org/wiki/Gaussian_function
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computeGaussian(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 pos = data.getPositionX();
-  epicsFloat64 fwhm = data.getFWHMX();
-  epicsInt32 bin = data.getBinX();  
-  fwhm = std::max(1.0, fwhm);
-
-  // This uses some class static constant data that has been pre-computed
-  epicsFloat64 sigma = fwhm / s_2s2l2;
-  
-  result = (1.0 / (sigma*s_s2pi)) * exp(-(((bin-pos)*(bin-pos))) / (2.0*(sigma*sigma)));
-
-  return asynSuccess;
-}
-
-/**
- * Implementation of a Cauchy-Lorentz function.
- * 
- * For more information on this see:
- * https://en.wikipedia.org/wiki/Cauchy_distribution
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computeLorentz(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 pos = data.getPositionX();
-  epicsFloat64 fwhm = data.getFWHMX();
-  epicsInt32 bin = data.getBinX();  
-  fwhm = std::max(1.0, fwhm);
-  
-  epicsFloat64 gamma = fwhm / 2.0;
-  result = (1 / (M_PI*gamma)) * ((gamma*gamma) / (((bin-pos)*(bin-pos)) + (gamma*gamma)));
-
-  return asynSuccess;
-}
-
-/**
- * Implementation of the approximation of the Voigt function (known as the Psudo-Voigt).
- * 
- * For more information on this see:
- * https://en.wikipedia.org/wiki/Voigt_profile
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computePseudoVoigt(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  //This implementation assumes the FWHM of the Gaussian and Lorentz is the same. However, we
-  //still use the full approximation for the Pseudo-Voigt total FWHM (fwhm_tot) and use two FWHM parameters
-  //(fwhm_g and fwhm_l), so that this function can easily be modified to use a different Gaussian
-  //and Lorentzian FWHM.
-  
-  epicsFloat64 fwhm_g = data.getFWHMX(); 
-  epicsFloat64 fwhm_l = data.getFWHMX(); 
-  epicsFloat64 eta = 0.0;
-  epicsFloat64 gaussian = 0.0;
-  epicsFloat64 lorentz = 0.0;
-
-  fwhm_g = std::max(1.0, fwhm_g);
-  fwhm_l = std::max(1.0, fwhm_l);
-  
-  computePseudoVoigtEta(fwhm_g, fwhm_l, &eta);
-  computeGaussian(data, gaussian);
-  computeLorentz(data, lorentz);
-
-  result = ((1.0 - eta)*gaussian) + (eta*lorentz);
-
-  return asynSuccess;
-}
-
-/**
- * Implementation of a Laplace function.
- * 
- * For more information on this see:
- * https://en.wikipedia.org/wiki/Laplace_distribution
- *
- * The FWHM can be calculated by determining the height when pos=bin, then taking 1/2 
- * that value and determining the value of 'bin' when the function equals that height, 
- * then doubling the result. Then we can calculate 'b' from our input FWHM.
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computeLaplace(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 pos = data.getPositionX();
-  epicsFloat64 fwhm = data.getFWHMX();
-  epicsInt32 bin = data.getBinX();
-  
-  fwhm = std::max(1.0, fwhm);
-
-  // This uses some class static constant data that has been pre-computed
-  epicsFloat64 b = fwhm / s_2l2;
-  result = (1.0/(2.0*b)) * exp(-((abs(bin - pos))/b));
-
-  return asynSuccess;
-}
-
-
-/**
- * Implementation of a simple isosceles triangle.
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computeTriangle(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 pos = data.getPositionX();
-  epicsFloat64 fwhm = data.getFWHMX();
-  epicsInt32 bin = data.getBinX();  
-
-  fwhm = std::max(1.0, fwhm);
-
-  epicsFloat64 peak = 1.0;
-  epicsFloat64 b = peak/fwhm;
-
-  if (bin <= static_cast<epicsInt32>(pos)) {
-    b = b*1.0;
-  } else {
-    b = b*-1.0;
-  }
-
-  result = peak + b*(bin-pos);
-  result = std::max(0.0, result);
-
-  return asynSuccess;
-}
-
-/**
- * Implementation of a simple square.
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computeSquare(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 pos = data.getPositionX();
-  epicsFloat64 fwhm = data.getFWHMX();
-  epicsInt32 bin = data.getBinX();  
-
-  fwhm = std::max(1.0, fwhm);
-
-  epicsFloat64 peak = 1.0;
-  
-  if ((bin > static_cast<epicsInt32>(pos - fwhm/2.0)) && (bin <= static_cast<epicsInt32>(pos + fwhm/2.0))) {
-    result = peak;
-  } else {
-    result = 0.0;
-  }
-
-  return asynSuccess;
-}
-
-/**
- * Implementation of a Moffat distribution. The Moffat function is determined by 
- * the alpha and beta 'seeing' parameters. We calculate alpha based on the input 
- * FWHM and beta. The beta parameter determins the shape of the function. Large 
- * values of beta (>>1) will cause the distribution to be similar to a gaussian, 
- * and small values (<1) will cause it to look like an exponential.
- *
- * For more information on this see:
- * https://en.wikipedia.org/wiki/Moffat_distribution
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computeMoffat(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 pos = data.getPositionX();
-  epicsFloat64 fwhm = data.getFWHMX();
-  epicsFloat64 beta = data.getParam1();
-  epicsInt32 bin = data.getBinX();  
-
-  fwhm = std::max(1.0, fwhm);
-  beta = zeroCheck(beta);
-
-  epicsFloat64 alpha = fwhm / (2.0 * sqrt(pow(2.0,1.0/beta) - 1));
-  epicsFloat64 alpha2 = alpha*alpha;
-  
-  result = ((beta-1)/(M_PI*alpha2)) * pow((1 + (((bin-pos)*(bin-pos))/alpha2)),-beta);
-
-  return asynSuccess;
-}
-
-
-/**
- * Implementation of a bivariate Gaussian function.
- * 
- * For more information on this see:
- * https://en.wikipedia.org/wiki/Normal_distribution
- * https://en.wikipedia.org/wiki/Gaussian_function
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computeGaussian2D(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 x_pos = data.getPositionX();
-  epicsFloat64 y_pos = data.getPositionY();
-  epicsFloat64 x_fwhm = data.getFWHMX();
-  epicsFloat64 y_fwhm = data.getFWHMY();
-  epicsFloat64 rho = data.getCorrelation();
-  epicsInt32 x_bin = data.getBinX();
-  epicsInt32 y_bin = data.getBinY();
-  
-  x_fwhm = std::max(1.0, x_fwhm);
-  y_fwhm = std::max(1.0, y_fwhm);
-  rho = std::min(1.0, std::max(-1.0, rho));
-
-  // This uses some class static constant data that has been pre-computed
-  epicsFloat64 x_sig = x_fwhm / s_2s2l2;
-  epicsFloat64 y_sig = y_fwhm / s_2s2l2;
-
-  epicsFloat64 xy_amp = 1.0 / (2.0 * M_PI * x_sig * y_sig * sqrt(1-(rho*rho)));
-  epicsFloat64 xy_factor = -1 / (2*(1-(rho*rho)));
-  epicsFloat64 xy_calc1 = (x_bin-x_pos)/x_sig;
-  epicsFloat64 xy_calc2 = (y_bin-y_pos)/y_sig;
-    
-  result = xy_amp * exp(xy_factor*(xy_calc1*xy_calc1 - 2*rho*xy_calc1*xy_calc2 + xy_calc2*xy_calc2));
-
-  return asynSuccess;
-}
-
-/**
- * Implementation of a bivariate Cauchy-Lorentz function.
- * 
- * For more information on this see:
- * https://en.wikipedia.org/wiki/Cauchy_distribution
- * 
- * I can only find bivariate Cauchy functions that are symmetric in X and Y so we just use
- * a single FWHM (taken as the X FWHM). 
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computeLorentz2D(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 x_pos = data.getPositionX();
-  epicsFloat64 y_pos = data.getPositionY(); 
-  epicsFloat64 fwhm = data.getFWHMX();
-  epicsInt32 x_bin = data.getBinX();
-  epicsInt32 y_bin = data.getBinY();
-
-  fwhm = std::max(1.0, fwhm);
-  
-  epicsFloat64 gamma = fwhm / 2.0;
-  epicsFloat64 xy_calc1 = x_bin-x_pos;
-  epicsFloat64 xy_calc2 = y_bin-y_pos;
-  
-  result = (1 / (2*M_PI)) * (gamma / pow(((xy_calc1*xy_calc1) + (xy_calc2*xy_calc2) + gamma*gamma),1.5));
-
-  return asynSuccess;
-}
-
-/**
- * Implementation of the approximation of the bivariate Voigt function 
- * (known as the Psudo-Voigt). The Guassian part of the function 
- * can be defined with different FWHM parameters in X and Y, and with
- * a skewed shape, but for the purposes of this approximation we
- * assume it has zero skew and an average is taken 
- * as the Lorenztian FWHM component.
- * 
- * For more information on this see:
- * https://en.wikipedia.org/wiki/Voigt_profile
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computePseudoVoigt2D(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 x_fwhm = data.getFWHMX();
-  epicsFloat64 y_fwhm = data.getFWHMY();   
-  epicsFloat64 fwhm_av = 0.0;
-  epicsFloat64 fwhm_g = 0.0;
-  epicsFloat64 fwhm_l = 0.0;
-  epicsFloat64 eta = 0.0;
-  epicsFloat64 gaussian = 0.0;
-  epicsFloat64 lorentz = 0.0;
-  
-  x_fwhm = std::max(1.0, x_fwhm);
-  y_fwhm = std::max(1.0, y_fwhm);
-  
-  fwhm_av = (x_fwhm+y_fwhm)/2.0;
-  fwhm_g = fwhm_av;
-  fwhm_l = fwhm_av;
-
-  computePseudoVoigtEta(fwhm_g, fwhm_l, &eta);
-  computeGaussian2D(data, gaussian);
-  computeLorentz2D(data, lorentz);
-
-  result = ((1.0 - eta)*gaussian) + (eta*lorentz);
-
-  return asynSuccess;
-}
-
-asynStatus ADSimPeaks::computePseudoVoigtEta(epicsFloat64 fwhm_g, epicsFloat64 fwhm_l, epicsFloat64 *eta)
-{
-  epicsFloat64 fwhm_sum = 0.0;
-  epicsFloat64 fwhm_tot = 0.0;
-
-  // This uses some class static constant data that has been pre-computed
-  fwhm_sum = pow(fwhm_g,5) + (s_pv_p1*pow(fwhm_g,4)*fwhm_l) + (s_pv_p2*pow(fwhm_g,3)*pow(fwhm_l,2)) +
-            (s_pv_p3*pow(fwhm_g,2)*pow(fwhm_l,3)) + (s_pv_p4*fwhm_g*pow(fwhm_l,4)) + pow(fwhm_l,5);
-  fwhm_tot = pow(fwhm_sum,0.2);
-  
-  *eta = ((s_pv_e1*(fwhm_l/fwhm_tot)) - (s_pv_e2*pow((fwhm_l/fwhm_tot),2)) + (s_pv_e3*pow((fwhm_l/fwhm_tot),3)));
-  
-  return asynSuccess;
-}
-
-/**
- * Implementation of a bivariate Laplace function.
- * 
- * For more information on this see:
- * https://en.wikipedia.org/wiki/Multivariate_Laplace_distribution
- *
- * We calculate the 'b' scale factor in the same way as for ADSimPeaks::computeLaplace,
- * then we calculate the standard deviation. The actual bivariate Laplace uses a modified
- * Bessle function of the second kind, see:
- * https://en.wikipedia.org/wiki/Bessel_function#Modified_Bessel_functions:_I%CE%B1,_K%CE%B1
- * but to avoid having to calculate this we just assume a decaying expoential, which seems 
- * like a good approximation. 
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computeLaplace2D(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 x_pos = data.getPositionX();
-  epicsFloat64 y_pos = data.getPositionY();
-  epicsFloat64 x_fwhm = data.getFWHMX();
-  epicsFloat64 y_fwhm = data.getFWHMY();
-  epicsFloat64 rho = data.getCorrelation();
-  epicsInt32 x_bin = data.getBinX();
-  epicsInt32 y_bin = data.getBinY();
-    
-  x_fwhm = std::max(1.0, x_fwhm);
-  y_fwhm = std::max(1.0, y_fwhm);
-  rho = std::min(1.0, std::max(-1.0, rho));
-
-  // This uses some class static constant data that has been pre-computed
-  // Standard deviation is sqrt(2) * the scale factor b
-  epicsFloat64 x_sig = sqrt(2.0) * (x_fwhm / s_2l2);
-  epicsFloat64 y_sig = sqrt(2.0) * (y_fwhm / s_2l2);
-
-  epicsFloat64 xy_amp = 1.0 / (M_PI * x_sig * y_sig * sqrt(1-(rho*rho)));
-  epicsFloat64 xy_calc1 = (x_bin-x_pos)/x_sig;
-  epicsFloat64 xy_calc2 = (y_bin-y_pos)/y_sig;
-    
-  result = xy_amp * exp(-sqrt((2.0*(xy_calc1*xy_calc1 - 2*rho*xy_calc1*xy_calc2 + xy_calc2*xy_calc2))/(1-(rho*rho))));
-
-  return asynSuccess;
-}
-
-/**
- * Implementation of a simple pyramid.
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computePyramid2D(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 x_pos = data.getPositionX();
-  epicsFloat64 y_pos = data.getPositionY();
-  epicsFloat64 x_fwhm = data.getFWHMX();
-  epicsFloat64 y_fwhm = data.getFWHMY();
-  epicsInt32 x_bin = data.getBinX();
-  epicsInt32 y_bin = data.getBinY();
-    
-  x_fwhm = std::max(1.0, x_fwhm);
-  y_fwhm = std::max(1.0, y_fwhm);
-
-  epicsFloat64 peak = 1.0;
-  epicsFloat64 b = peak/x_fwhm;
-  epicsFloat64 c = peak/y_fwhm;
-  if ((x_bin <= static_cast<epicsInt32>(x_pos)) && (y_bin <= static_cast<epicsInt32>(y_pos))) {
-    b = b*1.0;
-    c = c*1.0;
-  } else if ((x_bin <= static_cast<epicsInt32>(x_pos)) && (y_bin > static_cast<epicsInt32>(y_pos))) {
-    b = b*1.0;
-    c = c*-1.0;
-  } else if ((x_bin > static_cast<epicsInt32>(x_pos)) && (y_bin <= static_cast<epicsInt32>(y_pos))) {
-    b = b*-1.0;
-    c = c*1.0;
-  } else {
-    b = b*-1.0;
-    c = c*-1.0;
-  }
-  
-  result = peak + b*(x_bin-x_pos) + c*(y_bin-y_pos);
-  result = std::max(0.0, result);
-  
-  return asynSuccess;
-}
-
-/**
- * Implementation of an eliptical cone.
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computeCone2D(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 x_pos = data.getPositionX();
-  epicsFloat64 y_pos = data.getPositionY();
-  epicsFloat64 x_fwhm = data.getFWHMX();
-  epicsFloat64 y_fwhm = data.getFWHMY();
-  epicsInt32 x_bin = data.getBinX();
-  epicsInt32 y_bin = data.getBinY();
-  
-  x_fwhm = std::max(1.0, x_fwhm);
-  y_fwhm = std::max(1.0, y_fwhm);
-
-  epicsFloat64 peak = x_fwhm + y_fwhm;
-
-  epicsFloat64 height = 0.0;
-  // Find the distance of this point from the center of the ellipse
-  epicsFloat64 d = sqrt((x_bin-x_pos)*(x_bin-x_pos) + (y_bin-y_pos)*(y_bin-y_pos));
-  if (d != 0) {
-    // Find the angle of this point
-    epicsFloat64 theta = asin((y_bin-y_pos)/d);
-    // Find the radius of the ellipse defining the edge of the cone at this same angle 
-    epicsFloat64 r = (x_fwhm * y_fwhm) / sqrt(pow(y_fwhm*cos(theta),2) + pow(x_fwhm*sin(theta),2));
-    // Find the height of the cone inside the ellipse
-    height = (r-d) * (peak/r);
-  } else {
-    height = peak;
-  }
-  
-  result = height;
-  result = std::max(0.0, result);
-  
-  return asynSuccess;
-}
-
-/**
- * Implementation of a cube peak, which looks like a square from the top.
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computeSquare2D(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 x_pos = data.getPositionX();
-  epicsFloat64 y_pos = data.getPositionY();
-  epicsFloat64 x_fwhm = data.getFWHMX();
-  epicsFloat64 y_fwhm = data.getFWHMY();
-  epicsInt32 x_bin = data.getBinX();
-  epicsInt32 y_bin = data.getBinY();
-  
-  x_fwhm = std::max(1.0, x_fwhm);
-  y_fwhm = std::max(1.0, y_fwhm);
-
-  epicsFloat64 peak = 1.0;
-
-  if ((x_bin >  static_cast<epicsInt32>(x_pos - x_fwhm/2.0)) &&
-      (x_bin <= static_cast<epicsInt32>(x_pos + x_fwhm/2.0)) &&
-      (y_bin >  static_cast<epicsInt32>(y_pos - y_fwhm/2.0)) &&
-      (y_bin <= static_cast<epicsInt32>(y_pos + y_fwhm/2.0))) {
-    result = peak;
-  } else {
-    result = 0.0;
-  }
-  
-  return asynSuccess;
-}
-
-/**
- * Implementation of a Moffat distribution. The Moffat function is determined by the alpha 
- * and beta 'seeing' parameters. We calculate alpha based on the input FWHM and beta. The 
- * beta parameter determins the shape of the function. Large values of beta (>>1) will cause 
- * the distribution to be similar to a gaussian, and small values (<1) will cause it to look 
- * like an exponential.
- *
- * For more information on this see:
- * https://en.wikipedia.org/wiki/Moffat_distribution
- *
- * /arg /c ADSimPeaksData object defining the peak position, shape and the array bins (x,y)
- * /arg /c result This will be used to return the result of the calculation
- *
- * /return asynStatus
- */
-asynStatus ADSimPeaks::computeMoffat2D(const ADSimPeaksData& data, epicsFloat64 &result)
-{
-  epicsFloat64 x_pos = data.getPositionX();
-  epicsFloat64 y_pos = data.getPositionY();
-  epicsFloat64 fwhm = data.getFWHMX();
-  epicsFloat64 beta = data.getParam1();
-  epicsInt32 x_bin = data.getBinX();
-  epicsInt32 y_bin = data.getBinY();
-  
-  fwhm = std::max(1.0, fwhm);
-  beta = zeroCheck(beta);
-
-  epicsFloat64 alpha = fwhm / (2.0 * sqrt(pow(2.0,1.0/beta) - 1));
-  epicsFloat64 alpha2 = alpha*alpha;
-
-  result = ((beta-1)/(M_PI*alpha2))
-    * pow((1 + ((((x_bin-x_pos)*(x_bin-x_pos)) + ((y_bin-y_pos)*(y_bin-y_pos)))/alpha2)),-beta);
-  
-  return asynSuccess;
-}
 
 
 

@@ -14,6 +14,7 @@ DBD += ADSimPeaks.dbd
 
 ADSimPeaks_SRCS += ADSimPeaks.cpp
 ADSimPeaks_SRCS += ADSimPeaksData.cpp
+ADSimPeaks_SRCS += ADSimPeaksPeak.cpp
 
 ADSimPeaks_LIBS += $(EPICS_BASE_IOC_LIBS)
 
