@@ -14,6 +14,11 @@
  * The noise type can be either uniformly distributed or distributed
  * according to a Gaussian profile. 
  *
+ * The width of the peaks can be restricted by setting hard lower and upper
+ * boundaries, which may be useful in some cases (such as saving CPU). 
+ * Some types of peaks have wide tails and so this may be of limited use 
+ * for those. However, using a boundary is one way of simulating an edge. 
+ *
  * There are other classes defined in other files that are used by ADSimPeaks:
  * ADSimPeaksPeak - contains the implementation of the various peak shapes
  * ADSimPeaksData - container class to hold peak information
