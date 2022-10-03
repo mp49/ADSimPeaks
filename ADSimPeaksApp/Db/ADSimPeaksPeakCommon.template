@@ -9,7 +9,7 @@
 #################################################################
 
 # ///
-# /// Peak max
+# /// Peak amplitude
 # ///
 record(ao, "$(P)$(R)P$(PEAK)Amp") {
   field(DESC, "Peak Amplitude")
