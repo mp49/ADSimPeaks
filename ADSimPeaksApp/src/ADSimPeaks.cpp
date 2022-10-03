@@ -112,6 +112,10 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
   createParam(ADSPPeakCorParamString, asynParamFloat64, &ADSPPeakCorParam);
   createParam(ADSPPeakP1ParamString, asynParamFloat64, &ADSPPeakP1Param);
   createParam(ADSPPeakP2ParamString, asynParamFloat64, &ADSPPeakP2Param);
+  createParam(ADSPPeakMinXParamString, asynParamInt32, &ADSPPeakMinXParam);
+  createParam(ADSPPeakMinYParamString, asynParamInt32, &ADSPPeakMinYParam);
+  createParam(ADSPPeakMaxXParamString, asynParamInt32, &ADSPPeakMaxXParam);
+  createParam(ADSPPeakMaxYParamString, asynParamInt32, &ADSPPeakMaxYParam);
   createParam(ADSPBGC0XParamString, asynParamFloat64, &ADSPBGC0XParam);
   createParam(ADSPBGC1XParamString, asynParamFloat64, &ADSPBGC1XParam);
   createParam(ADSPBGC2XParamString, asynParamFloat64, &ADSPBGC2XParam);
@@ -166,6 +170,10 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
     paramStatus = ((setDoubleParam(ADSPPeakCorParam, 1.0) == asynSuccess) && paramStatus);
     paramStatus = ((setDoubleParam(ADSPPeakP1Param, 0.0) == asynSuccess) && paramStatus);
     paramStatus = ((setDoubleParam(ADSPPeakP2Param, 0.0) == asynSuccess) && paramStatus);
+    paramStatus = ((setIntegerParam(ADSPPeakMinXParam, 0) == asynSuccess) && paramStatus);
+    paramStatus = ((setIntegerParam(ADSPPeakMinYParam, 0) == asynSuccess) && paramStatus);
+    paramStatus = ((setIntegerParam(ADSPPeakMaxXParam, 0) == asynSuccess) && paramStatus);
+    paramStatus = ((setIntegerParam(ADSPPeakMaxYParam, 0) == asynSuccess) && paramStatus);
     callParamCallbacks(peak);
   }
   //Background Params X
@@ -279,13 +287,20 @@ asynStatus ADSimPeaks::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (value != currentYSize) {
       m_needNewArray = true;
     }
+  } else if (function == ADSPPeakMinXParam) {
+    value = std::max(0, std::min(value, static_cast<int32_t>(m_maxSizeX-1)));
+  } else if (function == ADSPPeakMinYParam) {
+    value = std::max(0, std::min(value, static_cast<int32_t>(m_maxSizeY-1)));
+  } else if (function == ADSPPeakMaxXParam) {
+    value = std::max(0, std::min(value, static_cast<int32_t>(m_maxSizeX-1)));
+  } else if (function == ADSPPeakMaxYParam) {
+    value = std::max(0, std::min(value, static_cast<int32_t>(m_maxSizeX-1)));
   } else if (function == NDDataType) {
     m_needNewArray = true;  
   } else if (function == ADNumImages) {
     value = std::max(1, value);
   }
   
-
   if (status != asynSuccess) {
     callParamCallbacks();
     return asynError;
@@ -464,6 +479,14 @@ void ADSimPeaks::report(FILE *fp, int details)
       fprintf(fp, "   param 1: %f\n", floatParam);
       getDoubleParam(i, ADSPPeakP2Param, &floatParam);
       fprintf(fp, "   param 2: %f\n", floatParam);
+      getIntegerParam(i, ADSPPeakMinXParam, &intParam);
+      fprintf(fp, "   min X: %d\n", intParam);
+      getIntegerParam(i, ADSPPeakMinYParam, &intParam);
+      fprintf(fp, "   min Y: %d\n", intParam);
+      getIntegerParam(i, ADSPPeakMaxXParam, &intParam);
+      fprintf(fp, "   max X: %d\n", intParam);
+      getIntegerParam(i, ADSPPeakMaxYParam, &intParam);
+      fprintf(fp, "   max Y: %d\n", intParam);
     } // end of peak loop
   } // end of if (details > 0)
 
@@ -686,7 +709,12 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   epicsInt32 sizeX = 0;
   epicsInt32 sizeY = 0;
   epicsInt32 peak_type = 0;
+  epicsInt32 intParam = 0.0;
   epicsFloat64 floatParam = 0.0;
+  epicsUInt32 minX = 0;
+  epicsUInt32 minY = 0;
+  epicsUInt32 maxX = 0;
+  epicsUInt32 maxY = 0;
   epicsFloat64 result = 0.0;
   epicsFloat64 result_max = 0.0;
   epicsFloat64 scale_factor = 0.0;
@@ -780,42 +808,60 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 
     if (!no_peak) {
     
-    // Get the peak parameters and initialize our peak data object
-    peak_data.clear();
-    getDoubleParam(peak, ADSPPeakPosXParam, &floatParam);
-    peak_data.setPositionX(floatParam);
-    getDoubleParam(peak, ADSPPeakPosYParam, &floatParam);
-    peak_data.setPositionY(floatParam);
-    getDoubleParam(peak, ADSPPeakFWHMXParam, &floatParam);
-    peak_data.setFWHMX(floatParam);    
-    getDoubleParam(peak, ADSPPeakFWHMYParam, &floatParam);
-    peak_data.setFWHMY(floatParam);    
-    getDoubleParam(peak, ADSPPeakAmpParam, &floatParam);
-    peak_data.setAmplitude(floatParam);
-    getDoubleParam(peak, ADSPPeakCorParam, &floatParam);
-    peak_data.setCorrelation(floatParam);
-    getDoubleParam(peak, ADSPPeakP1Param, &floatParam);
-    peak_data.setParam1(floatParam);
-    getDoubleParam(peak, ADSPPeakP2Param, &floatParam);
-    peak_data.setParam2(floatParam);
-    
-    if (!m_2d) {
-      // Compute 1D peak data
-      peak_data.setBinX(peak_data.getPositionX());	
-      peak_status = m_peaks.compute1D(peak_data, peak_type, result_max);
-      if (peak_status == m_peaks.e_status::success) {
-	scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
+      // Get the peak parameters and initialize our peak data object
+      peak_data.clear();
+      getDoubleParam(peak, ADSPPeakPosXParam, &floatParam);
+      peak_data.setPositionX(floatParam);
+      getDoubleParam(peak, ADSPPeakPosYParam, &floatParam);
+      peak_data.setPositionY(floatParam);
+      getDoubleParam(peak, ADSPPeakFWHMXParam, &floatParam);
+      peak_data.setFWHMX(floatParam);    
+      getDoubleParam(peak, ADSPPeakFWHMYParam, &floatParam);
+      peak_data.setFWHMY(floatParam);    
+      getDoubleParam(peak, ADSPPeakAmpParam, &floatParam);
+      peak_data.setAmplitude(floatParam);
+      getDoubleParam(peak, ADSPPeakCorParam, &floatParam);
+      peak_data.setCorrelation(floatParam);
+      getDoubleParam(peak, ADSPPeakP1Param, &floatParam);
+      peak_data.setParam1(floatParam);
+      getDoubleParam(peak, ADSPPeakP2Param, &floatParam);
+      peak_data.setParam2(floatParam);
+
+      // Read the peak min and max boundaries (and convert to unsigned ints)
+      getIntegerParam(ADSPPeakMinXParam, &intParam);
+      minX = static_cast<epicsUInt32>(intParam);
+      getIntegerParam(ADSPPeakMinYParam, &intParam);
+      minY = static_cast<epicsUInt32>(intParam);
+      getIntegerParam(ADSPPeakMaxXParam, &intParam);
+      maxX = static_cast<epicsUInt32>(intParam);
+      getIntegerParam(ADSPPeakMaxYParam, &intParam);
+      maxY = static_cast<epicsUInt32>(intParam);
+      if (maxX == 0) {
+	maxX = sizeX;
       }
-      for (epicsUInt32 bin=0; bin<size; bin++) {
-	peak_data.setBinX(bin);
-	peak_status = m_peaks.compute1D(peak_data, peak_type, result);
+      if (maxY == 0) {
+	maxY = sizeY;
+      }
+      
+      if (!m_2d) {
+	// Compute 1D peak data
+	peak_data.setBinX(peak_data.getPositionX());	
+	peak_status = m_peaks.compute1D(peak_data, peak_type, result_max);
 	if (peak_status == m_peaks.e_status::success) {
-	  result = (result*scale_factor);
-	  pData[bin] += static_cast<T>(result);
+	  scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	}
-      }
-    } else {
-      // Compute 2D peak data
+	for (epicsUInt32 bin=0; bin<size; bin++) {
+	  if ((bin >= minX) && (bin <= maxX)) {
+	    peak_data.setBinX(bin);
+	    peak_status = m_peaks.compute1D(peak_data, peak_type, result);
+	    if (peak_status == m_peaks.e_status::success) {
+	      result = (result*scale_factor);
+	      pData[bin] += static_cast<T>(result);
+	    }
+	  }
+	}
+      } else {
+	// Compute 2D peak data
 	peak_data.setBinX(peak_data.getPositionX());
 	peak_data.setBinY(peak_data.getPositionY());
 	peak_status = m_peaks.compute2D(peak_data, peak_type, result_max);
@@ -825,20 +871,22 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  bin_x = bin % sizeX;
 	  bin_y = floor(bin/sizeX);
-	  peak_data.setBinX(bin_x);
-	  peak_data.setBinY(bin_y);
-	  peak_status = m_peaks.compute2D(peak_data, peak_type, result);
-	  if (peak_status == m_peaks.e_status::success) {
-	    result = (result*scale_factor);
-	    pData[bin] += static_cast<T>(result);
+	  if ((bin_x >= minX) && (bin_x <= maxX) && (bin_y >= minY) && (bin_y <= maxY)) {
+	    peak_data.setBinX(bin_x);
+	    peak_data.setBinY(bin_y);
+	    peak_status = m_peaks.compute2D(peak_data, peak_type, result);
+	    if (peak_status == m_peaks.e_status::success) {
+	      result = (result*scale_factor);
+	      pData[bin] += static_cast<T>(result);
+	    }
 	  }
 	} 
-    } // end of if (!m_2d)
-
+      } // end of if (!m_2d)
+      
     } // end of if (!no_peak)
     
   } // end of peak loop
-
+  
   //Generate noise
   getIntegerParam(ADSPNoiseTypeParam, &noise_type);
   getDoubleParam(ADSPNoiseLevelParam, &noise_level);

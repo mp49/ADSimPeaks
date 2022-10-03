@@ -44,4 +44,39 @@ record(ai, "$(P)$(R)P$(PEAK)FWHM$(XY)_RBV") {
   field(PREC, "3")	
 }
 
+# ///
+# /// $(XY) Peak lower bin boundary (0=disabled)
+# ///
+record(longout, "$(P)$(R)P$(PEAK)Min$(XY)") {
+  field(DESC, "$(XY) Peak Min")
+  field(PINI, "YES")	       
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_MIN$(XY)")
+  field(VAL, "0")
+  info(autosaveFields, "VAL")
+}
+record(longin, "$(P)$(R)P$(PEAK)Min$(XY)_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_MIN$(XY)")
+  field(SCAN, "I/O Intr")	
+}
+
+# ///
+# /// $(XY) Peak upper bin boundary (0=disabled)
+# ///
+record(longout, "$(P)$(R)P$(PEAK)Max$(XY)") {
+  field(DESC, "$(XY) Peak Max")
+  field(PINI, "YES")	       
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_MAX$(XY)")
+  field(VAL, "0")
+  info(autosaveFields, "VAL")
+}
+record(longin, "$(P)$(R)P$(PEAK)Max$(XY)_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn($(PORT),$(PEAK),$(TIMEOUT))ADSP_PEAK_MAX$(XY)")
+  field(SCAN, "I/O Intr")	
+}
+
+
 

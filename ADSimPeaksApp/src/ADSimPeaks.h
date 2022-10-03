@@ -41,6 +41,10 @@
 #define ADSPPeakCorParamString     "ADSP_PEAK_COR"
 #define ADSPPeakP1ParamString      "ADSP_PEAK_P1"
 #define ADSPPeakP2ParamString      "ADSP_PEAK_P2"
+#define ADSPPeakMinXParamString    "ADSP_PEAK_MINX"
+#define ADSPPeakMinYParamString    "ADSP_PEAK_MINY"
+#define ADSPPeakMaxXParamString    "ADSP_PEAK_MAXX"
+#define ADSPPeakMaxYParamString    "ADSP_PEAK_MAXY"
 
 // Background Polynomial Coefficients
 // X
@@ -92,6 +96,10 @@ private:
   int ADSPPeakCorParam;
   int ADSPPeakP1Param;
   int ADSPPeakP2Param;
+  int ADSPPeakMinXParam;
+  int ADSPPeakMinYParam;
+  int ADSPPeakMaxXParam;
+  int ADSPPeakMaxYParam;
   int ADSPBGC0XParam;
   int ADSPBGC1XParam;
   int ADSPBGC2XParam;
