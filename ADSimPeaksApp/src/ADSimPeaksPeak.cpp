@@ -13,6 +13,7 @@
  * 5) Voigt (implemented as a psudo-Voigt, which is an approximation)
  * 6) Laplace
  * 7) Moffat
+ * 8) Smooth Step
  *
  * Supported 2D peak shapes are:
  * 1) Square
@@ -23,6 +24,7 @@
  * 6) Voigt (implemented as a psudo-Voigt, which is an approximation)
  * 7) Laplace
  * 8) Moffat
+ * 9) Smooth Step
  *
  * \author Matt Pearson 
  * \date Aug 31st, 2022 
