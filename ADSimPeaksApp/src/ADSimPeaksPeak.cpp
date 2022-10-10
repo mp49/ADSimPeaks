@@ -79,6 +79,8 @@ ADSimPeaksPeak::e_status ADSimPeaksPeak::compute1D(const ADSimPeaksData &data, e
     return computeLaplace(data, result);
   } else if (type == static_cast<epicsUInt32>(e_type_1d::moffat)) {
     return computeMoffat(data, result);
+  } else if (type == static_cast<epicsUInt32>(e_type_1d::smoothstep)) {
+    return computeSmoothStep(data, result);
   }
   
   return e_status::error;
@@ -100,6 +102,8 @@ std::string ADSimPeaksPeak::getType1DName(e_type_1d type)
     return "Laplace";
   } else if (type == e_type_1d::moffat) {
     return "Moffat";
+  } else if (type == e_type_1d::smoothstep) {
+    return "SmoothStep";
   } 
 
   return "None";   
@@ -123,6 +127,8 @@ ADSimPeaksPeak::e_status ADSimPeaksPeak::compute2D(const ADSimPeaksData &data, e
     return computeLaplace2D(data, result);
   } else if (type == static_cast<epicsUInt32>(e_type_2d::moffat)) {
     return computeMoffat2D(data, result);
+  } else if (type == static_cast<epicsUInt32>(e_type_2d::smoothstep)) {
+    return computeSmoothStep2D(data, result);
   }
     
   return e_status::error;
@@ -146,7 +152,9 @@ std::string ADSimPeaksPeak::getType2DName(e_type_2d type)
     return "Laplace";
   } else if (type == e_type_2d::moffat) {
     return "Moffat";
-  }
+  } else if (type == e_type_2d::smoothstep) {
+    return "SmoothStep";
+  } 
   
   return "None";   
 }
@@ -360,6 +368,36 @@ ADSimPeaksPeak::e_status ADSimPeaksPeak::computeMoffat(const ADSimPeaksData& dat
   epicsFloat64 alpha2 = alpha*alpha;
   
   result = ((beta-1)/(M_PI*alpha2)) * pow((1 + (((bin-pos)*(bin-pos))/alpha2)),-beta);
+
+  return e_status::success;
+}
+
+/**
+ * Implementation of a smooth step function.
+ *
+ * This is not really a peak function, but is useful for creating step functions.
+ * The peak center is the center of the step distribution. The FWHM is used
+ * for the width of the step.
+ * 
+ * For more information on this see:
+ * https://en.wikipedia.org/wiki/Smoothstep
+ *
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
+ * /arg /c result This will be used to return the result of the calculation
+ *
+ * /return ADSimPeaksPeak::e_status
+ */
+ADSimPeaksPeak::e_status ADSimPeaksPeak::computeSmoothStep(const ADSimPeaksData& data, epicsFloat64 &result)
+{
+  epicsFloat64 pos = data.getPositionX();
+  epicsFloat64 fwhm = data.getFWHMX();
+  epicsInt32 bin = data.getBinX();  
+
+  fwhm = std::max(1.0, fwhm);
+
+  epicsFloat64 low_edge = pos - fwhm/2.0;
+  result = std::max(0.0, std::min((bin-low_edge)/fwhm, 1.0));
+  result = 6*pow(result,5) - 15*pow(result,4) + 10*pow(result,3);
 
   return e_status::success;
 }
@@ -662,7 +700,7 @@ ADSimPeaksPeak::e_status ADSimPeaksPeak::computeSquare2D(const ADSimPeaksData& d
 }
 
 /**
- * Implementation of a Moffat distribution. The Moffat function is determined by the alpha 
+ * Implementation of a bivariate Moffat distribution. The Moffat function is determined by the alpha 
  * and beta 'seeing' parameters. We calculate alpha based on the input FWHM and beta. The 
  * beta parameter determins the shape of the function. Large values of beta (>>1) will cause 
  * the distribution to be similar to a gaussian, and small values (<1) will cause it to look 
@@ -694,6 +732,43 @@ ADSimPeaksPeak::e_status ADSimPeaksPeak::computeMoffat2D(const ADSimPeaksData& d
   result = ((beta-1)/(M_PI*alpha2))
     * pow((1 + ((((x_bin-x_pos)*(x_bin-x_pos)) + ((y_bin-y_pos)*(y_bin-y_pos)))/alpha2)),-beta);
   
+  return e_status::success;
+}
+
+/**
+ * Implementation of a bivariate smooth step function.
+ *
+ * This is not really a peak function, but is useful for creating step functions.
+ * The peak center is the center of the step distribution. The FWHM is used
+ * for the width of the step.
+ * 
+ * For more information on this see:
+ * https://en.wikipedia.org/wiki/Smoothstep
+ *
+ * /arg /c ADSimPeaksData object defining the peak position, shape and the array bin
+ * /arg /c result This will be used to return the result of the calculation
+ *
+ * /return ADSimPeaksPeak::e_status
+ */
+ADSimPeaksPeak::e_status ADSimPeaksPeak::computeSmoothStep2D(const ADSimPeaksData& data, epicsFloat64 &result)
+{
+  epicsFloat64 x_pos = data.getPositionX();
+  epicsFloat64 y_pos = data.getPositionY();
+  epicsFloat64 x_fwhm = data.getFWHMX();
+  epicsFloat64 y_fwhm = data.getFWHMY();
+  epicsInt32 x_bin = data.getBinX();
+  epicsInt32 y_bin = data.getBinY();
+
+  x_fwhm = std::max(1.0, x_fwhm);
+  y_fwhm = std::max(1.0, y_fwhm);
+
+  epicsFloat64 x_low_edge = x_pos - x_fwhm/2.0;
+  epicsFloat64 y_low_edge = y_pos - y_fwhm/2.0;
+  
+  result = (std::max(0.0, std::min((x_bin-x_low_edge)/x_fwhm, 1.0)) +
+	    std::max(0.0, std::min((y_bin-y_low_edge)/y_fwhm, 1.0))) / 2.0;
+  result = 6*pow(result,5) - 15*pow(result,4) + 10*pow(result,3);
+
   return e_status::success;
 }
 

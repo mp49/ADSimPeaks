@@ -38,7 +38,8 @@ class ADSimPeaksPeak
   e_status computeLaplace(const ADSimPeaksData &data, epicsFloat64 &result); 
   e_status computeTriangle(const ADSimPeaksData &data, epicsFloat64 &result); 
   e_status computeSquare(const ADSimPeaksData &data, epicsFloat64 &result); 
-  e_status computeMoffat(const ADSimPeaksData &data, epicsFloat64 &result); 
+  e_status computeMoffat(const ADSimPeaksData &data, epicsFloat64 &result);
+  e_status computeSmoothStep(const ADSimPeaksData &data, epicsFloat64 &result); 
 
   enum class e_type_1d {
     none,
@@ -48,7 +49,8 @@ class ADSimPeaksPeak
     lorentz,
     pseudovoigt,
     laplace,
-    moffat
+    moffat,
+    smoothstep 
   };
   
   // 2D Profiles
@@ -60,7 +62,8 @@ class ADSimPeaksPeak
   e_status computePyramid2D(const ADSimPeaksData &data, epicsFloat64 &result); 
   e_status computeCone2D(const ADSimPeaksData &data, epicsFloat64 &result); 
   e_status computeSquare2D(const ADSimPeaksData &data, epicsFloat64 &result); 
-  e_status computeMoffat2D(const ADSimPeaksData &data, epicsFloat64 &result); 
+  e_status computeMoffat2D(const ADSimPeaksData &data, epicsFloat64 &result);
+  e_status computeSmoothStep2D(const ADSimPeaksData &data, epicsFloat64 &result); 
 
   enum class e_type_2d {
     none,
@@ -71,7 +74,8 @@ class ADSimPeaksPeak
     lorentz,
     pseudovoigt,
     laplace,
-    moffat
+    moffat,
+    smoothstep  
   };
   
   // Read the string names of the supported peak types

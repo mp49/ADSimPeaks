@@ -911,7 +911,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
     } // end of if (!no_peak)
     
   } // end of peak loop
-  
+	  
   //Generate noise
   getIntegerParam(ADSPNoiseTypeParam, &noise_type);
   getDoubleParam(ADSPNoiseLevelParam, &noise_level);

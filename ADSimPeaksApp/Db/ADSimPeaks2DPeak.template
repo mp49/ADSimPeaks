@@ -33,6 +33,8 @@ record(mbbo, "$(P)$(R)P$(PEAK)Type") {
   field(SVVL, "7")
   field(EIST, "Moffat")
   field(EIVL, "8")
+  field(NIST, "SmoothStep")
+  field(NIVL, "9")
   info(autosaveFields, "VAL")
 }
 record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
@@ -56,6 +58,8 @@ record(mbbi, "$(P)$(R)P$(PEAK)Type_RBV") {
   field(SVVL, "7")
   field(EIST, "Moffat")
   field(EIVL, "8")
+  field(NIST, "SmoothStep")
+  field(NIVL, "9")
   field(SCAN, "I/O Intr")
 }
 
