@@ -121,11 +121,13 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
   createParam(ADSPPeakMinYParamString, asynParamInt32, &ADSPPeakMinYParam);
   createParam(ADSPPeakMaxXParamString, asynParamInt32, &ADSPPeakMaxXParam);
   createParam(ADSPPeakMaxYParamString, asynParamInt32, &ADSPPeakMaxYParam);
+  createParam(ADSPBGTypeXParamString, asynParamInt32, &ADSPBGTypeXParam);
   createParam(ADSPBGC0XParamString, asynParamFloat64, &ADSPBGC0XParam);
   createParam(ADSPBGC1XParamString, asynParamFloat64, &ADSPBGC1XParam);
   createParam(ADSPBGC2XParamString, asynParamFloat64, &ADSPBGC2XParam);
   createParam(ADSPBGC3XParamString, asynParamFloat64, &ADSPBGC3XParam);
   createParam(ADSPBGSHXParamString, asynParamFloat64, &ADSPBGSHXParam);
+  createParam(ADSPBGTypeYParamString, asynParamInt32, &ADSPBGTypeYParam);
   createParam(ADSPBGC0YParamString, asynParamFloat64, &ADSPBGC0YParam);
   createParam(ADSPBGC1YParamString, asynParamFloat64, &ADSPBGC1YParam);
   createParam(ADSPBGC2YParamString, asynParamFloat64, &ADSPBGC2YParam);
@@ -182,12 +184,14 @@ ADSimPeaks::ADSimPeaks(const char *portName, int maxSizeX, int maxSizeY, int max
     callParamCallbacks(peak);
   }
   //Background Params X
+  paramStatus = ((setIntegerParam(ADSPBGTypeXParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPBGC0XParam, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPBGC1XParam, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPBGC2XParam, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPBGC3XParam, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPBGSHXParam, 0.0) == asynSuccess) && paramStatus);
   //Background Params Y
+  paramStatus = ((setIntegerParam(ADSPBGTypeYParam, 0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPBGC0YParam, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPBGC1YParam, 0.0) == asynSuccess) && paramStatus);
   paramStatus = ((setDoubleParam(ADSPBGC2YParam, 0.0) == asynSuccess) && paramStatus);
@@ -430,6 +434,8 @@ void ADSimPeaks::report(FILE *fp, int details)
     getDoubleParam(ADSPNoiseUpperParam, &floatParam);
     fprintf(fp, "  noise upper: %f\n", floatParam);
 
+    getIntegerParam(ADSPBGTypeXParam, &intParam);
+    fprintf(fp, "  background X type: %d\n", intParam);
     getDoubleParam(ADSPBGC0XParam, &floatParam);
     fprintf(fp, "  background X coefficient 0: %f\n", floatParam);
     getDoubleParam(ADSPBGC1XParam, &floatParam);
@@ -441,6 +447,8 @@ void ADSimPeaks::report(FILE *fp, int details)
     getDoubleParam(ADSPBGSHXParam, &floatParam);
     fprintf(fp, "  background X shift: %f\n", floatParam);
     if (m_2d) {
+      getIntegerParam(ADSPBGTypeYParam, &intParam);
+      fprintf(fp, "  background Y type: %d\n", intParam);
       getDoubleParam(ADSPBGC0YParam, &floatParam);
       fprintf(fp, "  background Y coefficient 0: %f\n", floatParam);
       getDoubleParam(ADSPBGC1YParam, &floatParam);
@@ -723,11 +731,13 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   epicsFloat64 result = 0.0;
   epicsFloat64 result_max = 0.0;
   epicsFloat64 scale_factor = 0.0;
+  epicsInt32 bg_typex = 0;
   epicsFloat64 bg_c0x = 0.0;
   epicsFloat64 bg_c1x = 0.0;
   epicsFloat64 bg_c2x = 0.0;
   epicsFloat64 bg_c3x = 0.0;
   epicsFloat64 bg_shx = 0.0;
+  epicsInt32 bg_typey = 0;
   epicsFloat64 bg_c0y = 0.0;
   epicsFloat64 bg_c1y = 0.0;
   epicsFloat64 bg_c2y = 0.0;
@@ -769,12 +779,14 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   }
 
   //Calculate the background profile
+  getIntegerParam(ADSPBGTypeXParam, &bg_typex);
   getDoubleParam(ADSPBGC0XParam, &bg_c0x);
   getDoubleParam(ADSPBGC1XParam, &bg_c1x);
   getDoubleParam(ADSPBGC2XParam, &bg_c2x);
   getDoubleParam(ADSPBGC3XParam, &bg_c3x);
   getDoubleParam(ADSPBGSHXParam, &bg_shx);
   if (m_2d) {
+    getIntegerParam(ADSPBGTypeYParam, &bg_typey);
     getDoubleParam(ADSPBGC0YParam, &bg_c0y);
     getDoubleParam(ADSPBGC1YParam, &bg_c1y);
     getDoubleParam(ADSPBGC2YParam, &bg_c2y);
@@ -787,10 +799,18 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   epicsUInt32 bin_y = 0;
   for (epicsInt32 bin=0; bin<static_cast<epicsInt32>(size); bin++) {
     bin_x = bin % sizeX;
-    bg_x = bg_c0x + (bin_x-bg_shx)*bg_c1x + pow((bin_x-bg_shx),2)*bg_c2x + pow((bin_x-bg_shx),3)*bg_c3x;
+    if (bg_typex == static_cast<epicsUInt32>(e_bg_type::polynomial)) {
+      bg_x = bg_c0x + (bin_x-bg_shx)*bg_c1x + pow((bin_x-bg_shx),2)*bg_c2x + pow((bin_x-bg_shx),3)*bg_c3x;
+    } else if (bg_typex == static_cast<epicsUInt32>(e_bg_type::exponential)) {
+      bg_x = bg_c0x + bg_c1x*(pow(exp(1.0), (bin_x-bg_shx)*bg_c2x));
+    }
     if (m_2d) {
       bin_y = floor(bin/sizeX);
-      bg_y = bg_c0y + (bin_y-bg_shy)*bg_c1y + pow((bin_y-bg_shy),2)*bg_c2y + pow((bin_y-bg_shy),3)*bg_c3y;
+      if (bg_typey == static_cast<epicsUInt32>(e_bg_type::polynomial)) {
+	bg_y = bg_c0y + (bin_y-bg_shy)*bg_c1y + pow((bin_y-bg_shy),2)*bg_c2y + pow((bin_y-bg_shy),3)*bg_c3y;
+      } else if (bg_typey == static_cast<epicsUInt32>(e_bg_type::exponential)) {
+	bg_y  = bg_c0y + bg_c1y*(pow(exp(1.0), (bin_y-bg_shy)*bg_c2y));
+      }
     }
     pData[bin] += bg_x + bg_y;
   }

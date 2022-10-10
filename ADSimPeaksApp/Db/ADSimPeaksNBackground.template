@@ -10,7 +10,35 @@
 ############################################################
 
 # ///
-# /// $(XY) Background Polynomial Constant Term
+# /// $(XY) Background Type
+# ///
+record(mbbo, "$(P)$(R)BGType$(XY)") {
+  field(PINI, "YES")
+  field(DTYP, "asynInt32")
+  field(OUT,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_TYPE$(XY)")
+  field(VAL,  "0")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Polynomial")
+  field(ONVL, "1")
+  field(TWST, "Exponential")
+  field(TWVL, "2")
+  info(autosaveFields, "VAL")
+}
+record(mbbi, "$(P)$(R)BGType$(XY)_RBV") {
+  field(DTYP, "asynInt32")
+  field(INP,  "@asyn($(PORT),$(ADDR),$(TIMEOUT))ADSP_BG_TYPE$(XY)")
+  field(ZRST, "None")
+  field(ZRVL, "0")
+  field(ONST, "Polynomial")
+  field(ONVL, "1")
+  field(TWST, "Exponential")
+  field(TWVL, "2")
+  field(SCAN, "I/O Intr")
+}
+
+# ///
+# /// $(XY) Background Constant Offset Term
 # ///
 record(ao, "$(P)$(R)BGC0$(XY)") {
   field(DESC, "$(XY) Background Coef 0")
@@ -28,7 +56,7 @@ record(ai, "$(P)$(R)BGC0$(XY)_RBV") {
 }
 
 # ///
-# /// $(XY) Background Polynomial Slope
+# /// $(XY) Background Slope Coefficient
 # ///
 record(ao, "$(P)$(R)BGC1$(XY)") {
   field(DESC, "$(XY) Background Coef 1")
@@ -46,7 +74,10 @@ record(ai, "$(P)$(R)BGC1$(XY)_RBV") {
 }
 
 # ///
-# /// $(XY) Background Polynomial 2nd Order Coefficients
+# /// $(XY) Background 2nd Order Coefficient
+# ///
+# /// For the exponential background this is the exponent.
+# /// So this can be set negative to model an exponential decay.
 # ///
 record(ao, "$(P)$(R)BGC2$(XY)") {
   field(DESC, "$(XY) Background Coef 2")
@@ -64,7 +95,7 @@ record(ai, "$(P)$(R)BGC2$(XY)_RBV") {
 }
 
 # ///
-# /// $(XY) Background Polynomial 3rd Order Coefficients
+# /// $(XY) Background 3rd Order Coefficient (polynomial only)
 # ///
 record(ao, "$(P)$(R)BGC3$(XY)") {
   field(DESC, "$(XY) Background Coef 3")
@@ -82,7 +113,7 @@ record(ai, "$(P)$(R)BGC3$(XY)_RBV") {
 }
 
 # ///
-# /// $(XY) Background Polynomial Shift 
+# /// $(XY) Background Shift 
 # ///
 record(ao, "$(P)$(R)BGSH$(XY)") {
   field(DESC, "$(XY) Background Shift")

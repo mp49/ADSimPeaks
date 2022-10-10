@@ -46,14 +46,16 @@
 #define ADSPPeakMaxXParamString    "ADSP_PEAK_MAXX"
 #define ADSPPeakMaxYParamString    "ADSP_PEAK_MAXY"
 
-// Background Polynomial Coefficients
+// Background Coefficients
 // X
+#define ADSPBGTypeXParamString "ADSP_BG_TYPEX"
 #define ADSPBGC0XParamString  "ADSP_BG_C0X"
 #define ADSPBGC1XParamString  "ADSP_BG_C1X"
 #define ADSPBGC2XParamString  "ADSP_BG_C2X"
 #define ADSPBGC3XParamString  "ADSP_BG_C3X"
 #define ADSPBGSHXParamString  "ADSP_BG_SHX"
 // Y
+#define ADSPBGTypeYParamString "ADSP_BG_TYPEY"
 #define ADSPBGC0YParamString  "ADSP_BG_C0Y"
 #define ADSPBGC1YParamString  "ADSP_BG_C1Y"
 #define ADSPBGC2YParamString  "ADSP_BG_C2Y"
@@ -100,6 +102,8 @@ private:
   int ADSPPeakMinYParam;
   int ADSPPeakMaxXParam;
   int ADSPPeakMaxYParam;
+  int ADSPBGTypeXParam;
+  int ADSPBGTypeYParam;
   int ADSPBGC0XParam;
   int ADSPBGC1XParam;
   int ADSPBGC2XParam;
@@ -142,6 +146,16 @@ private:
     none,
     uniform,
     gaussian  
+  };
+
+  /**
+   * The enum for the type of backgroun. This needs to match
+   * the list order presented to the user in the database.
+   */
+  enum class e_bg_type {
+    none,
+    polynomial,
+    exponential  
   };
   
   // Static Data
