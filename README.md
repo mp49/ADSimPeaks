@@ -22,6 +22,27 @@ boundaries, which may be useful in some cases (such as saving CPU).
 
 ## Getting Started
 
+There are two example IOC applications packaged with this module:
+
+* example - 1D ADSimPeaks example
+* example2d - 2D ADSimPeaks example
+
+The IOC applications demonstrate how to instantiate the driver for 1D data or 2D data. 
+
+For 1D data the driver is instantiated in the IOC startup script like:
+```
+# Arguments:
+# 1 - Asyn port name
+# 2 - Maximum size of the NDArray X dimension
+# 3 - Maximum size of the NDArray Y dimension (set to 0 for 1D data)
+# 4 - Maximum number of peaks (which defines the maximum number of Asyn addresses)
+# 5 - Starting data type for the NDArray object (NDDataType_t)
+# 6 - Maximum buffers (0 = default)
+# 7 - 
+#  
+ADSimPeaksConfig(D1.SIM,65536,0,10,3,0,0,0,0)
+```
+
 ## Usage
 
 ## Developer
