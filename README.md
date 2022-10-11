@@ -32,6 +32,8 @@ There are two example IOC applications packaged with this module:
 * example - 1D ADSimPeaks example
 * example2d - 2D ADSimPeaks example
 
+### IOC startup script
+
 The IOC applications demonstrate how to instantiate the driver. The same function is used for both 1D and 2D data, with a 2D driver being setup if the Y dimension is non-zero. 
 
 For 1D data (max size = 65536) the driver is instantiated in the IOC startup script like:
@@ -60,7 +62,9 @@ The example IOC applications also use the areaDetector PVAccess plugin to export
 ```
 NDPvaConfigure(D1.PV1,100,0,D1.SIM,0,"ST99:Det:Det1:PV1:Array",0,0,0)
 ```
-where ```ST99:Det:Det1:PV1:Array``` is the name of the PVAccess channel used to access the NTNDArray object. If you need to use Channel Access instead, then use the ```StdArrays``` plugin instead.
+where ```ST99:Det:Det1:PV1:Array``` is the name of the PVAccess channel used to access the NTNDArray object. If you need to use Channel Access, then use the ```StdArrays``` plugin instead.
+
+### Setting up the database
 
 The example IOC applications show that the database can be built using substitution files. For example, the database for the 1D driver can be built using:
 ```
@@ -101,7 +105,7 @@ There are additional database template files used in the example IOC application
 
 ## Developer
 
-The build has been tested on Red Hat Enterprise Linux 7 and 8 with:
+The build has been tested on Red Hat Enterprise Linux 8 with:
 
 * EPICS base 7.0.6.1
 * Asyn R4-43
@@ -135,5 +139,5 @@ OPEN-SOURCE LICENSE
 
 ## Contact
 
-For general help contact EPICS Tech-Talk mailing list.
+Submit a ticket to the project, or for general help contact the EPICS Tech-Talk mailing list.
 
