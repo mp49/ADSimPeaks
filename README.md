@@ -42,7 +42,8 @@ Supported 2D peak shapes are:
 8) [Moffat](https://en.wikipedia.org/wiki/Moffat_distribution)
 9) [Smooth Step](https://en.wikipedia.org/wiki/Smoothstep)
 
-The are defined by several parameters:
+The peaks are defined by several parameters:
+
 * Center position
 * Full width half maximum (FWHM)
 * Amplitude
@@ -53,7 +54,8 @@ Setting the lower and upper boundaries can be useful in case a hard edge is need
 
 The two following screenshots are an example of the types of plots that can be created by this driver. 
 
-![1D Spectrum with several peaks, polynomial background and noise](./docs/images/complex_1d_plot.PNG)![2D Spectrum with several peaks, constant background and noise](./docs/images/complex_2d_plot.PNG)
+![1D Spectrum with several peaks, polynomial background and noise](./docs/images/complex_1d_plot.PNG)
+![2D Spectrum with several peaks, constant background and noise](./docs/images/complex_2d_plot.PNG)
 
 ## Getting Started
 
