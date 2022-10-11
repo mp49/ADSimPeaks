@@ -6,10 +6,10 @@ and noise in 1D or 2D.
 ## Description
 
 This areaDetector driver can be used to simulate semi-realistic diffraction
-data in 1D and 2D. It can produce a 1D or 2D NDArray object of variable size and 
+data in 1D and 2D. It can produce a 1D or 2D NDArray objects of variable size and 
 of different data types. The data can contain a background profile and any number 
 of peaks of a few different shapes, with the option to add different kinds of 
-noise to the signal.
+noise to the signal. The driver can integrate the data over time for multiple NDArray objects. 
 
 The background type can either be a 3rd order polynomial, so that the shape can be 
 a flat offset, a slope or a curve, or an exponential with a slope and offset. 
