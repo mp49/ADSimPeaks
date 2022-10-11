@@ -27,9 +27,9 @@ There are two example IOC applications packaged with this module:
 * example - 1D ADSimPeaks example
 * example2d - 2D ADSimPeaks example
 
-The IOC applications demonstrate how to instantiate the driver for 1D data or 2D data. 
+The IOC applications demonstrate how to instantiate the driver. The same function is used for both 1D and 2D data, with a 2D driver being setup if the Y dimension is non-zero. 
 
-For 1D data the driver is instantiated in the IOC startup script like:
+For 1D data (max size = 65536) the driver is instantiated in the IOC startup script like:
 ```
 # Arguments:
 # 1 - Asyn port name
@@ -37,11 +37,52 @@ For 1D data the driver is instantiated in the IOC startup script like:
 # 3 - Maximum size of the NDArray Y dimension (set to 0 for 1D data)
 # 4 - Maximum number of peaks (which defines the maximum number of Asyn addresses)
 # 5 - Starting data type for the NDArray object (NDDataType_t)
-# 6 - Maximum buffers (0 = default)
-# 7 - 
-#  
+# 6 - Maximum buffers (0 = unlimited)
+# 7 - Maximum memory (0 = unlimited)
+# 8 - Priority (0 = default)
+# 9 - Stack Size (0 = default)
 ADSimPeaksConfig(D1.SIM,65536,0,10,3,0,0,0,0)
 ```
+
+And for 2D data (1024 x 1024) it would be:
+```
+ADSimPeaksConfig(D1.SIM,1024,1024,10,3,0,0,0,0)
+```
+
+In both the above cases the Asyn port name is ```D1.SIM``` and the data type is UInt16. The ```NDDataType_t``` enum can be found in the areaDetector documentation, however the driver supports changing the data type at runtime.  
+
+The example IOC applications show that the database can be built using substitution files. For example, the database for the 1D driver can be built using:
+```
+file ADSimPeaks.template
+{
+pattern {P, R, PORT, ADDR, TIMEOUT}
+        {ST99:Det, :Det1:, D1.SIM, 0, 1}
+}
+
+file ADSimPeaks1DBackground.template
+{
+pattern {P, R, PORT, ADDR, TIMEOUT}
+        {ST99:Det, :Det1:, D1.SIM, 0, 1}
+}
+
+file ADSimPeaks1DPeak.template
+{
+pattern {P, R, PORT, ADDR, TIMEOUT, PEAK}
+        {ST99:Det, :Det1:, D1.SIM, 0, 1, 0}
+        {ST99:Det, :Det1:, D1.SIM, 0, 1, 1}
+        {ST99:Det, :Det1:, D1.SIM, 0, 1, 2}
+        {ST99:Det, :Det1:, D1.SIM, 0, 1, 3}
+        {ST99:Det, :Det1:, D1.SIM, 0, 1, 4}
+        {ST99:Det, :Det1:, D1.SIM, 0, 1, 5}
+        {ST99:Det, :Det1:, D1.SIM, 0, 1, 6}
+        {ST99:Det, :Det1:, D1.SIM, 0, 1, 7}
+}
+```
+
+There are similar database template files for the 2D case (ADSimPeaks2DBackground.template and ADSimPeaks2DPeak.template). ```ADSimPeaks1DPeak.template``` or ```ADSimPeaks2DPeak.template``` files should be instantiated for each peak that will need to be configured. 
+
+There are additional database template files used in the example IOC applications to deal with autosave status, IOC statistics and adding busy record support. So these applications also require the use of those modules, which are common EPICS modules (see the [Useful Links](#useful-links) section).
+
 
 ## Usage
 
@@ -74,6 +115,9 @@ OPEN-SOURCE LICENSE
 1. [EPICS](https://epics-controls.org/)
 2. [Asyn Module](https://github.com/epics-modules/asyn)
 3. [areaDetector Project](https://github.com/areaDetector)
+4. [busy record](https://github.com/epics-modules/busy)
+5. [IOC statistics](https://github.com/epics-modules/iocStats)
+6. [autosave support](https://github.com/epics-modules/autosave)
 
 ## Contact
 
