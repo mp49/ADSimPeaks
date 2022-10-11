@@ -126,14 +126,15 @@ pattern {P, R, PORT, ADDR, TIMEOUT, PEAK}
 }
 ```
 
-There are similar database template files for the 2D case (ADSimPeaks2DBackground.template and ADSimPeaks2DPeak.template). ```ADSimPeaks1DPeak.template``` or ```ADSimPeaks2DPeak.template``` files should be instantiated for each peak that will need to be configured. 
+There are similar database template files for the 2D case (```ADSimPeaks2DBackground.template``` and ```ADSimPeaks2DPeak.template```). As shown above, the ```ADSimPeaks1DPeak.template``` or ```ADSimPeaks2DPeak.template``` files should be instantiated for each peak that will need to be configured. 
 
-The example database substitution files also demonstrates how to use the database template for the pvaPlugin support. 
+The example database substitution files also demonstrate how to use the database template for the pvaPlugin support. 
 
-There are additional database template files used in the example IOC applications to deal with autosave status and adding busy record support. So these examples also require the use of those modules, which are common EPICS modules (see the [Useful Links](#useful-links) section).
-
+There is an additional database template file used in the example IOC applications to deal with autosave status. In addition, the busy record support is also needed. So these examples also require the use of those modules, which are common EPICS modules (see the [Useful Links](#useful-links) section).
 
 ## Usage
+
+TBD
 
 ## Developer
 
