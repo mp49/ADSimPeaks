@@ -50,7 +50,7 @@ The peaks are defined by several parameters:
 * Lower / upper boundary
 * Two additional general purpose parameters 
 
-Setting the lower and upper boundaries can be useful in case a hard edge is needed or we want to save on CPU cycles (since most of the peak types are continuous functions that stetch out to infinity). The amplitude can be positive or negative, and the center position can be defined outside of the range of the array.
+The amplitude can be positive or negative, and the center position can be defined outside of the range of the array. Setting the lower and upper boundaries can be useful in case a hard edge is needed or we want to save on CPU cycles (since most of the peak types are continuous functions that stetch out to infinity). 
 
 The two following screenshots are an example of the types of plots that can be created by this driver. 
 
