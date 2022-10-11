@@ -16,9 +16,7 @@ example_registerRecordDeviceDriver pdbbase
 
 ADSimPeaksConfig(D1.SIM,65536,0,10,3,0,0,0,0)
 
-NDCodecConfigure(D1.CO1,100,0,D1.SIM,0,0,0,0,0)
-
-NDPvaConfigure(D1.PV1,100,0,D1.CO1,0,"ST99:Det:Det1:PV1:Array",0,0,0)
+NDPvaConfigure(D1.PV1,100,0,D1.SIM,0,"ST99:Det:Det1:PV1:Array",0,0,0)
 
 ###############################################
 

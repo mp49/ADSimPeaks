@@ -21,7 +21,6 @@ example_DBD += NDPluginPva.dbd
 example_DBD += ADSimPeaks.dbd
 example_DBD += busySupport.dbd
 example_DBD += asSupport.dbd
-example_DBD += devIocStats.dbd
 
 example_DBD += PVAServerRegister.dbd
 example_DBD += qsrv.dbd
@@ -33,7 +32,6 @@ example_LIBS += NDPlugin
 example_LIBS += ADSimPeaks
 example_LIBS += busy
 example_LIBS += autosave
-example_LIBS += devIocStats
 
 example_LIBS += qsrv
 example_LIBS += $(EPICS_BASE_PVA_CORE_LIBS)
