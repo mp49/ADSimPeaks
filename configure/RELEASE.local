@@ -1,7 +1,6 @@
 
 ASYN       = /home/controls/common/asyn/main
 ADCORE     = /home/controls/common/adcore/main
-ADSUPPORT  = /home/controls/common/adsupport/main
 
 EPICS_BASE = /home/controls/common/base/main
 
