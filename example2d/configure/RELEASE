@@ -6,7 +6,6 @@ ADSIMPEAKS    = /home/controls/common/adsimpeaks/main
 
 BUSY          = /home/controls/common/busy/main
 AUTOSAVE      = /home/controls/common/autosave/main
-IOCSTATS      = /home/controls/common/ioc-stats/main
 
 EPICS_BASE    = /home/controls/common/base/main
 
