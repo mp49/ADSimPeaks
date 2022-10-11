@@ -90,7 +90,7 @@ ADSimPeaksConfig(D2.SIM,1024,1024,10,3,0,0,0,0)
 
 In both the above cases the data type is UInt16. The ```NDDataType_t``` enum can be found in the areaDetector documentation, however the driver supports changing the data type at runtime.  
 
-The example IOC applications also use the areaDetector PVAccess plugin to export the data over PVAccess for visualization in a client application. This is done like:
+The example IOC applications also use the areaDetector PVAccess plugin to export the data over PVAccess for visualization in a client application. For example:
 ```
 NDPvaConfigure(D1.PV1,100,0,D1.SIM,0,"ST99:Det:Det1:PV1:Array",0,0,0)
 ```
@@ -98,7 +98,7 @@ where ```ST99:Det:Det1:PV1:Array``` is the name of the PVAccess channel used to 
 
 ### Setting up the database
 
-The example IOC applications show that the database can be built using substitution files. For example, the database for the 1D driver can be built using:
+The example IOC applications build the EPICS database using substitution files. For example, the database for the 1D driver can be built using:
 ```
 file ADSimPeaks.template
 {
