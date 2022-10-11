@@ -22,7 +22,8 @@ boundaries, which may be useful in some cases (such as saving CPU).
 
 The two following screenshots are an example of the types of plots that can be created by this driver. 
 
-![1D Spectrum with several peaks, polynomial background and noise](./docs/images/complex_1d_plot.png)
+![1D Spectrum with several peaks, polynomial background and noise](./docs/images/complex_1d_plot.PNG)
+![2D Spectrum with several peaks, constant background and noise](./docs/images/complex_2d_plot.PNG)
 
 ## Getting Started
 
