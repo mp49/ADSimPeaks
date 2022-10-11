@@ -46,10 +46,16 @@ ADSimPeaksConfig(D1.SIM,65536,0,10,3,0,0,0,0)
 
 And for 2D data (1024 x 1024) it would be:
 ```
-ADSimPeaksConfig(D1.SIM,1024,1024,10,3,0,0,0,0)
+ADSimPeaksConfig(D2.SIM,1024,1024,10,3,0,0,0,0)
 ```
 
-In both the above cases the Asyn port name is ```D1.SIM``` and the data type is UInt16. The ```NDDataType_t``` enum can be found in the areaDetector documentation, however the driver supports changing the data type at runtime.  
+In both the above cases the data type is UInt16. The ```NDDataType_t``` enum can be found in the areaDetector documentation, however the driver supports changing the data type at runtime.  
+
+The example IOC applications also use the areaDetector PVAccess plugin to export the data over PVAccess for visualization in a client application. This is done like:
+```
+NDPvaConfigure(D1.PV1,100,0,D1.SIM,0,"ST99:Det:Det1:PV1:Array",0,0,0)
+```
+where ```ST99:Det:Det1:PV1:Array``` is the name of the PVAccess channel used to access the NTNDArray object. If you need to use Channel Access instead, then use the ```StdArrays``` plugin instead.
 
 The example IOC applications show that the database can be built using substitution files. For example, the database for the 1D driver can be built using:
 ```
@@ -81,6 +87,8 @@ pattern {P, R, PORT, ADDR, TIMEOUT, PEAK}
 
 There are similar database template files for the 2D case (ADSimPeaks2DBackground.template and ADSimPeaks2DPeak.template). ```ADSimPeaks1DPeak.template``` or ```ADSimPeaks2DPeak.template``` files should be instantiated for each peak that will need to be configured. 
 
+In addition to the 
+
 There are additional database template files used in the example IOC applications to deal with autosave status, IOC statistics and adding busy record support. So these applications also require the use of those modules, which are common EPICS modules (see the [Useful Links](#useful-links) section).
 
 
@@ -93,6 +101,8 @@ The build has been tested on Red Hat Enterprise Linux 7 and 8 with:
 * EPICS base 7.0.6.1
 * Asyn R4-43
 * areaDetector ADCore R3-11
+
+The bundled example IOC applications require the use of EPICS 7 as they use the QSRV module to export data over PVAccess. However, the ADSimPeaks driver itself should work with EPICS 3.14.12.X and 3.15.X as long as a recent version of Asyn and areaDetector are used.  
 
 The project requires a reasonably modern C++ compiler (C++11 or newer). 
 
