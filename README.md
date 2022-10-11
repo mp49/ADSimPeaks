@@ -17,13 +17,43 @@ a flat offset, a slope or a curve, or an exponential with a slope and offset.
 The noise type can be either uniformly distributed or distributed
 according to a Gaussian profile. 
 
-The width of the peaks can be restricted by setting hard lower and upper
-boundaries, which may be useful in some cases (such as saving CPU). 
+The peaks are mostly modelled using continuous probability distribution functions that 
+are commonly used to fit experimental data, although there are a few simple shapes and 
+a smooth step function. 
+
+Supported 1D peak shapes are:
+1) Square
+2) Triangle
+3) [Gaussian](https://en.wikipedia.org/wiki/Normal_distribution) (normal)
+4) [Lorentzian](https://en.wikipedia.org/wiki/Cauchy_distribution) (also known as Cauchy)
+5) [Voigt](https://en.wikipedia.org/wiki/Voigt_profile) (implemented as a psudo-Voigt)
+6) [Laplace](https://en.wikipedia.org/wiki/Laplace_distribution)
+7) [Moffat](https://en.wikipedia.org/wiki/Moffat_distribution)
+8) [Smooth Step](https://en.wikipedia.org/wiki/Smoothstep)
+
+Supported 2D peak shapes are:
+1) Square
+2) Pyramid
+3) Eliptical Cone
+4) [Gaussian](https://en.wikipedia.org/wiki/Normal_distribution) (normal)
+5) [Lorentzian](https://en.wikipedia.org/wiki/Cauchy_distribution) (also known as Cauchy)
+6) [Voigt](https://en.wikipedia.org/wiki/Voigt_profile) (implemented as a psudo-Voigt)
+7) [Laplace](https://en.wikipedia.org/wiki/Laplace_distribution)
+8) [Moffat](https://en.wikipedia.org/wiki/Moffat_distribution)
+9) [Smooth Step](https://en.wikipedia.org/wiki/Smoothstep)
+
+The are defined by several parameters:
+* Center position
+* Full width half maximum (FWHM)
+* Amplitude
+* Lower / upper boundary
+* Two ddditional general purpose parameters 
+
+Setting the lower and upper boundaries can be useful in case a hard edge is needed or we want to save on CPU cycles (since most of the peak types are continuous functions that stetch out to infinity).
 
 The two following screenshots are an example of the types of plots that can be created by this driver. 
 
-![1D Spectrum with several peaks, polynomial background and noise](./docs/images/complex_1d_plot.PNG)
-![2D Spectrum with several peaks, constant background and noise](./docs/images/complex_2d_plot.PNG)
+![1D Spectrum with several peaks, polynomial background and noise](./docs/images/complex_1d_plot.PNG)![2D Spectrum with several peaks, constant background and noise](./docs/images/complex_2d_plot.PNG)
 
 ## Getting Started
 
