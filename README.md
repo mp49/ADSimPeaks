@@ -20,6 +20,10 @@ according to a Gaussian profile.
 The width of the peaks can be restricted by setting hard lower and upper
 boundaries, which may be useful in some cases (such as saving CPU). 
 
+The two following screenshots are an example of the types of plots that can be created by this driver. 
+
+![1D Spectrum with several peaks, polynomial background and noise](./docs/images/complex_1d_plot.png)
+
 ## Getting Started
 
 There are two example IOC applications packaged with this module:
