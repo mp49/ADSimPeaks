@@ -6,10 +6,10 @@ and noise in 1D or 2D.
 ## Description
 
 This areaDetector driver can be used to simulate semi-realistic diffraction
-data in 1D and 2D. It can produce a 1D or 2D NDArray object of variable size and 
+data in 1D and 2D. It can produce a 1D or 2D NDArray objects of variable size and 
 of different data types. The data can contain a background profile and any number 
 of peaks of a few different shapes, with the option to add different kinds of 
-noise to the signal.
+noise to the signal. The driver can integrate the data over time for multiple NDArray objects. 
 
 The background type can either be a 3rd order polynomial, so that the shape can be 
 a flat offset, a slope or a curve, or an exponential with a slope and offset. 
@@ -17,8 +17,45 @@ a flat offset, a slope or a curve, or an exponential with a slope and offset.
 The noise type can be either uniformly distributed or distributed
 according to a Gaussian profile. 
 
-The width of the peaks can be restricted by setting hard lower and upper
-boundaries, which may be useful in some cases (such as saving CPU). 
+The peaks are mostly modelled using continuous probability distribution functions that 
+are commonly used to fit experimental data, although there are a few simple shapes and 
+a smooth step function. 
+
+Supported 1D peak shapes are:
+1) Square
+2) Triangle
+3) [Gaussian](https://en.wikipedia.org/wiki/Normal_distribution) (normal)
+4) [Lorentzian](https://en.wikipedia.org/wiki/Cauchy_distribution) (also known as Cauchy)
+5) [Voigt](https://en.wikipedia.org/wiki/Voigt_profile) (implemented as a psudo-Voigt)
+6) [Laplace](https://en.wikipedia.org/wiki/Laplace_distribution)
+7) [Moffat](https://en.wikipedia.org/wiki/Moffat_distribution)
+8) [Smooth Step](https://en.wikipedia.org/wiki/Smoothstep)
+
+Supported 2D peak shapes are:
+1) Square
+2) Pyramid
+3) Eliptical Cone
+4) [Gaussian](https://en.wikipedia.org/wiki/Normal_distribution) (normal)
+5) [Lorentzian](https://en.wikipedia.org/wiki/Cauchy_distribution) (also known as Cauchy)
+6) [Voigt](https://en.wikipedia.org/wiki/Voigt_profile) (implemented as a psudo-Voigt)
+7) [Laplace](https://en.wikipedia.org/wiki/Laplace_distribution)
+8) [Moffat](https://en.wikipedia.org/wiki/Moffat_distribution)
+9) [Smooth Step](https://en.wikipedia.org/wiki/Smoothstep)
+
+The peaks are defined by several parameters:
+
+* Center position
+* Full width half maximum (FWHM)
+* Amplitude
+* Lower / upper boundary
+* Two additional general purpose parameters 
+
+The amplitude can be positive or negative, and the center position can be defined outside of the range of the array. Setting the lower and upper boundaries can be useful in case a hard edge is needed or we want to save on CPU cycles (since most of the peak types are continuous functions that stetch out to infinity). 
+
+The two following screenshots are an example of the types of plots that can be created by this driver. 
+
+![1D Spectrum with several peaks, polynomial background and noise](./docs/images/complex_1d_plot.PNG)
+![2D Spectrum with several peaks, constant background and noise](./docs/images/complex_2d_plot.PNG)
 
 ## Getting Started
 
@@ -26,6 +63,8 @@ There are two example IOC applications packaged with this module:
 
 * example - 1D ADSimPeaks example
 * example2d - 2D ADSimPeaks example
+
+### IOC startup script
 
 The IOC applications demonstrate how to instantiate the driver. The same function is used for both 1D and 2D data, with a 2D driver being setup if the Y dimension is non-zero. 
 
@@ -51,13 +90,15 @@ ADSimPeaksConfig(D2.SIM,1024,1024,10,3,0,0,0,0)
 
 In both the above cases the data type is UInt16. The ```NDDataType_t``` enum can be found in the areaDetector documentation, however the driver supports changing the data type at runtime.  
 
-The example IOC applications also use the areaDetector PVAccess plugin to export the data over PVAccess for visualization in a client application. This is done like:
+The example IOC applications also use the areaDetector PVAccess plugin to export the data over PVAccess for visualization in a client application. For example:
 ```
 NDPvaConfigure(D1.PV1,100,0,D1.SIM,0,"ST99:Det:Det1:PV1:Array",0,0,0)
 ```
-where ```ST99:Det:Det1:PV1:Array``` is the name of the PVAccess channel used to access the NTNDArray object. If you need to use Channel Access instead, then use the ```StdArrays``` plugin instead.
+where ```ST99:Det:Det1:PV1:Array``` is the name of the PVAccess channel used to access the NTNDArray object. If you need to use Channel Access, then use the ```StdArrays``` plugin instead.
 
-The example IOC applications show that the database can be built using substitution files. For example, the database for the 1D driver can be built using:
+### Setting up the database
+
+The example IOC applications build the EPICS database using substitution files. For example, the database for the 1D driver can be built using:
 ```
 file ADSimPeaks.template
 {
@@ -85,18 +126,23 @@ pattern {P, R, PORT, ADDR, TIMEOUT, PEAK}
 }
 ```
 
-There are similar database template files for the 2D case (ADSimPeaks2DBackground.template and ADSimPeaks2DPeak.template). ```ADSimPeaks1DPeak.template``` or ```ADSimPeaks2DPeak.template``` files should be instantiated for each peak that will need to be configured. 
+There are similar database template files for the 2D case (```ADSimPeaks2DBackground.template``` and ```ADSimPeaks2DPeak.template```). As shown above, the ```ADSimPeaks1DPeak.template``` or ```ADSimPeaks2DPeak.template``` files should be instantiated for each peak that will need to be configured. 
 
-The example database substitution files also demonstrates how to use the database template for the pvaPlugin support. 
+The example database substitution files also demonstrate how to use the database template for the pvaPlugin support. 
 
-There are additional database template files used in the example IOC applications to deal with autosave status and adding busy record support. So these examples also require the use of those modules, which are common EPICS modules (see the [Useful Links](#useful-links) section).
-
+There is an additional database template file used in the example IOC applications to deal with autosave status. In addition, the busy record support is also needed. So these examples also require the use of those modules, which are common EPICS modules (see the [Useful Links](#useful-links) section).
 
 ## Usage
 
+TBD
+
+## Examples
+
+TBD
+
 ## Developer
 
-The build has been tested on Red Hat Enterprise Linux 7 and 8 with:
+The build has been tested on Red Hat Enterprise Linux 8 with:
 
 * EPICS base 7.0.6.1
 * Asyn R4-43
@@ -130,5 +176,5 @@ OPEN-SOURCE LICENSE
 
 ## Contact
 
-For general help contact EPICS Tech-Talk mailing list.
+Submit a ticket to the project, or for general help contact the EPICS Tech-Talk mailing list.
 
