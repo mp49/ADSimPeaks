@@ -8,8 +8,8 @@
  * of peaks of a few different shapes, with the option to add different kinds of 
  * noise to the signal.
  *
- * The background is defined as a 3rd order polynomial so that the shape
- * can be a flat offset, a slope or a curve.
+ * The background type can either be a 3rd order polynomial, so that the shape can be 
+ * a flat offset, a slope or a curve, or an exponential with a slope and offset. 
  *
  * The noise type can be either uniformly distributed or distributed
  * according to a Gaussian profile. 
@@ -645,6 +645,10 @@ void ADSimPeaks::ADSimPeaksTask(void)
 	m_acquiring = false;
 	setIntegerParam(ADStatus, ADStatusIdle);
 	setStringParam(ADStatusMessage, "Simulation Idle");
+        callParamCallbacks();
+        setIntegerParam(ADAcquire, 0);
+        asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+		    "%s completed simulation.\n", functionName.c_str());
       } else {
 	//Wait for a stop event
 	this->unlock();
