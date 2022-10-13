@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>Peak $(PEAK) Settings</name>
+  <width>600</width>
+  <grid_step_x>5</grid_step_x>
+  <grid_step_y>5</grid_step_y>
+  <widget type="label" version="2.0.0">
+    <name>Label</name>
+    <text>Peak $(PEAK) Settings - $(P)$(R)</text>
+    <x>20</x>
+    <y>10</y>
+    <width>565</width>
+    <height>30</height>
+    <font>
+      <font name="Header 1" family="Liberation Sans" style="BOLD" size="22.0">
+      </font>
+    </font>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>Peak $(PEAK)</name>
+    <x>5</x>
+    <y>50</y>
+    <width>325</width>
+    <height>515</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <widget type="combo" version="2.0.0">
+      <name>Combo Box_12</name>
+      <pv_name>$(P)$(R)P$(PEAK)Type</pv_name>
+      <x>137</x>
+      <y>12</y>
+      <width>135</width>
+      <height>25</height>
+      <background_color>
+        <color name="Write_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_43</name>
+      <text>X Position</text>
+      <x>7</x>
+      <y>72</y>
+      <width>125</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_4</name>
+      <pv_name>$(P)$(R)P$(PEAK)PosX</pv_name>
+      <x>137</x>
+      <y>72</y>
+      <width>65</width>
+      <height>25</height>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_5</name>
+      <pv_name>$(P)$(R)P$(PEAK)FWHMX</pv_name>
+      <x>137</x>
+      <y>132</y>
+      <width>65</width>
+      <height>25</height>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_6</name>
+      <pv_name>$(P)$(R)P$(PEAK)Amp</pv_name>
+      <x>137</x>
+      <y>192</y>
+      <width>65</width>
+      <height>25</height>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_68</name>
+      <text>Type</text>
+      <x>12</x>
+      <y>12</y>
+      <width>120</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_93</name>
+      <pv_name>$(P)$(R)P$(PEAK)Type_RBV</pv_name>
+      <x>137</x>
+      <y>42</y>
+      <width>135</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_94</name>
+      <pv_name>$(P)$(R)P$(PEAK)PosX_RBV</pv_name>
+      <x>207</x>
+      <y>72</y>
+      <width>65</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_95</name>
+      <pv_name>$(P)$(R)P$(PEAK)FWHMX_RBV</pv_name>
+      <x>207</x>
+      <y>132</y>
+      <width>65</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_96</name>
+      <pv_name>$(P)$(R)P$(PEAK)Amp_RBV</pv_name>
+      <x>207</x>
+      <y>192</y>
+      <width>65</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_47</name>
+      <pv_name>$(P)$(R)P$(PEAK)PosY</pv_name>
+      <x>137</x>
+      <y>102</y>
+      <width>65</width>
+      <height>25</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_138</name>
+      <pv_name>$(P)$(R)P$(PEAK)PosY_RBV</pv_name>
+      <x>207</x>
+      <y>102</y>
+      <width>65</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_48</name>
+      <pv_name>$(P)$(R)P$(PEAK)FWHMY</pv_name>
+      <x>137</x>
+      <y>162</y>
+      <width>65</width>
+      <height>25</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_139</name>
+      <pv_name>$(P)$(R)P$(PEAK)FWHMY_RBV</pv_name>
+      <x>207</x>
+      <y>162</y>
+      <width>65</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_82</name>
+      <pv_name>$(P)$(R)P$(PEAK)Cor</pv_name>
+      <x>137</x>
+      <y>222</y>
+      <width>65</width>
+      <height>25</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_174</name>
+      <pv_name>$(P)$(R)P$(PEAK)Cor_RBV</pv_name>
+      <x>207</x>
+      <y>222</y>
+      <width>65</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_46</name>
+      <text>Y Position</text>
+      <x>7</x>
+      <y>102</y>
+      <width>125</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_47</name>
+      <text>X FWHM</text>
+      <x>7</x>
+      <y>132</y>
+      <width>125</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_49</name>
+      <text>Y FWHM</text>
+      <x>7</x>
+      <y>162</y>
+      <width>125</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_54</name>
+      <text>Amplitude</text>
+      <x>7</x>
+      <y>192</y>
+      <width>125</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_57</name>
+      <text>Correlation</text>
+      <x>7</x>
+      <y>222</y>
+      <width>125</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_71</name>
+      <pv_name>$(P)$(R)P$(PEAK)P1</pv_name>
+      <x>137</x>
+      <y>252</y>
+      <width>65</width>
+      <height>25</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_162</name>
+      <pv_name>$(P)$(R)P$(PEAK)P1_RBV</pv_name>
+      <x>207</x>
+      <y>252</y>
+      <width>65</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_58</name>
+      <text>Param 1</text>
+      <x>7</x>
+      <y>252</y>
+      <width>125</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_90</name>
+      <pv_name>$(P)$(R)P$(PEAK)P2</pv_name>
+      <x>137</x>
+      <y>282</y>
+      <width>65</width>
+      <height>25</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_182</name>
+      <pv_name>$(P)$(R)P$(PEAK)P2_RBV</pv_name>
+      <x>207</x>
+      <y>282</y>
+      <width>65</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_59</name>
+      <text>Param 2</text>
+      <x>7</x>
+      <y>282</y>
+      <width>125</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_106</name>
+      <pv_name>$(P)$(R)P$(PEAK)MinX</pv_name>
+      <x>137</x>
+      <y>312</y>
+      <width>65</width>
+      <height>25</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_198</name>
+      <pv_name>$(P)$(R)P$(PEAK)MinX_RBV</pv_name>
+      <x>207</x>
+      <y>312</y>
+      <width>65</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_60</name>
+      <text>X Lower Boundary</text>
+      <x>7</x>
+      <y>312</y>
+      <width>125</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_114</name>
+      <pv_name>$(P)$(R)P$(PEAK)MaxX</pv_name>
+      <x>137</x>
+      <y>342</y>
+      <width>65</width>
+      <height>25</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_206</name>
+      <pv_name>$(P)$(R)P$(PEAK)MaxX_RBV</pv_name>
+      <x>207</x>
+      <y>342</y>
+      <width>65</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_61</name>
+      <text>X Upper Boundary</text>
+      <x>7</x>
+      <y>342</y>
+      <width>125</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_122</name>
+      <pv_name>$(P)$(R)P$(PEAK)MinY</pv_name>
+      <x>137</x>
+      <y>372</y>
+      <width>65</width>
+      <height>25</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_214</name>
+      <pv_name>$(P)$(R)P$(PEAK)MinY_RBV</pv_name>
+      <x>207</x>
+      <y>372</y>
+      <width>65</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_62</name>
+      <text>Y Lower Boundary</text>
+      <x>7</x>
+      <y>372</y>
+      <width>125</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_130</name>
+      <pv_name>$(P)$(R)P$(PEAK)MaxY</pv_name>
+      <x>137</x>
+      <y>402</y>
+      <width>65</width>
+      <height>25</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_222</name>
+      <pv_name>$(P)$(R)P$(PEAK)MaxY_RBV</pv_name>
+      <x>207</x>
+      <y>402</y>
+      <width>65</width>
+      <height>25</height>
+      <vertical_alignment>1</vertical_alignment>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_63</name>
+      <text>Y Upper Boundary</text>
+      <x>7</x>
+      <y>402</y>
+      <width>125</width>
+      <height>25</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+  </widget>
+</display>
