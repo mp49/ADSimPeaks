@@ -1,0 +1,18 @@
+variables:
+  GIT_STRATEGY: clone
+
+stages:          # List of stages for jobs, and their order of execution
+  - build
+
+build-job:       # This job runs in the build stage, which runs first.
+  stage: build
+  script:
+    - echo "Compiling the code..."
+    - echo "ASYN=`pwd`/../asyn" >> configure/RELEASE.local
+    - echo "ADCORE=`pwd`/../adcore" >> configure/RELEASE.local
+    - echo "EPICS_BASE=`pwd`/../base" >> configure/RELEASE.local
+    - make
+    - echo "Compile complete."
+  artifacts:
+    untracked: true
+    expire_in: 10 mins
