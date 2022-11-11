@@ -142,6 +142,8 @@ The driver makes use of a few standard records inherited from ```ADBase.template
 | AcquirePeriod | This is used to define a delay between the generation of each simulation NDArray. Set this to zero to run as fast as possible. |
 | SizeX | This is the size of the next NDArray in the X dimension |
 | SizeY | This is the size of the next NDArray in the Y dimension (2D Only) |
+| DataType | This is the data type of the next NDArray (UInt8, UInt32, Float64, etc.) |
+| ImageMode | This controls how the driver operates. 'Single' means only one NDArray is generated. 'Multiple' means that only a particular number of NDArrays will be generated (as defined by $(P)$(R)NumImages), and 'Continuous' means it will run until $(P)$(R)Acquire is set to 0. The 'Multiple' acqusition can also be aborted by setting $(P)$(R)Acquire to 0. |
 
 ## Examples
 
