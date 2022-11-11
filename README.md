@@ -180,7 +180,7 @@ These records are specific to 1D peaks and background profile:
 | $(P)$(R)$(PEAK)BGSHX <br> $(P)$(R)$(PEAK)BGSHX_RBV | Background shift (horizontal shift). |
 
 
-These records are specific to 1D peaks and background profile:
+These records are specific to 2D peaks and background profile:
 
 | Record Name | Description |
 | ------ | ------ |
