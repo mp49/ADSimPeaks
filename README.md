@@ -134,7 +134,14 @@ There is an additional database template file used in the example IOC applicatio
 
 ## Usage
 
-TBD
+The driver makes use of a few standard records inherited from ```ADBase.template```:
+
+| Record Name | Description |
+| ------ | ------ |
+| $(P)$(R)Acquire | Start (1) or Stop (0) the simulation |
+| AcquirePeriod | This is used to define a delay between the generation of each simulation NDArray. Set this to zero to run as fast as possible. |
+| SizeX | This is the size of the next NDArray in the X dimension |
+| SizeY | This is the size of the next NDArray in the Y dimension (2D Only) |
 
 ## Examples
 
