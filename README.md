@@ -160,12 +160,30 @@ A few additional records are specific to this driver (for both 1D and 2D):
 | $(P)$(R)NoiseLower <br> $(P)$(R)NoiseLower_RBV | Set the lower noise clamp value. |
 | $(P)$(R)NoiseUpper <br> $(P)$(R)NoiseUpper_RBV | Set the upper noise clamp value. |
 
-These records are specific to 1D peaks:
+These records are specific to 1D peaks and background profile:
 
 | Record Name | Description |
 | ------ | ------ |
 | $(P)$(R)$(PEAK)Type <br> $(P)$(R)$(PEAK)Type_RBV | Configure the type of peak (Guassian, Lorentz, etc.) |
 | $(P)$(R)$(PEAK)Amp <br> $(P)$(R)$(PEAK)Amp_RBV | Set the peak amplitude. |
+| $(P)$(R)$(PEAK)PosX <br> $(P)$(R)$(PEAK)PosX_RBV | Set the peak position. |
+| $(P)$(R)$(PEAK)FWHMX <br> $(P)$(R)$(PEAK)FWHMX_RBV | Set the peak FWHM (full width half max). |
+| $(P)$(R)$(PEAK)MinX <br> $(P)$(R)$(PEAK)MinX_RBV | Set the peak lower boundary. No data will be calculated for this peak for bins less than MinX. |
+| $(P)$(R)$(PEAK)MaxX <br> $(P)$(R)$(PEAK)MaxX_RBV | Set the peak upper boundary. No data will be calculated for this peak for bins greater than MaxX. |
+| $(P)$(R)$(PEAK)P1 <br> $(P)$(R)$(PEAK)P1_RBV | Additional parameter required for some peak types (optional for most peak types). For 1D peaks this is only used for the Moffat peak and is used for the 'beta' parameter. |
+| $(P)$(R)$(PEAK)P2 <br> $(P)$(R)$(PEAK)P2_RBV | Additional spare parameter. Currently not used. |
+| $(P)$(R)$(PEAK)BGTypeX <br> $(P)$(R)$(PEAK)BGTypeX_RBV | Set the background type ('None', 'Polynomial' or 'Exponential' ) |
+| $(P)$(R)$(PEAK)BGC0X <br> $(P)$(R)$(PEAK)BGC0X_RBV | Background constant offset (height). |
+| $(P)$(R)$(PEAK)BGC1X <br> $(P)$(R)$(PEAK)BGC1X_RBV | Background slope coefficient. |
+| $(P)$(R)$(PEAK)BGC2X <br> $(P)$(R)$(PEAK)BGC2X_RBV | Background 2nd order coefficient (for polynomial) or the exponent for the exponential (set to negative for model an exponential decay). |
+| $(P)$(R)$(PEAK)BGC3X <br> $(P)$(R)$(PEAK)BGC3X_RBV | Background 3rd order coefficient (polynomial only). |
+| $(P)$(R)$(PEAK)BGSHX <br> $(P)$(R)$(PEAK)BGSHX_RBV | Background shift (horizontal shift). |
+
+
+
+
+
+
 
 
 
