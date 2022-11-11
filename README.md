@@ -139,7 +139,7 @@ The driver makes use of a few standard records inherited from ```ADBase.template
 | Record Name | Read/Write/1D/2D | Description |
 | ------ | ------ | ------ |
 | $(P)$(R)Acquire | Read/Write/1D/2D | Start (1) or Stop (0) the simulation |
-| $(P)$(R)AcquirePeriod | Read/Write/1D/2D | This is used to define a delay between the generation of each simulation NDArray. Set this to zero to run as fast as possible. |
+| $(P)$(R)AcquirePeriod <br> $(P)$(R)AcquirePeriod_RBV | Read/Write/1D/2D | This is used to define a delay between the generation of each simulation NDArray. Set this to zero to run as fast as possible. |
 | $(P)$(R)SizeX | Read/Write/1D/2D | This is the size of the next NDArray in the X dimension |
 | $(P)$(R)SizeY | Read/Write/2D | This is the size of the next NDArray in the Y dimension (2D Only) |
 | $(P)$(R)DataType | Read/Write/1D/2D | This is the data type of the next NDArray (UInt8, UInt32, Float64, etc.) |
