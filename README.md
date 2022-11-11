@@ -134,17 +134,46 @@ There is an additional database template file used in the example IOC applicatio
 
 ## Usage
 
-The driver makes use of a few standard records inherited from ```ADBase.template```.
+The driver makes use of a few standard records inherited from ```ADBase.template```:
 
-| Record Name | Read/Write/1D/2D | Description |
-| ------ | ------ | ------ |
-| $(P)$(R)Acquire | Read/Write/1D/2D | Start (1) or Stop (0) the simulation |
-| $(P)$(R)AcquirePeriod <br> $(P)$(R)AcquirePeriod_RBV | Read/Write/1D/2D | This is used to define a delay between the generation of each simulation NDArray. Set this to zero to run as fast as possible. |
-| $(P)$(R)SizeX | Read/Write/1D/2D | This is the size of the next NDArray in the X dimension |
-| $(P)$(R)SizeY | Read/Write/2D | This is the size of the next NDArray in the Y dimension (2D Only) |
-| $(P)$(R)DataType | Read/Write/1D/2D | This is the data type of the next NDArray (UInt8, UInt32, Float64, etc.) |
-| $(P)$(R)ImageMode | Read/Write/1D/2D | This controls how the driver operates. 'Single' means only one NDArray is generated. 'Multiple' means that only a particular number of NDArrays will be generated (as defined by $(P)$(R)NumImages), and 'Continuous' means it will run until $(P)$(R)Acquire is set to 0. The 'Multiple' acquisition can also be aborted by setting $(P)$(R)Acquire to 0. |
-| $(P)$(R)NumImages | Read/Write/1D/2D | Used to define the number of NDArrays to generate when $(P)$(R)ImageMode is set to 'Multiple' |
+| Record Name | Description |
+| ------ | ------ |
+| $(P)$(R)Acquire | Start (1) or Stop (0) the simulation |
+| $(P)$(R)AcquirePeriod <br> $(P)$(R)AcquirePeriod_RBV | This is used to define a delay between the generation of each simulation NDArray. Set this to zero to run as fast as possible. |
+| $(P)$(R)SizeX <br> $(P)$(R)SizeX_RBV | This is the size of the next NDArray in the X dimension |
+| $(P)$(R)SizeY <br> $(P)$(R)SizeY_RBV | This is the size of the next NDArray in the Y dimension (2D Only) |
+| $(P)$(R)DataType <br> $(P)$(R)DataType_RBV | This is the data type of the next NDArray (UInt8, UInt32, Float64, etc.) |
+| $(P)$(R)ImageMode <br> $(P)$(R)ImageMode_RBV | This controls how the driver operates. 'Single' means only one NDArray is generated. 'Multiple' means that only a particular number of NDArrays will be generated (as defined by $(P)$(R)NumImages), and 'Continuous' means it will run until $(P)$(R)Acquire is set to 0. The 'Multiple' acquisition can also be aborted by setting $(P)$(R)Acquire to 0. |
+| $(P)$(R)NumImages <br> $(P)$(R)NumImages_RBV | Used to define the number of NDArrays to generate when $(P)$(R)ImageMode is set to 'Multiple' |
+| $(P)$(R)DetectorState_RBV | The status of the simulation (Idle, Acquire, Aborted, etc.) |
+| $(P)$(R)StatusMessage_RBV | The status message from the simulation driver |
+
+A few additional records are specific to this driver (for both 1D and 2D):
+
+| Record Name | Description |
+| ------ | ------ |
+| $(P)$(R)ElapsedTime | The elapsed time (in seconds) since the simulation started. |
+| $(P)$(R)Integrate <br> $(P)$(R)Integrate_RBV | Controls if the simulated NDArray data is integrated or not. |
+| $(P)$(R)NoiseType <br> $(P)$(R)NoiseType_RBV | Set the simulated noise ('None', 'Uniform' or 'Gaussian') |
+| $(P)$(R)NoiseLevel <br> $(P)$(R)NoiseLevel_RBV | Set the noise level. For 'Uniform' mode, this is the range of the noise. For 'Gaussian' noise this is the standard deviation of the noise distribution. |
+| $(P)$(R)NoiseClamp <br> $(P)$(R)NoiseClamp_RBV | Enable or disable a noise clamp (lower or upper bound). |
+| $(P)$(R)NoiseLower <br> $(P)$(R)NoiseLower_RBV | Set the lower noise clamp value. |
+| $(P)$(R)NoiseUpper <br> $(P)$(R)NoiseUpper_RBV | Set the upper noise clamp value. |
+
+These records are specific to 1D peaks:
+
+| Record Name | Description |
+| ------ | ------ |
+| $(P)$(R)$(PEAK)Type <br> $(P)$(R)$(PEAK)Type_RBV | Configure the type of peak (Guassian, Lorentz, etc.) |
+| $(P)$(R)$(PEAK)Amp <br> $(P)$(R)$(PEAK)Amp_RBV | Set the peak amplitude. |
+
+
+
+
+
+
+
+
 
 
 ## Examples
