@@ -180,19 +180,34 @@ These records are specific to 1D peaks and background profile:
 | $(P)$(R)$(PEAK)BGSHX <br> $(P)$(R)$(PEAK)BGSHX_RBV | Background shift (horizontal shift). |
 
 
+These records are specific to 1D peaks and background profile:
 
-
-
-
-
-
-
-
-
-
-
-
-
+| Record Name | Description |
+| ------ | ------ |
+| $(P)$(R)$(PEAK)Type <br> $(P)$(R)$(PEAK)Type_RBV | Configure the type of peak (Guassian, Lorentz, etc.) |
+| $(P)$(R)$(PEAK)Amp <br> $(P)$(R)$(PEAK)Amp_RBV | Set the peak amplitude. |
+| $(P)$(R)$(PEAK)PosX <br> $(P)$(R)$(PEAK)PosX_RBV | Set the peak X position. |
+| $(P)$(R)$(PEAK)PosY <br> $(P)$(R)$(PEAK)PosY_RBV | Set the peak Y position. |
+| $(P)$(R)$(PEAK)FWHMX <br> $(P)$(R)$(PEAK)FWHMX_RBV | Set the peak FWHM in X (full width half max). |
+| $(P)$(R)$(PEAK)FWHMY <br> $(P)$(R)$(PEAK)FWHMY_RBV | Set the peak FWHM in Y (full width half max). |
+| $(P)$(R)$(PEAK)MinX <br> $(P)$(R)$(PEAK)MinX_RBV | Set the peak lower X boundary. No data will be calculated for this peak for bins less than MinX. |
+| $(P)$(R)$(PEAK)MinY <br> $(P)$(R)$(PEAK)MinY_RBV | Set the peak lower Y boundary. No data will be calculated for this peak for bins less than MinY. |
+| $(P)$(R)$(PEAK)MaxX <br> $(P)$(R)$(PEAK)MaxX_RBV | Set the peak upper X boundary. No data will be calculated for this peak for bins greater than MaxX. |
+| $(P)$(R)$(PEAK)MaxY <br> $(P)$(R)$(PEAK)MaxY_RBV | Set the peak upper Y boundary. No data will be calculated for this peak for bins greater than MaxY. |
+| $(P)$(R)$(PEAK)P1 <br> $(P)$(R)$(PEAK)P1_RBV | Additional parameter required for some peak types (optional for most peak types). For 1D peaks this is only used for the Moffat peak and is used for the 'beta' parameter. |
+| $(P)$(R)$(PEAK)P2 <br> $(P)$(R)$(PEAK)P2_RBV | Additional spare parameter. Currently not used. |
+| $(P)$(R)$(PEAK)BGTypeX <br> $(P)$(R)$(PEAK)BGTypeX_RBV | Set the background type in the X direction ('None', 'Polynomial' or 'Exponential' ) |
+| $(P)$(R)$(PEAK)BGTypeY <br> $(P)$(R)$(PEAK)BGTypeY_RBV | Set the background type in the Y direction ('None', 'Polynomial' or 'Exponential' ) |
+| $(P)$(R)$(PEAK)BGC0X <br> $(P)$(R)$(PEAK)BGC0X_RBV | Background constant X offset (height). |
+| $(P)$(R)$(PEAK)BGC0Y <br> $(P)$(R)$(PEAK)BGC0Y_RBV | Background constant Y offset (height). |
+| $(P)$(R)$(PEAK)BGC1X <br> $(P)$(R)$(PEAK)BGC1X_RBV | Background slope X coefficient. |
+| $(P)$(R)$(PEAK)BGC1Y <br> $(P)$(R)$(PEAK)BGC1Y_RBV | Background slope Y coefficient. |
+| $(P)$(R)$(PEAK)BGC2X <br> $(P)$(R)$(PEAK)BGC2X_RBV | Background 2nd order X coefficient (for polynomial) or the exponent for the exponential (set to negative for model an exponential decay). |
+| $(P)$(R)$(PEAK)BGC2Y <br> $(P)$(R)$(PEAK)BGC2Y_RBV | Background 2nd order Y coefficient (for polynomial) or the exponent for the exponential (set to negative for model an exponential decay). |
+| $(P)$(R)$(PEAK)BGC3X <br> $(P)$(R)$(PEAK)BGC3X_RBV | Background 3rd order X coefficient (polynomial only). |
+| $(P)$(R)$(PEAK)BGC3Y <br> $(P)$(R)$(PEAK)BGC3Y_RBV | Background 3rd order Y coefficient (polynomial only). |
+| $(P)$(R)$(PEAK)BGSHX <br> $(P)$(R)$(PEAK)BGSHX_RBV | Background X shift (horizontal shift in the X direction). |
+| $(P)$(R)$(PEAK)BGSHY <br> $(P)$(R)$(PEAK)BGSHY_RBV | Background Y shift (horizontal shift in the Y direction). |
 
 ## Examples
 
