@@ -136,14 +136,16 @@ There is an additional database template file used in the example IOC applicatio
 
 The driver makes use of a few standard records inherited from ```ADBase.template```:
 
-| Record Name | Description |
+| Record Name | Read/Write/1D/2D | Description |
 | ------ | ------ |
-| $(P)$(R)Acquire | Start (1) or Stop (0) the simulation |
-| AcquirePeriod | This is used to define a delay between the generation of each simulation NDArray. Set this to zero to run as fast as possible. |
-| SizeX | This is the size of the next NDArray in the X dimension |
-| SizeY | This is the size of the next NDArray in the Y dimension (2D Only) |
-| DataType | This is the data type of the next NDArray (UInt8, UInt32, Float64, etc.) |
-| ImageMode | This controls how the driver operates. 'Single' means only one NDArray is generated. 'Multiple' means that only a particular number of NDArrays will be generated (as defined by $(P)$(R)NumImages), and 'Continuous' means it will run until $(P)$(R)Acquire is set to 0. The 'Multiple' acqusition can also be aborted by setting $(P)$(R)Acquire to 0. |
+| $(P)$(R)Acquire | Read/Write/1D/2D | Start (1) or Stop (0) the simulation |
+| $(P)$(R)AcquirePeriod | This is used to define a delay between the generation of each simulation NDArray. Set this to zero to run as fast as possible. |
+| $(P)$(R)SizeX | This is the size of the next NDArray in the X dimension |
+| $(P)$(R)SizeY | This is the size of the next NDArray in the Y dimension (2D Only) |
+| $(P)$(R)DataType | This is the data type of the next NDArray (UInt8, UInt32, Float64, etc.) |
+| $(P)$(R)ImageMode | This controls how the driver operates. 'Single' means only one NDArray is generated. 'Multiple' means that only a particular number of NDArrays will be generated (as defined by $(P)$(R)NumImages), and 'Continuous' means it will run until $(P)$(R)Acquire is set to 0. The 'Multiple' acquisition can also be aborted by setting $(P)$(R)Acquire to 0. |
+| $(P)$(R)NumImages | Used to define the number of NDArrays to generate when $(P)$(R)ImageMode is set to 'Multiple' |
+
 
 ## Examples
 
