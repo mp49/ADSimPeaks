@@ -755,6 +755,8 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
   epicsFloat64 noise = 0.0;
   ADSimPeaksData peak_data;
   ADSimPeaksPeak::e_status peak_status;
+  ADSimPeaksPeak::e_type_1d peak_type_1d = m_peaks.e_type_1d::none;
+  ADSimPeaksPeak::e_type_2d peak_type_2d = m_peaks.e_type_2d::none;
   
   string functionName(s_className + "::" + __func__);
   
@@ -825,12 +827,14 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
     bool no_peak = false;
     if (!m_2d) {
       getIntegerParam(peak, ADSPPeakType1DParam, &peak_type);
-      if (peak_type == static_cast<epicsUInt32>(m_peaks.e_type_1d::none)) {
+      peak_type_1d = static_cast<ADSimPeaksPeak::e_type_1d>(peak_type);
+      if (peak_type_1d == m_peaks.e_type_1d::none) {
 	no_peak = true;
       }
     } else {
       getIntegerParam(peak, ADSPPeakType2DParam, &peak_type);
-      if (peak_type == static_cast<epicsUInt32>(m_peaks.e_type_2d::none)) {
+      peak_type_2d = static_cast<ADSimPeaksPeak::e_type_2d>(peak_type);
+      if (peak_type_2d == m_peaks.e_type_2d::none) {
 	no_peak = true;
       }
     }
@@ -875,14 +879,14 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
       if (!m_2d) {
 	// Compute 1D peak data
 	peak_data.setBinX(peak_data.getPositionX());	
-	peak_status = m_peaks.compute1D(peak_data, peak_type, result_max);
+	peak_status = m_peaks.compute1D(peak_data, peak_type_1d, result_max);
 	if (peak_status == m_peaks.e_status::success) {
 	  scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	}
 	for (epicsUInt32 bin=0; bin<size; bin++) {
 	  if ((bin >= minX) && (bin <= maxX)) {
 	    peak_data.setBinX(bin);
-	    peak_status = m_peaks.compute1D(peak_data, peak_type, result);
+	    peak_status = m_peaks.compute1D(peak_data, peak_type_1d, result);
 	    if (peak_status == m_peaks.e_status::success) {
 	      result = (result*scale_factor);
 	      pData[bin] += static_cast<T>(result);
@@ -893,7 +897,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	// Compute 2D peak data
 	peak_data.setBinX(peak_data.getPositionX());
 	peak_data.setBinY(peak_data.getPositionY());
-	peak_status = m_peaks.compute2D(peak_data, peak_type, result_max);
+	peak_status = m_peaks.compute2D(peak_data, peak_type_2d, result_max);
 	if (peak_status == m_peaks.e_status::success) {
 	  scale_factor = peak_data.getAmplitude() / zeroCheck(result_max);
 	}
@@ -903,7 +907,7 @@ template <typename T> asynStatus ADSimPeaks::computeDataT()
 	  if ((bin_x >= minX) && (bin_x <= maxX) && (bin_y >= minY) && (bin_y <= maxY)) {
 	    peak_data.setBinX(bin_x);
 	    peak_data.setBinY(bin_y);
-	    peak_status = m_peaks.compute2D(peak_data, peak_type, result);
+	    peak_status = m_peaks.compute2D(peak_data, peak_type_2d, result);
 	    if (peak_status == m_peaks.e_status::success) {
 	      result = (result*scale_factor);
 	      pData[bin] += static_cast<T>(result);
@@ -963,9 +967,6 @@ epicsFloat64 ADSimPeaks::zeroCheck(epicsFloat64 value)
   }
 }
  
-
-
-
 
 /**
  * C function to tie into EPICS

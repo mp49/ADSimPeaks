@@ -24,12 +24,45 @@ class ADSimPeaksPeak
   virtual ~ADSimPeaksPeak(void);
 
   enum class e_status {
-    success,
+    success = 0,
     error
   };
+
+  /**
+   * The enum for the 1D peak type. This needs to match
+   * the list order presented to the user in the database.
+   */
+  enum class e_type_1d {
+    none = 0,
+    square,
+    triangle,
+    gaussian,
+    lorentz,
+    pseudovoigt,
+    laplace,
+    moffat,
+    smoothstep 
+  };
+
+  /**
+   * The enum for the 2D peak type. This needs to match
+   * the list order presented to the user in the database.
+   */
+  enum class e_type_2d {
+    none = 0,
+    square,
+    pyramid,
+    cone,
+    gaussian,
+    lorentz,
+    pseudovoigt,
+    laplace,
+    moffat,
+    smoothstep  
+  };
   
-  e_status compute1D(const ADSimPeaksData &data, epicsUInt32 type, epicsFloat64 &result);
-  e_status compute2D(const ADSimPeaksData &data, epicsUInt32 type, epicsFloat64 &result);
+  e_status compute1D(const ADSimPeaksData &data, e_type_1d type, epicsFloat64 &result);
+  e_status compute2D(const ADSimPeaksData &data, e_type_2d type, epicsFloat64 &result);
   
   // 1D Profiles
   e_status computeGaussian(const ADSimPeaksData &data, epicsFloat64 &result); 
@@ -41,18 +74,6 @@ class ADSimPeaksPeak
   e_status computeMoffat(const ADSimPeaksData &data, epicsFloat64 &result);
   e_status computeSmoothStep(const ADSimPeaksData &data, epicsFloat64 &result); 
 
-  enum class e_type_1d {
-    none,
-    square,
-    triangle,
-    gaussian,
-    lorentz,
-    pseudovoigt,
-    laplace,
-    moffat,
-    smoothstep 
-  };
-  
   // 2D Profiles
   e_status computeGaussian2D(const ADSimPeaksData &data, epicsFloat64 &result); 
   e_status computeLorentz2D(const ADSimPeaksData &data, epicsFloat64 &result); 
@@ -64,19 +85,6 @@ class ADSimPeaksPeak
   e_status computeSquare2D(const ADSimPeaksData &data, epicsFloat64 &result); 
   e_status computeMoffat2D(const ADSimPeaksData &data, epicsFloat64 &result);
   e_status computeSmoothStep2D(const ADSimPeaksData &data, epicsFloat64 &result); 
-
-  enum class e_type_2d {
-    none,
-    square,
-    pyramid,
-    cone,
-    gaussian,
-    lorentz,
-    pseudovoigt,
-    laplace,
-    moffat,
-    smoothstep  
-  };
   
   // Read the string names of the supported peak types
   std::string getType1DName(e_type_1d type);

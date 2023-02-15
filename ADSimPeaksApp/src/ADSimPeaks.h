@@ -143,7 +143,7 @@ private:
    * the list order presented to the user in the database.
    */
   enum class e_noise_type {
-    none,
+    none = 0,
     uniform,
     gaussian  
   };
@@ -153,7 +153,7 @@ private:
    * the list order presented to the user in the database.
    */
   enum class e_bg_type {
-    none,
+    none = 0,
     polynomial,
     exponential  
   };

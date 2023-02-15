@@ -65,23 +65,23 @@ ADSimPeaksPeak::ADSimPeaksPeak(void) {
 ADSimPeaksPeak::~ADSimPeaksPeak(void) {
 }
 
-ADSimPeaksPeak::e_status ADSimPeaksPeak::compute1D(const ADSimPeaksData &data, epicsUInt32 type, epicsFloat64 &result)
+ADSimPeaksPeak::e_status ADSimPeaksPeak::compute1D(const ADSimPeaksData &data, e_type_1d type, epicsFloat64 &result)
 {
-  if (type == static_cast<epicsUInt32>(e_type_1d::square)) {
+  if (type == e_type_1d::square) {
     return computeSquare(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_1d::triangle)) {
+  } else if (type == e_type_1d::triangle) {
     return computeTriangle(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_1d::gaussian)) {
+  } else if (type == e_type_1d::gaussian) {
     return computeGaussian(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_1d::lorentz)) {
+  } else if (type == e_type_1d::lorentz) {
     return computeLorentz(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_1d::pseudovoigt)) {
+  } else if (type == e_type_1d::pseudovoigt) {
     return computePseudoVoigt(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_1d::laplace)) {
+  } else if (type == e_type_1d::laplace) {
     return computeLaplace(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_1d::moffat)) {
+  } else if (type == e_type_1d::moffat) {
     return computeMoffat(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_1d::smoothstep)) {
+  } else if (type == e_type_1d::smoothstep) {
     return computeSmoothStep(data, result);
   }
   
@@ -111,25 +111,25 @@ std::string ADSimPeaksPeak::getType1DName(e_type_1d type)
   return "None";   
 }
 
-ADSimPeaksPeak::e_status ADSimPeaksPeak::compute2D(const ADSimPeaksData &data, epicsUInt32 type, epicsFloat64 &result)
+ADSimPeaksPeak::e_status ADSimPeaksPeak::compute2D(const ADSimPeaksData &data, e_type_2d type, epicsFloat64 &result)
 {
-  if (type == static_cast<epicsUInt32>(e_type_2d::square)) {
+  if (type == e_type_2d::square) {
     return computeSquare2D(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_2d::pyramid)) {
+  } else if (type == e_type_2d::pyramid) {
     return computePyramid2D(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_2d::cone)) {
+  } else if (type == e_type_2d::cone) {
     return computeCone2D(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_2d::gaussian)) {
+  } else if (type == e_type_2d::gaussian) {
     return computeGaussian2D(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_2d::lorentz)) {
+  } else if (type == e_type_2d::lorentz) {
     return computeLorentz2D(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_2d::pseudovoigt)) {
+  } else if (type == e_type_2d::pseudovoigt) {
     return computePseudoVoigt2D(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_2d::laplace)) {
+  } else if (type == e_type_2d::laplace) {
     return computeLaplace2D(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_2d::moffat)) {
+  } else if (type == e_type_2d::moffat) {
     return computeMoffat2D(data, result);
-  } else if (type == static_cast<epicsUInt32>(e_type_2d::smoothstep)) {
+  } else if (type == e_type_2d::smoothstep) {
     return computeSmoothStep2D(data, result);
   }
     
