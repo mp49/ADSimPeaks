@@ -134,7 +134,80 @@ There is an additional database template file used in the example IOC applicatio
 
 ## Usage
 
-TBD
+The driver makes use of a few standard records inherited from ```ADBase.template```:
+
+| Record Name | Description |
+| ------ | ------ |
+| $(P)$(R)Acquire | Start (1) or Stop (0) the simulation |
+| $(P)$(R)AcquirePeriod <br> $(P)$(R)AcquirePeriod_RBV | This is used to define a delay between the generation of each simulation NDArray. Set this to zero to run as fast as possible. |
+| $(P)$(R)SizeX <br> $(P)$(R)SizeX_RBV | This is the size of the next NDArray in the X dimension |
+| $(P)$(R)SizeY <br> $(P)$(R)SizeY_RBV | This is the size of the next NDArray in the Y dimension (2D Only) |
+| $(P)$(R)DataType <br> $(P)$(R)DataType_RBV | This is the data type of the next NDArray (UInt8, UInt32, Float64, etc.) |
+| $(P)$(R)ImageMode <br> $(P)$(R)ImageMode_RBV | This controls how the driver operates. 'Single' means only one NDArray is generated. 'Multiple' means that only a particular number of NDArrays will be generated (as defined by $(P)$(R)NumImages), and 'Continuous' means it will run until $(P)$(R)Acquire is set to 0. The 'Multiple' acquisition can also be aborted by setting $(P)$(R)Acquire to 0. |
+| $(P)$(R)NumImages <br> $(P)$(R)NumImages_RBV | Used to define the number of NDArrays to generate when $(P)$(R)ImageMode is set to 'Multiple' |
+| $(P)$(R)DetectorState_RBV | The status of the simulation (Idle, Acquire, Aborted, etc.) |
+| $(P)$(R)StatusMessage_RBV | The status message from the simulation driver |
+
+A few additional records are specific to this driver (for both 1D and 2D):
+
+| Record Name | Description |
+| ------ | ------ |
+| $(P)$(R)ElapsedTime | The elapsed time (in seconds) since the simulation started. |
+| $(P)$(R)Integrate <br> $(P)$(R)Integrate_RBV | Controls if the simulated NDArray data is integrated or not. |
+| $(P)$(R)NoiseType <br> $(P)$(R)NoiseType_RBV | Set the simulated noise ('None', 'Uniform' or 'Gaussian') |
+| $(P)$(R)NoiseLevel <br> $(P)$(R)NoiseLevel_RBV | Set the noise level. For 'Uniform' mode, this is the range of the noise. For 'Gaussian' noise this is the standard deviation of the noise distribution. |
+| $(P)$(R)NoiseClamp <br> $(P)$(R)NoiseClamp_RBV | Enable or disable a noise clamp (lower or upper bound). |
+| $(P)$(R)NoiseLower <br> $(P)$(R)NoiseLower_RBV | Set the lower noise clamp value. |
+| $(P)$(R)NoiseUpper <br> $(P)$(R)NoiseUpper_RBV | Set the upper noise clamp value. |
+
+These records are specific to 1D peaks and background profile:
+
+| Record Name | Description |
+| ------ | ------ |
+| $(P)$(R)$(PEAK)Type <br> $(P)$(R)$(PEAK)Type_RBV | Configure the type of peak (Guassian, Lorentz, etc.) |
+| $(P)$(R)$(PEAK)Amp <br> $(P)$(R)$(PEAK)Amp_RBV | Set the peak amplitude. |
+| $(P)$(R)$(PEAK)PosX <br> $(P)$(R)$(PEAK)PosX_RBV | Set the peak position. |
+| $(P)$(R)$(PEAK)FWHMX <br> $(P)$(R)$(PEAK)FWHMX_RBV | Set the peak FWHM (full width half max). |
+| $(P)$(R)$(PEAK)MinX <br> $(P)$(R)$(PEAK)MinX_RBV | Set the peak lower boundary. No data will be calculated for this peak for bins less than MinX. |
+| $(P)$(R)$(PEAK)MaxX <br> $(P)$(R)$(PEAK)MaxX_RBV | Set the peak upper boundary. No data will be calculated for this peak for bins greater than MaxX. |
+| $(P)$(R)$(PEAK)P1 <br> $(P)$(R)$(PEAK)P1_RBV | Additional parameter required for some peak types (optional for most peak types). For 1D peaks this is only used for the Moffat peak and is used for the 'beta' parameter. |
+| $(P)$(R)$(PEAK)P2 <br> $(P)$(R)$(PEAK)P2_RBV | Additional spare parameter. Currently not used. |
+| $(P)$(R)$(PEAK)BGTypeX <br> $(P)$(R)$(PEAK)BGTypeX_RBV | Set the background type ('None', 'Polynomial' or 'Exponential' ) |
+| $(P)$(R)$(PEAK)BGC0X <br> $(P)$(R)$(PEAK)BGC0X_RBV | Background constant offset (height). |
+| $(P)$(R)$(PEAK)BGC1X <br> $(P)$(R)$(PEAK)BGC1X_RBV | Background slope coefficient. |
+| $(P)$(R)$(PEAK)BGC2X <br> $(P)$(R)$(PEAK)BGC2X_RBV | Background 2nd order coefficient (for polynomial) or the exponent for the exponential (set to negative for model an exponential decay). |
+| $(P)$(R)$(PEAK)BGC3X <br> $(P)$(R)$(PEAK)BGC3X_RBV | Background 3rd order coefficient (polynomial only). |
+| $(P)$(R)$(PEAK)BGSHX <br> $(P)$(R)$(PEAK)BGSHX_RBV | Background shift (horizontal shift). |
+
+
+These records are specific to 2D peaks and background profile:
+
+| Record Name | Description |
+| ------ | ------ |
+| $(P)$(R)$(PEAK)Type <br> $(P)$(R)$(PEAK)Type_RBV | Configure the type of peak (Guassian, Lorentz, etc.) |
+| $(P)$(R)$(PEAK)Amp <br> $(P)$(R)$(PEAK)Amp_RBV | Set the peak amplitude. |
+| $(P)$(R)$(PEAK)PosX <br> $(P)$(R)$(PEAK)PosX_RBV | Set the peak X position. |
+| $(P)$(R)$(PEAK)PosY <br> $(P)$(R)$(PEAK)PosY_RBV | Set the peak Y position. |
+| $(P)$(R)$(PEAK)FWHMX <br> $(P)$(R)$(PEAK)FWHMX_RBV | Set the peak FWHM in X (full width half max). |
+| $(P)$(R)$(PEAK)FWHMY <br> $(P)$(R)$(PEAK)FWHMY_RBV | Set the peak FWHM in Y (full width half max). |
+| $(P)$(R)$(PEAK)MinX <br> $(P)$(R)$(PEAK)MinX_RBV | Set the peak lower X boundary. No data will be calculated for this peak for bins less than MinX. |
+| $(P)$(R)$(PEAK)MinY <br> $(P)$(R)$(PEAK)MinY_RBV | Set the peak lower Y boundary. No data will be calculated for this peak for bins less than MinY. |
+| $(P)$(R)$(PEAK)MaxX <br> $(P)$(R)$(PEAK)MaxX_RBV | Set the peak upper X boundary. No data will be calculated for this peak for bins greater than MaxX. |
+| $(P)$(R)$(PEAK)MaxY <br> $(P)$(R)$(PEAK)MaxY_RBV | Set the peak upper Y boundary. No data will be calculated for this peak for bins greater than MaxY. |
+| $(P)$(R)$(PEAK)P1 <br> $(P)$(R)$(PEAK)P1_RBV | Additional parameter required for some peak types (optional for most peak types). For 1D peaks this is only used for the Moffat peak and is used for the 'beta' parameter. |
+| $(P)$(R)$(PEAK)P2 <br> $(P)$(R)$(PEAK)P2_RBV | Additional spare parameter. Currently not used. |
+| $(P)$(R)$(PEAK)BGTypeX <br> $(P)$(R)$(PEAK)BGTypeX_RBV | Set the background type in the X direction ('None', 'Polynomial' or 'Exponential' ) |
+| $(P)$(R)$(PEAK)BGTypeY <br> $(P)$(R)$(PEAK)BGTypeY_RBV | Set the background type in the Y direction ('None', 'Polynomial' or 'Exponential' ) |
+| $(P)$(R)$(PEAK)BGC0X <br> $(P)$(R)$(PEAK)BGC0X_RBV | Background constant X offset (height). |
+| $(P)$(R)$(PEAK)BGC0Y <br> $(P)$(R)$(PEAK)BGC0Y_RBV | Background constant Y offset (height). |
+| $(P)$(R)$(PEAK)BGC1X <br> $(P)$(R)$(PEAK)BGC1X_RBV | Background slope X coefficient. |
+| $(P)$(R)$(PEAK)BGC1Y <br> $(P)$(R)$(PEAK)BGC1Y_RBV | Background slope Y coefficient. |
+| $(P)$(R)$(PEAK)BGC2X <br> $(P)$(R)$(PEAK)BGC2X_RBV | Background 2nd order X coefficient (for polynomial) or the exponent for the exponential (set to negative for model an exponential decay). |
+| $(P)$(R)$(PEAK)BGC2Y <br> $(P)$(R)$(PEAK)BGC2Y_RBV | Background 2nd order Y coefficient (for polynomial) or the exponent for the exponential (set to negative for model an exponential decay). |
+| $(P)$(R)$(PEAK)BGC3X <br> $(P)$(R)$(PEAK)BGC3X_RBV | Background 3rd order X coefficient (polynomial only). |
+| $(P)$(R)$(PEAK)BGC3Y <br> $(P)$(R)$(PEAK)BGC3Y_RBV | Background 3rd order Y coefficient (polynomial only). |
+| $(P)$(R)$(PEAK)BGSHX <br> $(P)$(R)$(PEAK)BGSHX_RBV | Background X shift (horizontal shift in the X direction). |
+| $(P)$(R)$(PEAK)BGSHY <br> $(P)$(R)$(PEAK)BGSHY_RBV | Background Y shift (horizontal shift in the Y direction). |
 
 ## Examples
 
