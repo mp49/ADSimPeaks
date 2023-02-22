@@ -67,69 +67,106 @@ ADSimPeaksPeak::~ADSimPeaksPeak(void) {
 
 ADSimPeaksPeak::e_status ADSimPeaksPeak::compute1D(const ADSimPeaksData &data, e_type_1d type, epicsFloat64 &result)
 {
-  if (type == e_type_1d::square) {
+
+  switch (type) {
+  case e_type_1d::none:
+    result = 0.0;
+    return e_status::success;
+    
+  case e_type_1d::square:
     return computeSquare(data, result);
-  } else if (type == e_type_1d::triangle) {
+    
+  case e_type_1d::triangle:
     return computeTriangle(data, result);
-  } else if (type == e_type_1d::gaussian) {
+    
+  case e_type_1d::gaussian:
     return computeGaussian(data, result);
-  } else if (type == e_type_1d::lorentz) {
+    
+  case e_type_1d::lorentz:
     return computeLorentz(data, result);
-  } else if (type == e_type_1d::pseudovoigt) {
+    
+  case e_type_1d::pseudovoigt:
     return computePseudoVoigt(data, result);
-  } else if (type == e_type_1d::laplace) {
+    
+  case e_type_1d::laplace:
     return computeLaplace(data, result);
-  } else if (type == e_type_1d::moffat) {
+
+  case e_type_1d::moffat:
     return computeMoffat(data, result);
-  } else if (type == e_type_1d::smoothstep) {
+    
+  case e_type_1d::smoothstep:
     return computeSmoothStep(data, result);
   }
-  
+    
   return e_status::error;
 }
 
 std::string ADSimPeaksPeak::getType1DName(e_type_1d type)
 {
-  if (type == e_type_1d::square) {
+  switch (type) {
+  case e_type_1d::none:
+    return "None";
+    
+  case e_type_1d::square:
     return "Square";
-  } else if (type == e_type_1d::triangle) {
+
+  case e_type_1d::triangle:
     return "Triangle";
-  } else if (type == e_type_1d::gaussian) {
+
+  case e_type_1d::gaussian:
     return "Gaussian";
-  } else if (type == e_type_1d::lorentz) {
+
+  case e_type_1d::lorentz:
     return "Lorentz";
-  } else if (type == e_type_1d::pseudovoigt) {
+
+  case e_type_1d::pseudovoigt:
     return "Pseudo-Voigt";
-  } else if (type == e_type_1d::laplace) {
+
+  case e_type_1d::laplace:
     return "Laplace";
-  } else if (type == e_type_1d::moffat) {
+
+  case e_type_1d::moffat:
     return "Moffat";
-  } else if (type == e_type_1d::smoothstep) {
+
+  case e_type_1d::smoothstep:
     return "SmoothStep";
-  } 
+  }
 
   return "None";   
 }
 
 ADSimPeaksPeak::e_status ADSimPeaksPeak::compute2D(const ADSimPeaksData &data, e_type_2d type, epicsFloat64 &result)
 {
-  if (type == e_type_2d::square) {
+  switch (type) {
+  case e_type_2d::none:
+    result = 0.0;
+    return e_status::success;
+
+  case e_type_2d::square:
     return computeSquare2D(data, result);
-  } else if (type == e_type_2d::pyramid) {
+
+  case e_type_2d::pyramid:
     return computePyramid2D(data, result);
-  } else if (type == e_type_2d::cone) {
+
+  case e_type_2d::cone:
     return computeCone2D(data, result);
-  } else if (type == e_type_2d::gaussian) {
+
+  case e_type_2d::gaussian:
     return computeGaussian2D(data, result);
-  } else if (type == e_type_2d::lorentz) {
+
+  case e_type_2d::lorentz:
     return computeLorentz2D(data, result);
-  } else if (type == e_type_2d::pseudovoigt) {
+
+  case e_type_2d::pseudovoigt:
     return computePseudoVoigt2D(data, result);
-  } else if (type == e_type_2d::laplace) {
+
+  case e_type_2d::laplace:
     return computeLaplace2D(data, result);
-  } else if (type == e_type_2d::moffat) {
+
+  case e_type_2d::moffat:
     return computeMoffat2D(data, result);
-  } else if (type == e_type_2d::smoothstep) {
+
+  case e_type_2d::smoothstep:
     return computeSmoothStep2D(data, result);
   }
     
@@ -138,25 +175,37 @@ ADSimPeaksPeak::e_status ADSimPeaksPeak::compute2D(const ADSimPeaksData &data, e
 
 std::string ADSimPeaksPeak::getType2DName(e_type_2d type)
 {
-  if (type == e_type_2d::square) {
+  switch (type) {
+  case e_type_2d::none:
+    return "None";
+
+  case e_type_2d::square:
     return "Square";
-  } else if (type == e_type_2d::pyramid) {
+
+  case e_type_2d::pyramid:
     return "Pyramid";
-  } else if (type == e_type_2d::cone) {
+
+  case e_type_2d::cone:
     return "Cone";
-  } else if (type == e_type_2d::gaussian) {
+
+  case e_type_2d::gaussian:
     return "Gaussian";
-  } else if (type == e_type_2d::lorentz) {
+
+  case e_type_2d::lorentz:
     return "Lorentz";
-  } else if (type == e_type_2d::pseudovoigt) {
+
+  case e_type_2d::pseudovoigt:
     return "Pseudo-Voigt";
-  } else if (type == e_type_2d::laplace) {
+
+  case e_type_2d::laplace:
     return "Laplace";
-  } else if (type == e_type_2d::moffat) {
+
+  case e_type_2d::moffat:
     return "Moffat";
-  } else if (type == e_type_2d::smoothstep) {
+
+  case e_type_2d::smoothstep:
     return "SmoothStep";
-  } 
+  }
   
   return "None";   
 }
