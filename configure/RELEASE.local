@@ -1,6 +1,6 @@
 
-ASYN       = /home/controls/common/asyn/main
-ADCORE     = /home/controls/common/adcore/main
+ASYN       = /home/controls/prod/common/asyn/rel4-44-1_20230322
+ADCORE     = /home/controls/prod/common/adcore/rel3-12-1_20230322
 
-EPICS_BASE = /home/controls/common/base/main
+EPICS_BASE = /home/controls/prod/common/base/rel7.0.7_20230322
 
