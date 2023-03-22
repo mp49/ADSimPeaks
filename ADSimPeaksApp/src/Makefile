@@ -8,6 +8,8 @@ include $(TOP)/configure/CONFIG
 #==================================================
 # build a support library
 
+USR_CXXFLAGS += -std=c++11
+
 LIBRARY_IOC += ADSimPeaks
 
 DBD += ADSimPeaks.dbd
