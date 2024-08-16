@@ -631,8 +631,13 @@ void ADSimPeaks::ADSimPeaksTask(void)
 	
 	this->getAttributes(p_NDArray->pAttributeList);
 	
-	if (arrayCallbacks) {	  
-	  doCallbacksGenericPointer(p_NDArray, NDArrayData, 0);
+	if (arrayCallbacks) {
+	  // Copy the data to a new NDArray (p_NDArrayPlugins) for use
+	  // by the plugins, as we need to hold to our NDArray (p_NDArray)
+	  // for integrating data.
+	  p_NDArrayPlugins = this->pNDArrayPool->copy(p_NDArray, NULL, true);
+	  doCallbacksGenericPointer(p_NDArrayPlugins, NDArrayData, 0);
+	  p_NDArrayPlugins->release();
 	}
 	callParamCallbacks();
       }
