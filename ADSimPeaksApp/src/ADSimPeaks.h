@@ -129,6 +129,7 @@ private:
   bool m_initialized;
 
   NDArray *p_NDArray;
+  NDArray *p_NDArrayPlugins;
   bool m_needNewArray;
   bool m_needReset;
 
