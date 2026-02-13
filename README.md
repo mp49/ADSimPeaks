@@ -139,7 +139,8 @@ The driver makes use of a few standard records inherited from ```ADBase.template
 | Record Name | Description |
 | ------ | ------ |
 | $(P)$(R)Acquire | Start (1) or Stop (0) the simulation |
-| $(P)$(R)AcquirePeriod <br> $(P)$(R)AcquirePeriod_RBV | This is used to define a delay between the generation of each simulation NDArray. Set this to zero to run as fast as possible. |
+| $(P)$(R)AcquireTime <br> $(P)$(R)AcquireTime_RBV | This is used to simulate a a non-zero acquisition time. Set this to zero to run as fast as possible. |
+| $(P)$(R)AcquirePeriod <br> $(P)$(R)AcquirePeriod_RBV | This is used to define a delay between the generation of each simulation NDArray. Must be >=AcquireTime. Set this to zero to run as fast as possible. |
 | $(P)$(R)SizeX <br> $(P)$(R)SizeX_RBV | This is the size of the next NDArray in the X dimension |
 | $(P)$(R)SizeY <br> $(P)$(R)SizeY_RBV | This is the size of the next NDArray in the Y dimension (2D Only) |
 | $(P)$(R)DataType <br> $(P)$(R)DataType_RBV | This is the data type of the next NDArray (UInt8, UInt32, Float64, etc.) |
@@ -186,6 +187,7 @@ These records are specific to 2D peaks and background profile:
 | ------ | ------ |
 | $(P)$(R)$(PEAK)Type <br> $(P)$(R)$(PEAK)Type_RBV | Configure the type of peak (Guassian, Lorentz, etc.) |
 | $(P)$(R)$(PEAK)Amp <br> $(P)$(R)$(PEAK)Amp_RBV | Set the peak amplitude. |
+| $(P)$(R)$(PEAK)Cor <br> $(P)$(R)$(PEAK)Cor_RBV | Set the X/Y correlation. |
 | $(P)$(R)$(PEAK)PosX <br> $(P)$(R)$(PEAK)PosX_RBV | Set the peak X position. |
 | $(P)$(R)$(PEAK)PosY <br> $(P)$(R)$(PEAK)PosY_RBV | Set the peak Y position. |
 | $(P)$(R)$(PEAK)FWHMX <br> $(P)$(R)$(PEAK)FWHMX_RBV | Set the peak FWHM in X (full width half max). |
