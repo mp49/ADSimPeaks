@@ -187,6 +187,7 @@ These records are specific to 2D peaks and background profile:
 | ------ | ------ |
 | $(P)$(R)$(PEAK)Type <br> $(P)$(R)$(PEAK)Type_RBV | Configure the type of peak (Guassian, Lorentz, etc.) |
 | $(P)$(R)$(PEAK)Amp <br> $(P)$(R)$(PEAK)Amp_RBV | Set the peak amplitude. |
+| $(P)$(R)$(PEAK)Cor <br> $(P)$(R)$(PEAK)Cor_RBV | Set the X/Y correlation. |
 | $(P)$(R)$(PEAK)PosX <br> $(P)$(R)$(PEAK)PosX_RBV | Set the peak X position. |
 | $(P)$(R)$(PEAK)PosY <br> $(P)$(R)$(PEAK)PosY_RBV | Set the peak Y position. |
 | $(P)$(R)$(PEAK)FWHMX <br> $(P)$(R)$(PEAK)FWHMX_RBV | Set the peak FWHM in X (full width half max). |
