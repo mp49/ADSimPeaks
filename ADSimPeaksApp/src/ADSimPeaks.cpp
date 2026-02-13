@@ -354,8 +354,18 @@ asynStatus ADSimPeaks::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     return(status);
   }
 
-  if (function == ADAcquirePeriod) {
+  if (function == ADAcquireTime) {
     value = std::max(0.0, value);
+    epicsFloat64 acquirePeriod = 0.0;
+    getDoubleParam(ADAcquirePeriod, &acquirePeriod);
+    acquirePeriod = std::max(value, acquirePeriod);
+    setDoubleParam(ADAcquirePeriod, acquirePeriod);
+  } else if (function == ADAcquirePeriod) {
+    value = std::max(0.0, value);
+    epicsFloat64 acquireTime = 0.0;
+    getDoubleParam(ADAcquireTime, &acquireTime);
+    acquireTime = std::min(value, acquireTime);
+    setDoubleParam(ADAcquireTime, acquireTime);
   } else if (function == ADSPPeakFWHMXParam) {
     value = std::max(1.0, value);
   } else if (function == ADSPPeakFWHMYParam) {
@@ -538,6 +548,7 @@ void ADSimPeaks::ADSimPeaksTask(void)
   int arrayCallbacks = 0;
   int imageMode = 0;
   int numImages = 0;
+  epicsFloat64 acquireTime = 0.0;
   epicsFloat64 updatePeriod = 0.0;
   double elapsedTime = 0.0;
   epicsEventWaitStatus eventStatus;
@@ -613,7 +624,20 @@ void ADSimPeaks::ADSimPeaksTask(void)
 	if (computeData(dataType) != asynSuccess) {
 	  asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "%s failed to compute data.\n", functionName.c_str());
 	}
-	
+
+        //Get the acquire time - use this to simulate additional acqusition time
+        getDoubleParam(ADAcquireTime, &acquireTime);
+        this->unlock();
+        eventStatus = epicsEventWaitWithTimeout(m_stopEvent, acquireTime);
+        this->lock();
+        if (eventStatus == epicsEventWaitOK) {
+          cout << "aborting simulated acquire time" << endl;
+          asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+                    "%s aborting simulated acquire time.\n", functionName.c_str());
+          m_acquiring = false;
+          setStringParam(ADStatusMessage, "Simulation Aborted");
+        }
+        
 	epicsTimeGetCurrent(&nowTime);
 	elapsedTime = epicsTimeDiffInSeconds(&nowTime, &startTime);
         p_NDArray->uniqueId = arrayCounter;
@@ -642,29 +666,33 @@ void ADSimPeaks::ADSimPeaksTask(void)
 	callParamCallbacks();
       }
       
-      //Get the acquire period, which we use to define the update rate
+      //Get the acquire period, which we use to define the update rate for multi-image acquisition
+      //Subtract the acquireTime, which has already been taken into account
       getDoubleParam(ADAcquirePeriod, &updatePeriod);
+      updatePeriod = std::max(0.0, updatePeriod - acquireTime);
 
       //Figure out if we are finished
-      if ((imageMode == ADImageSingle) || ((imageMode == ADImageMultiple) && (imagesCounter >= numImages))) {
-	m_acquiring = false;
-	setIntegerParam(ADStatus, ADStatusIdle);
-	setStringParam(ADStatusMessage, "Simulation Idle");
-        callParamCallbacks();
-        setIntegerParam(ADAcquire, 0);
-        asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+      if (m_acquiring == true) {
+        if ((imageMode == ADImageSingle) || ((imageMode == ADImageMultiple) && (imagesCounter >= numImages))) {
+          m_acquiring = false;
+          setIntegerParam(ADStatus, ADStatusIdle);
+          setStringParam(ADStatusMessage, "Simulation Idle");
+          callParamCallbacks();
+          setIntegerParam(ADAcquire, 0);
+          asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
 		    "%s completed simulation.\n", functionName.c_str());
-      } else {
-	//Wait for a stop event
-	this->unlock();
-	eventStatus = epicsEventWaitWithTimeout(m_stopEvent, updatePeriod);
-	this->lock();
-	if (eventStatus == epicsEventWaitOK) {
-	  asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
-		    "%s stopping simulation.\n", functionName.c_str());
-	  m_acquiring = false;
-	  setStringParam(ADStatusMessage, "Simulation Idle");
-	}
+        } else {
+          //Wait for a stop event
+          this->unlock();
+          eventStatus = epicsEventWaitWithTimeout(m_stopEvent, updatePeriod);
+          this->lock();
+          if (eventStatus == epicsEventWaitOK) {
+            asynPrint(this->pasynUserSelf, ASYN_TRACE_FLOW,
+                      "%s stopping simulation.\n", functionName.c_str());
+            m_acquiring = false;
+            setStringParam(ADStatusMessage, "Simulation Idle");
+          }
+        }
       }
       callParamCallbacks();
     }
